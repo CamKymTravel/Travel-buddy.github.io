@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1118">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Travel Buddy">
+  <style>html,body{margin:0;min-height:100%;background:#071018;color:#f4f7fb}</style>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Travel Buddy</title>
+</head>
+<body>
+  <div id="launch" class="launch-screen" aria-live="polite">
+    <div id="launchBrand" class="launch-stage is-visible">
+      <img class="launch-logo" src="./icon-192.png" alt="" aria-hidden="true">
+      <div class="launch-title">Travel Buddy</div>
+    </div>
+    <div id="launchStay" class="launch-stage"></div>
+  </div>
+  <div id="app" class="app-shell" hidden>
+    <main id="screen" class="screen" tabindex="-1"></main>
+    <nav id="bottomNav" class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-item is-active" data-route="home" type="button" aria-current="page"><span aria-hidden="true">⌂</span><b>Home</b></button>
+      <button class="nav-item" data-route="expenses" type="button"><span aria-hidden="true">$</span><b>Expenses</b></button>
+      <button class="nav-item" data-route="shopping" type="button"><span aria-hidden="true">✓</span><b>Shopping</b></button>
+      <button class="nav-item" data-route="settings" type="button"><span aria-hidden="true">⚙</span><b>Settings</b></button>
+    </nav>
+  </div>
+  <input id="shoppingImportFile" type="file" accept="application/json,.json" hidden>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
