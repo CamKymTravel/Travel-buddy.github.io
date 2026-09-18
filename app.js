@@ -129,7 +129,7 @@ function itemIcon(name,category=null,storedIcon=''){
 
 function stayHero(stay=currentStay){
   if(!stay)return'';
-  return `<section class="hero compact-hero"><div class="hero-top"><div class="flag">${esc(stay.flag||'◉')}</div><div><p class="eyebrow">Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill">${esc(stay.currencyCode)}</span></div></section>`;
+  return `<section class="hero compact-hero"><div class="hero-top"><div class="flag">${esc(stay.flag||'◉')}</div><div><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill">${esc(stay.currencyCode)}</span></div></section>`;
 }
 
 function stayStrip(){
@@ -151,8 +151,8 @@ async function renderHome(){
   const recent=[...expenses].sort(expenseSortNewest).slice(0,3);
   const couldnt=shopping.filter(item=>item.state==='couldnt').length;
   present(`${stayHero()}
-    <button class="home-action expense-home" data-add-expense><span class="home-action-icon">＋</span><span><strong>Add Expense</strong><small>${esc(currentStay.currencyCode)} amount → Save</small></span></button>
-    <button class="home-action shopping-home" data-open-shopping><span class="home-action-icon">🛒</span><span><strong>Shopping List</strong><small>${shopping.length} active${couldnt?` · ${couldnt} couldn’t get`:''}</small></span></button>
+    <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span></button>
+    <button class="home-action shopping-home" data-open-shopping><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span><span><strong>Shopping List</strong><small>${shopping.length} active${couldnt?` · ${couldnt} couldn’t get`:''}</small></span></button>
     <button class="transfer-summary" data-open-expenses><span>Expenses to transfer</span><strong>${pending.length}</strong></button>
     ${recent.length?`<h3 class="section-title">Recent Expenses</h3><div class="list">${recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join('')}</div>`:''}`);
 }
@@ -163,7 +163,7 @@ async function renderExpenses(){
   if(expenseFilter==='pending')rows=rows.filter(expense=>!expense.transferred);
   else if(expenseFilter==='transferred')rows=rows.filter(expense=>expense.transferred);
   rows.sort(expenseSortNewest);
-  present(`${pageHead('Expenses','Things to enter into Travel Command Centre.','Expenses')}${stayStrip()}
+  present(`${pageHead('Expenses','To enter later.','Expenses')}${stayStrip()}
     <button class="btn primary full quick-add-button" data-add-expense>Add Expense</button>
     <div class="filters expense-filters" aria-label="Expense filters">
       ${[['pending','To Transfer'],['transferred','Transferred'],['all','All']].map(([value,label])=>`<button class="filter ${expenseFilter===value?'is-active':''}" aria-pressed="${expenseFilter===value?'true':'false'}" data-expense-filter="${value}">${label}</button>`).join('')}
@@ -180,8 +180,8 @@ function expenseEditor(existing=null,defaults={}){
   present(`${pageHead(existing?'Edit Expense':'Add Expense',existing?'Change what you need.':'Type the amount and save.','Expenses')}
     <form class="quick-expense-form" id="expenseForm">
       <div class="quick-amount-card">
-        <label for="expenseAmount">Amount <span>${esc(stay.currencyCode)}</span></label>
-        <div class="amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" value="${existing?esc(existing.localAmount):''}" required></div>
+        <label for="expenseAmount">Amount</label>
+        <div class="amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(existing.localAmount):''}" required></div>
         <button class="btn primary full save-expense-button" type="submit">Save Expense</button>
       </div>
       <details class="optional-details" ${existing?'open':''}>
@@ -221,9 +221,9 @@ async function renderShopping(){
   const personMap=new Map(people.map(person=>[person.id,person]));
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const couldnt=items.filter(item=>item.state==='couldnt').length;
-  present(`${pageHead('Shopping','One continuous list.','Shopping')}
+  present(`${pageHead('Shopping','','Shopping')}
     <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-icon">＋</span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-icon">★</span>Regular Items</button></div>
-    ${items.length?`<button class="btn warm full finish-shopping" data-finish-shopping>Finish Shopping</button>`:''}
+    ${items.length?`<button class="btn finish full finish-shopping" data-finish-shopping>Finish Shopping</button>`:''}
     ${couldnt?`<div class="notice compact-notice">${couldnt} couldn’t-get item${couldnt===1?'':'s'} will stay for next time.</div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
     <div class="shopping-list">${items.length?items.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):emptyCard('Shopping list is empty','data-add-shop','Add Item')}</div>`);
@@ -244,7 +244,7 @@ function shoppingRow(item,personMap,categoryMap){
     </div>
     <div class="shop-actions">
       <button class="btn ${item.state==='got'?'secondary':'success'}" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='got'?'true':'false'}">${item.state==='got'?'Undo':'Got It'}</button>
-      <button class="btn ${item.state==='couldnt'?'secondary':'warm'}" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${item.state==='couldnt'?'Undo':'Couldn’t Get'}</button>
+      <button class="btn ${item.state==='couldnt'?'secondary':'unavailable'}" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${item.state==='couldnt'?'Undo':'Couldn’t Get'}</button>
     </div>
   </article>`;
 }
@@ -407,23 +407,31 @@ async function importShoppingFile(file){
 
 async function renderSettings(){
   const [people,categories,catalogue,regulars]=await Promise.all([getAll('people'),getAll('categories'),getAll('catalogue'),getAll('regularItems')]);
-  present(`${pageHead('Settings','Only the controls Travel Buddy needs.','Settings')}
+  present(`${pageHead('Settings','','Settings')}
     <section class="settings-section settings-current" data-tone="blue"><h2>Current Stay</h2>
       <div class="settings-summary"><strong>${esc(currentStay.flag)} ${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</span></div>
       <div class="button-row"><button class="btn secondary" data-edit-stay>Edit Stay</button><button class="btn primary" data-change-stay>Change Stay</button></div>
     </section>
     <section class="settings-section settings-shopping" data-tone="gold"><h2>Shopping Setup</h2>
-      <button class="settings-row" data-manage-people><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></button>
-      <button class="settings-row" data-manage-categories><strong>Categories</strong><span>${categories.length}</span></button>
-      <button class="settings-row" data-manage-regulars><strong>Regular Items</strong><span>${regulars.length}</span></button>
-      <button class="settings-row" data-manage-custom><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length}</span></button>
+      <button class="settings-row" data-tone="blue" data-manage-people><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></button>
+      <button class="settings-row" data-tone="gold" data-manage-categories><strong>Categories</strong><span>${categories.length}</span></button>
+      <button class="settings-row" data-tone="teal" data-manage-regulars><strong>Regular Items</strong><span>${regulars.length}</span></button>
+      <button class="settings-row" data-tone="purple" data-manage-custom><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length}</span></button>
     </section>
-    <section class="settings-section settings-advanced" data-tone="silver"><h2>Advanced</h2>
+    <section class="settings-section settings-advanced" data-tone="silver"><h2>More</h2>
+      <button class="settings-row" data-tone="silver" data-advanced-settings><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></button>
+    </section>
+    <p class="app-version">Travel Buddy V1 · Build ${esc(BUILD_VERSION)} · Offline local PWA</p>`);
+}
+
+async function advancedSettings(){
+  present(`${pageHead('Advanced','','Settings')}
+    <div class="settings-list">
       <button class="settings-row" data-shopping-tools><strong>Shopping List Transfer</strong><span>Manual share/import only</span></button>
       <button class="settings-row" data-exchange-rate><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></button>
       <button class="settings-row danger" data-reset><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></button>
-    </section>
-    <p class="app-version">Travel Buddy V1 · Build ${esc(BUILD_VERSION)} · Offline local PWA</p>`);
+    </div>
+    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function stayEditor(mode='edit',force=false){
@@ -609,7 +617,7 @@ async function addRegularToList(regularId){
 }
 
 async function shoppingTools(){
-  present(`${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<button class="settings-row" data-share-shopping><strong>Share Shopping List</strong><span>Send a versioned list file.</span></button><button class="settings-row" data-import-shopping><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></button><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list"><button class="settings-row" data-share-shopping><strong>Share Shopping List</strong><span>Send a versioned list file.</span></button><button class="settings-row" data-import-shopping><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function resetTravelBuddy(){
@@ -681,6 +689,7 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-edit-regular]'))return regularEditor(await getRecord('regularItems',button.dataset.editRegular),'settings');
   if(button.matches('[data-delete-regular]')){const item=await getRecord('regularItems',button.dataset.deleteRegular);if(item&&confirm(`Delete Regular Item “${item.name}”?`))await deleteRecord('regularItems',item.id);return manageRegulars();}
   if(button.matches('[data-regular-cancel]'))return regularEditorReturn==='shopping'?showRegularItems():manageRegulars();
+  if(button.matches('[data-advanced-settings]'))return advancedSettings();
   if(button.matches('[data-shopping-tools]'))return shoppingTools();
   if(button.matches('[data-share-shopping]'))return shareShopping();
   if(button.matches('[data-import-shopping]'))return importInput.click();
