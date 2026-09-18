@@ -1,4 +1,4 @@
-export const BUILD_VERSION = '0.8.2';
+export const BUILD_VERSION = '0.9.0';
 export const SCHEMA_VERSION = 3;
 export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Shopping','Misc'];
 export const SHOPPING_STATES = ['pending','got','couldnt'];
@@ -107,7 +107,8 @@ export function normalizeCurrencyCode(value) {
 
 export function buildExpenseRecord({existing=null, form, stay, now = new Date().toISOString()}) {
   const localAmount = Number(form.localAmount);
-  if (!stay || !Number.isFinite(localAmount) || localAmount < 0) throw new Error('Invalid expense amount');
+  if (!stay || !Number.isFinite(localAmount) || localAmount <= 0) throw new Error('Invalid expense amount');
+  if (!validateAuDate(form.date)) throw new Error('Invalid expense date');
   if (!EXPENSE_CATEGORIES.includes(form.category)) throw new Error('Invalid expense category');
   const savedRate = Number(stay.exchangeRate);
   const hasRate = Number.isFinite(savedRate) && savedRate > 0;
