@@ -1,4 +1,4 @@
-export const BUILD_VERSION = '0.8.1';
+export const BUILD_VERSION = '0.8.2';
 export const SCHEMA_VERSION = 3;
 export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Shopping','Misc'];
 export const SHOPPING_STATES = ['pending','got','couldnt'];
@@ -24,6 +24,17 @@ export function auDateToSort(value) {
   return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
 }
 
+export function isoDateToAu(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || '').trim());
+  if (!m) return '';
+  const au = `${m[3]}/${m[2]}/${m[1]}`;
+  return validateAuDate(au) ? au : '';
+}
+
+export function auDateToIso(value) {
+  return validateAuDate(value) ? auDateToSort(value) : '';
+}
+
 export function todayAu(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-AU', {day:'2-digit',month:'2-digit',year:'numeric'}).formatToParts(date);
   const map = Object.fromEntries(parts.map(p => [p.type,p.value]));
@@ -37,6 +48,7 @@ export function convertLocalToAud(localAmount, exchangeRate) {
 }
 
 export function formatAud(value) {
+  if (value === null || value === undefined || value === '') return 'AUD —';
   const n = Number(value);
   return Number.isFinite(n) ? `AUD ${n.toFixed(2)}` : 'AUD —';
 }
@@ -95,9 +107,11 @@ export function normalizeCurrencyCode(value) {
 
 export function buildExpenseRecord({existing=null, form, stay, now = new Date().toISOString()}) {
   const localAmount = Number(form.localAmount);
-  const aud = convertLocalToAud(localAmount, stay?.exchangeRate);
-  if (!stay || aud === null) throw new Error('Invalid expense conversion');
+  if (!stay || !Number.isFinite(localAmount) || localAmount < 0) throw new Error('Invalid expense amount');
   if (!EXPENSE_CATEGORIES.includes(form.category)) throw new Error('Invalid expense category');
+  const savedRate = Number(stay.exchangeRate);
+  const hasRate = Number.isFinite(savedRate) && savedRate > 0;
+  const aud = hasRate ? convertLocalToAud(localAmount, savedRate) : null;
   return {
     id: existing?.id || crypto.randomUUID(),
     date: String(form.date).trim(),
@@ -106,7 +120,7 @@ export function buildExpenseRecord({existing=null, form, stay, now = new Date().
     currencyCode: stay.currencyCode,
     currencySymbol: stay.currencySymbol,
     audAmount: aud,
-    exchangeRate: Number(stay.exchangeRate),
+    exchangeRate: hasRate ? savedRate : null,
     country: stay.country,
     city: stay.city,
     stayId: stay.id,
@@ -114,7 +128,7 @@ export function buildExpenseRecord({existing=null, form, stay, now = new Date().
       id: stay.id, country: stay.country, city: stay.city, flag: stay.flag,
       startDate: stay.startDate, endDate: stay.endDate,
       currencyName: stay.currencyName, currencyCode: stay.currencyCode,
-      currencySymbol: stay.currencySymbol, exchangeRate: Number(stay.exchangeRate)
+      currencySymbol: stay.currencySymbol, exchangeRate: hasRate ? savedRate : null
     },
     note: String(form.note || '').trim().slice(0,180),
     transferred: false,

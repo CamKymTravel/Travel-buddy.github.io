@@ -1,5 +1,6 @@
 import {ensureSeedData,getAll,getRecord,putRecord,putMany,deleteRecord,resetDatabase,atomicWrite} from './db.js';
-import {BUILD_VERSION,EXPENSE_CATEGORIES,SHOPPING_STATES,MAX_IMPORT_BYTES,MAX_IMPORT_ITEMS,validateAuDate,auDateToSort,todayAu,convertLocalToAud,formatAud,formatLocal,expenseSortNewest,shoppingSortStable,nextShoppingOrder,finishShopping,normalizeInitials,nonBlank,normalizeCurrencyCode,buildExpenseRecord,validateShoppingEnvelope,normalizeShoppingImportItem,mergeImportedShopping} from './logic.js';
+import {BUILD_VERSION,EXPENSE_CATEGORIES,SHOPPING_STATES,MAX_IMPORT_BYTES,MAX_IMPORT_ITEMS,validateAuDate,auDateToSort,isoDateToAu,auDateToIso,todayAu,convertLocalToAud,formatAud,formatLocal,expenseSortNewest,shoppingSortStable,nextShoppingOrder,finishShopping,normalizeInitials,nonBlank,buildExpenseRecord,validateShoppingEnvelope,normalizeShoppingImportItem,mergeImportedShopping} from './logic.js';
+import {COUNTRIES,findCountry} from './country-data.js';
 
 const screen=document.querySelector('#screen');
 const app=document.querySelector('#app');
@@ -18,6 +19,8 @@ const id=()=>crypto.randomUUID();
 const now=()=>new Date().toISOString();
 const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const sum=(rows,key)=>rows.reduce((n,r)=>n+(Number(r[key])||0),0);
+const audTotal=rows=>{const values=rows.map(r=>r?.audAmount).filter(v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))).map(Number);return values.length?values.reduce((a,b)=>a+b,0):null;};
+const stayRate=stay=>{const n=Number(stay?.exchangeRate);return Number.isFinite(n)&&n>0?n:null;};
 const pageHead=(title,subtitle,accent='Travel Buddy')=>`<div class="page-head"><div><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div></div>`;
 
 function resetView(){
@@ -34,7 +37,16 @@ function setRoute(next){
     if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
   });
 }
-async function loadCurrentStay(){const setting=await getRecord('settings','currentStayId');currentStay=setting?.value?await getRecord('stays',setting.value):null;}
+async function loadCurrentStay(){
+  const setting=await getRecord('settings','currentStayId');currentStay=setting?.value?await getRecord('stays',setting.value):null;
+  if(!currentStay)return;
+  if(!validateAuDate(currentStay.startDate)||!validateAuDate(currentStay.endDate)){currentStay=null;return;}
+  const ref=findCountry(currentStay.country);
+  if(ref&&(currentStay.flag!==ref.flag||currentStay.currencyCode!==ref.currencyCode||currentStay.currencyName!==ref.currencyName||currentStay.currencySymbol!==ref.currencySymbol)){
+    currentStay={...currentStay,flag:ref.flag,currencyCode:ref.currencyCode,currencyName:ref.currencyName,currencySymbol:ref.currencySymbol,modifiedAt:now()};
+    await putRecord('stays',currentStay);
+  }
+}
 async function renderRoute(next=route){
   if(!currentStay){setRoute('settings');setNavigationEnabled(false);return stayEditor('setup',true);}
   setNavigationEnabled(true);setRoute(next);
@@ -46,21 +58,21 @@ async function renderRoute(next=route){
 
 function stayHero(stay=currentStay){
   if(!stay)return'';
-  return `<section class="hero"><div class="hero-top"><div class="flag">${esc(stay.flag||'◉')}</div><div><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill">${esc(stay.currencyCode)}</span><span class="pill">1 AUD = ${esc(stay.exchangeRate)} ${esc(stay.currencyCode)}</span></div></section>`;
+  const rate=stayRate(stay);return `<section class="hero"><div class="hero-top"><div class="flag">${esc(stay.flag||'◉')}</div><div><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill">${esc(stay.currencyCode)}</span>${rate?`<span class="pill">1 AUD = ${esc(rate)} ${esc(stay.currencyCode)}</span>`:''}</div></section>`;
 }
 function stayStrip(){return currentStay?`<div class="screen-title-strip"><div class="flag">${esc(currentStay.flag||'◉')}</div><div><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><small>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</small></div></div>`:'';}
 function emptyCard(text,button,label){return `<div class="card empty">${esc(text)}${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;}
 function categoryMark(category){return `<span class="category-dot cat-${slug(category)}" aria-hidden="true"></span>`;}
 function pendingSummary(expenses){
   const pending=expenses.filter(e=>!e.transferred), pendingCurrent=pending.filter(e=>e.stayId===currentStay?.id);
-  return {pending,pendingCurrent,count:pending.length,aud:sum(pending,'audAmount'),local:sum(pendingCurrent,'localAmount')};
+  return {pending,pendingCurrent,count:pending.length,aud:audTotal(pending),local:sum(pendingCurrent,'localAmount')};
 }
 
 async function renderHome(){
   const [expenses,shopping]=await Promise.all([getAll('expenses'),getAll('shoppingItems')]);
   const today=todayAu(),currentExpenses=expenses.filter(e=>e.stayId===currentStay.id),todays=currentExpenses.filter(e=>e.date===today),pending=pendingSummary(expenses),couldnt=shopping.filter(i=>i.state==='couldnt'),recent=[...expenses].sort(expenseSortNewest).slice(0,4);
   present(`${stayHero()}<section class="card action-card expense-accent"><div><p class="eyebrow">Quick Expense</p><h3>Add an expense</h3><p>Capture it now. Transfer it later.</p></div><button class="btn primary" data-add-expense>Add Expense</button></section>
-  <div class="grid"><section class="card metric"><div class="label">Today’s Spending</div><div class="value">${formatLocal(sum(todays,'localAmount'),currentStay.currencyCode)}</div><div class="sub">${formatAud(sum(todays,'audAmount'))}</div></section><section class="card metric"><div class="label">Not Yet Transferred</div><div class="value">${pending.count}</div><div class="sub">${formatAud(pending.aud)} total · Current stay ${formatLocal(pending.local,currentStay.currencyCode)}</div></section></div>
+  <div class="grid"><section class="card metric"><div class="label">Today’s Spending</div><div class="value">${formatLocal(sum(todays,'localAmount'),currentStay.currencyCode)}</div><div class="sub">${formatAud(audTotal(todays))}</div></section><section class="card metric"><div class="label">Not Yet Transferred</div><div class="value">${pending.count}</div><div class="sub">${formatAud(pending.aud)} total · Current stay ${formatLocal(pending.local,currentStay.currencyCode)}</div></section></div>
   <button class="settings-row shopping-accent" data-open-shopping><strong>Shopping List</strong><span>${shopping.length} active · ${couldnt.length} couldn’t get</span></button>
   <h3 class="section-title">Recent Expenses</h3><div class="list">${recent.length?recent.map(e=>expenseRow(e,'home')).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense')}</div>`);
 }
@@ -78,7 +90,7 @@ async function renderExpenses(){
   rows.sort(expenseSortNewest);
   const currentRows=expenses.filter(e=>e.stayId===currentStay.id),pending=pendingSummary(expenses);
   present(`${pageHead('Expenses','Local currency first, AUD underneath.')}${stayStrip()}<button class="btn primary full" data-add-expense>Add Expense</button>
-  <div class="grid" style="margin-top:12px"><section class="card metric"><div class="label">Current Stay Total</div><div class="value">${formatLocal(sum(currentRows,'localAmount'),currentStay.currencyCode)}</div><div class="sub">${formatAud(sum(currentRows,'audAmount'))}</div></section><section class="card metric"><div class="label">Untransferred</div><div class="value">${pending.count}</div><div class="sub">${formatAud(pending.aud)} total · Current stay ${formatLocal(pending.local,currentStay.currencyCode)}</div></section></div>
+  <div class="grid" style="margin-top:12px"><section class="card metric"><div class="label">Current Stay Total</div><div class="value">${formatLocal(sum(currentRows,'localAmount'),currentStay.currencyCode)}</div><div class="sub">${formatAud(audTotal(currentRows))}</div></section><section class="card metric"><div class="label">Untransferred</div><div class="value">${pending.count}</div><div class="sub">${formatAud(pending.aud)} total · Current stay ${formatLocal(pending.local,currentStay.currencyCode)}</div></section></div>
   <div class="filters" aria-label="Expense status filters">${[['current','Current Stay'],['all','All Expenses'],['pending','Not Transferred'],['transferred','Transferred']].map(([v,l])=>`<button class="filter ${expenseFilter===v?'is-active':''}" aria-pressed="${expenseFilter===v?'true':'false'}" data-expense-filter="${v}">${l}</button>`).join('')}</div>
   <div class="filters" aria-label="Expense category filters">${['All',...EXPENSE_CATEGORIES].map(v=>`<button class="filter ${expenseCategory===v?'is-active':''}" aria-pressed="${expenseCategory===v?'true':'false'}" data-category-filter="${esc(v)}">${esc(v)}</button>`).join('')}</div>
   <div class="list">${rows.length?rows.map(e=>expenseRow(e,'expenses')).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense')}</div>`);
@@ -88,22 +100,22 @@ function expenseEditor(existing=null,defaults={}){
   const stay=existing?.staySnapshot||currentStay;
   if(!stay)return stayEditor('setup',true);
   expenseReturnRoute=defaults.returnRoute||route||'expenses';
-  const defaultDate=existing?.date||defaults.date||todayAu(),category=existing?.category||defaults.category||'Groceries';
-  present(`${pageHead(existing?'Edit Expense':'Add Expense','Nothing is committed until Save is tapped.')}<form class="editor-card" id="expenseForm">
-  <label>Date<input name="date" inputmode="numeric" placeholder="DD/MM/YYYY" maxlength="10" value="${esc(defaultDate)}" required></label>
+  const defaultDate=existing?.date||defaults.date||todayAu(),category=existing?.category||defaults.category||'Groceries',rate=stayRate(stay);
+  present(`${pageHead(existing?'Edit Expense':'Add Expense','Quick capture — Save when finished.')}<form class="editor-card" id="expenseForm">
+  <label>Date<input name="date" type="date" value="${esc(auDateToIso(defaultDate))}" required></label>
   <label>Category<select name="category">${EXPENSE_CATEGORIES.map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
   <label>Amount <span class="hint">${esc(stay.currencyCode)}</span><input name="localAmount" type="number" min="0" step="any" inputmode="decimal" value="${existing?esc(existing.localAmount):''}" required></label>
-  <div class="formula-box">1 AUD = ${esc(stay.exchangeRate)} ${esc(stay.currencyCode)}<div class="preview" id="expensePreview">AUD —</div></div>
+  <div class="formula-box">${rate?`1 AUD = ${esc(rate)} ${esc(stay.currencyCode)}<div class="preview" id="expensePreview">AUD —</div>`:`AUD conversion is optional. No exchange rate is set for this stay.<div class="preview">AUD —</div>`}</div>
   <label>Note <span class="hint">Optional</span><textarea name="note" maxlength="180" placeholder="Supermarket, lunch, taxi…">${esc(existing?.note||'')}</textarea></label>
   ${existing?`<div class="notice">Editing this saved expense will return it to <strong>Not Transferred</strong> when Save is tapped.</div>`:''}
   <div class="editor-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>${existing?`<button class="btn danger full" style="margin-top:10px" data-delete-expense="${esc(existing.id)}">Delete Expense</button>`:''}`);
   const form=screen.querySelector('#expenseForm'),amount=form.elements.localAmount,preview=screen.querySelector('#expensePreview');
-  const update=()=>{const a=convertLocalToAud(amount.value,stay.exchangeRate);preview.textContent=a===null?'AUD —':formatAud(a);};amount.addEventListener('input',update);update();
+  if(rate&&preview){const update=()=>{const a=convertLocalToAud(amount.value,rate);preview.textContent=a===null?'AUD —':formatAud(a);};amount.addEventListener('input',update);update();}
   form.addEventListener('submit',async e=>{
-    e.preventDefault();const data=Object.fromEntries(new FormData(form));
-    if(!validateAuDate(data.date)){alert('Use DD/MM/YYYY for the expense date.');return;}
-    const aud=convertLocalToAud(data.localAmount,stay.exchangeRate);if(aud===null){alert('Enter a valid local-currency amount.');return;}
-    const rec=buildExpenseRecord({existing,form:data,stay});await putRecord('expenses',rec);await renderRoute(expenseReturnRoute);
+    e.preventDefault();const data=Object.fromEntries(new FormData(form)),dateAu=isoDateToAu(data.date);
+    if(!dateAu){alert('Choose a valid expense date.');return;}
+    const amountValue=Number(data.localAmount);if(!Number.isFinite(amountValue)||amountValue<0){alert('Enter a valid local-currency amount.');return;}
+    data.date=dateAu;const rec=buildExpenseRecord({existing,form:data,stay});await putRecord('expenses',rec);await renderRoute(expenseReturnRoute);
   });
 }
 
@@ -168,7 +180,7 @@ async function importShoppingFile(file){
 async function renderSettings(){
   const [people,categories,catalogue,regulars]=await Promise.all([getAll('people'),getAll('categories'),getAll('catalogue'),getAll('regularItems')]);
   present(`${pageHead('Settings','Only the controls Travel Buddy needs.')}
-  <section class="settings-section"><h2>Current Stay</h2><button class="settings-row" data-edit-stay><strong>Edit Current Stay</strong><span>${currentStay?`${esc(currentStay.flag)} ${esc(currentStay.country)} · ${esc(currentStay.city)} · 1 AUD = ${esc(currentStay.exchangeRate)} ${esc(currentStay.currencyCode)}`:'Not configured'}</span></button><button class="settings-row" data-change-stay><strong>Change Current Stay</strong><span>Create the next stay while preserving old expense history.</span></button></section>
+  <section class="settings-section"><h2>Current Stay</h2><button class="settings-row" data-edit-stay><strong>Edit Current Stay</strong><span>${currentStay?`${esc(currentStay.flag)} ${esc(currentStay.country)} · ${esc(currentStay.city)} · ${esc(currentStay.currencyCode)}`:'Not configured'}</span></button><button class="settings-row" data-change-stay><strong>Change Current Stay</strong><span>Country, city and dates only.</span></button><button class="settings-row" data-exchange-rate><strong>Exchange Rate <span class="optional-tag">Optional</span></strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Not set — expenses can still be saved without AUD conversion.'}</span></button></section>
   <section class="settings-section"><h2>People</h2><div class="card">${people.length?people.map(p=>`<div class="manage-row"><div><strong>${esc(p.name)}</strong><div class="muted">Initials: ${esc(p.initials)}</div></div><div class="mini-actions"><button class="mini" data-edit-person="${esc(p.id)}">Edit</button><button class="mini danger" data-delete-person="${esc(p.id)}">Delete</button></div></div>`).join(''):'<p class="muted">No people configured.</p>'}<button class="btn secondary full" style="margin-top:12px" data-add-person>Add Person</button></div></section>
   <section class="settings-section"><h2>Shopping Setup</h2><button class="settings-row" data-manage-categories><strong>Categories</strong><span>${categories.length} categories</span></button><button class="settings-row" data-manage-custom><strong>Custom Items</strong><span>${catalogue.filter(x=>!x.builtIn).length} custom items</span></button><button class="settings-row" data-manage-regulars><strong>Regular Items</strong><span>${regulars.length} regular items</span></button></section>
   <section class="settings-section"><h2>Data</h2><button class="settings-row danger" data-reset><strong>Reset Travel Buddy</strong><span>Remove local user data and return to Current Stay setup.</span></button></section>
@@ -176,25 +188,35 @@ async function renderSettings(){
 }
 
 async function stayEditor(mode='edit',force=false){
-  const base=mode==='edit'?currentStay:null,title=mode==='setup'?'Current Stay Setup':mode==='change'?'Change Current Stay':base?'Edit Current Stay':'Current Stay Setup',subtitle=mode==='change'?'A new stay will preserve all old expense snapshots.':'Manual destination and fixed stay exchange rate.';
+  const base=mode==='edit'?currentStay:null,title=mode==='setup'?'Current Stay Setup':mode==='change'?'Change Current Stay':base?'Edit Current Stay':'Current Stay Setup';
+  const subtitle=mode==='setup'?'Four quick details and you’re in. Flag and currency are automatic.':mode==='change'?'Set the next place. Old expenses stay unchanged.':'Change the place or dates. Flag and currency are automatic.';
   if(force)setNavigationEnabled(false);
-  present(`${pageHead(title,subtitle)}<form class="editor-card" id="stayForm"><label>Country<input name="country" required maxlength="60" autocomplete="country-name" value="${esc(base?.country||'')}"></label><label>City / Destination<input name="city" required maxlength="80" autocomplete="address-level2" value="${esc(base?.city||'')}"></label><label>Country flag<input name="flag" maxlength="8" placeholder="🇯🇵" required value="${esc(base?.flag||'')}"></label><div class="field-grid two"><label>Stay start<input name="startDate" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" required value="${esc(base?.startDate||'')}"></label><label>Stay end<input name="endDate" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" required value="${esc(base?.endDate||'')}"></label></div><label>Local currency name<input name="currencyName" required maxlength="60" placeholder="Japanese Yen" value="${esc(base?.currencyName||'')}"></label><div class="field-grid two"><label>Currency code<input name="currencyCode" required maxlength="3" autocapitalize="characters" placeholder="JPY" value="${esc(base?.currencyCode||'')}"></label><label>Currency symbol<input name="currencySymbol" required maxlength="8" placeholder="¥" value="${esc(base?.currencySymbol||'')}"></label></div><label>Exchange rate <span class="hint">1 AUD = X local currency</span><input name="exchangeRate" type="number" min="0.000001" step="any" required inputmode="decimal" value="${esc(base?.exchangeRate||'')}"></label><div class="formula-box">AUD value = local amount ÷ exchange rate</div><div class="editor-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">Save</button></div></form>`);
-  const form=screen.querySelector('#stayForm');form.addEventListener('submit',async e=>{
-    e.preventDefault();const d=Object.fromEntries(new FormData(form)),country=d.country.trim(),city=d.city.trim(),flag=d.flag.trim(),currencyName=d.currencyName.trim(),currencySymbol=d.currencySymbol.trim(),currencyCode=normalizeCurrencyCode(d.currencyCode);
-    if(!nonBlank(country,60)||!nonBlank(city,80)||!nonBlank(flag,8)||!nonBlank(currencyName,60)||!nonBlank(currencySymbol,8)){alert('Complete all Current Stay fields.');return;}
-    if(!currencyCode){alert('Currency code must be exactly three letters, for example JPY.');return;}
-    if(!validateAuDate(d.startDate)||!validateAuDate(d.endDate)){alert('Use DD/MM/YYYY for both stay dates.');return;}
-    if(auDateToSort(d.endDate)<auDateToSort(d.startDate)){alert('Stay end date cannot be before the start date.');return;}
-    const rate=Number(d.exchangeRate);if(!Number.isFinite(rate)||rate<=0){alert('Enter a valid exchange rate greater than zero.');return;}
+  const options=COUNTRIES.map(c=>`<option value="${esc(c.name)}"></option>`).join('');
+  present(`${pageHead(title,subtitle)}<form class="editor-card quick-stay" id="stayForm"><label>Country<input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing, e.g. Germany" value="${esc(base?.country||'')}"><datalist id="countryList">${options}</datalist></label><div class="auto-country" id="countryAuto">${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:'Flag and currency will fill automatically.'}</div><label>City / Destination<input name="city" required maxlength="80" autocomplete="address-level2" placeholder="e.g. Munich" value="${esc(base?.city||'')}"></label><div class="field-grid two"><label>Stay start<input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label>Stay end<input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div><div class="editor-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">Save & Continue</button></div></form>`);
+  const form=screen.querySelector('#stayForm'),countryInput=form.elements.country,auto=screen.querySelector('#countryAuto');
+  const updateCountry=()=>{const ref=findCountry(countryInput.value);auto.textContent=ref?`${ref.flag} ${ref.currencyCode} · ${ref.currencyName}`:'Choose a country from the suggestions.';auto.classList.toggle('is-ready',!!ref);};
+  countryInput.addEventListener('input',updateCountry);countryInput.addEventListener('change',updateCountry);updateCountry();
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();const d=Object.fromEntries(new FormData(form)),countryRef=findCountry(d.country),city=String(d.city||'').trim(),startDate=isoDateToAu(d.startDate),endDate=isoDateToAu(d.endDate);
+    if(!countryRef){alert('Choose a country from the list so Travel Buddy can set the flag and currency automatically.');countryInput.focus();return;}
+    if(!nonBlank(city,80)){alert('Enter the city or destination.');return;}
+    if(!startDate||!endDate){alert('Choose both stay dates.');return;}
+    if(auDateToSort(endDate)<auDateToSort(startDate)){alert('Stay end date cannot be before the start date.');return;}
     if(mode==='edit'&&base){
       const saved=await getAll('expenses'),hasExpenses=saved.some(x=>x.stayId===base.id);
-      if(hasExpenses&&currencyCode!==base.currencyCode){alert('This stay already has saved expenses. Use Change Current Stay to use a different currency code.');return;}
-      if(hasExpenses&&(country!==base.country||city!==base.city)&&!confirm('Correct the Current Stay country/city? Existing expense snapshots will remain unchanged.'))return;
+      if(hasExpenses&&countryRef.currencyCode!==base.currencyCode){alert('This stay already has saved expenses. Use Change Current Stay to move to a country with a different currency.');return;}
+      if(hasExpenses&&(countryRef.name!==base.country||city!==base.city)&&!confirm('Correct the Current Stay country/city? Existing expense snapshots will remain unchanged.'))return;
     }
-    if(mode==='change'&&currentStay&&!confirm('Replace the Current Stay with this new stay? Old expenses will remain unchanged.'))return;
-    const ts=now(),rec={id:mode==='edit'&&base?base.id:id(),country,city,flag,startDate:d.startDate.trim(),endDate:d.endDate.trim(),currencyName,currencyCode,currencySymbol,exchangeRate:rate,createdAt:mode==='edit'&&base?base.createdAt:ts,modifiedAt:ts};
+    if(mode==='change'&&currentStay&&!confirm('Change to this new Current Stay? Old expenses will remain unchanged.'))return;
+    const ts=now(),sameCurrency=base&&base.currencyCode===countryRef.currencyCode,rec={id:mode==='edit'&&base?base.id:id(),country:countryRef.name,city,flag:countryRef.flag,startDate,endDate,currencyName:countryRef.currencyName,currencyCode:countryRef.currencyCode,currencySymbol:countryRef.currencySymbol,exchangeRate:sameCurrency?(stayRate(base)||null):null,createdAt:mode==='edit'&&base?base.createdAt:ts,modifiedAt:ts};
     await atomicWrite(['stays','settings'],st=>{st.stays.put(rec);st.settings.put({key:'currentStayId',value:rec.id});});currentStay=rec;setNavigationEnabled(true);await renderRoute(force?'home':'settings');
   });
+}
+
+async function exchangeRateEditor(){
+  if(!currentStay)return stayEditor('setup',true);
+  present(`${pageHead('Exchange Rate','Optional — only needed if you want AUD shown under local expenses.')}<form class="editor-card" id="rateForm"><div class="notice">${esc(currentStay.flag)} ${esc(currentStay.country)} · ${esc(currentStay.currencyCode)}<br>Expenses can be saved without an exchange rate.</div><label>1 AUD = <span class="hint">${esc(currentStay.currencyCode)}</span><input name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn AUD conversion off" value="${esc(stayRate(currentStay)||'')}"></label><div class="editor-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`);
+  screen.querySelector('#rateForm').addEventListener('submit',async e=>{e.preventDefault();const raw=String(new FormData(e.currentTarget).get('exchangeRate')||'').trim();let rate=null;if(raw){rate=Number(raw);if(!Number.isFinite(rate)||rate<=0){alert('Enter a valid exchange rate or leave it blank.');return;}}currentStay={...currentStay,exchangeRate:rate,modifiedAt:now()};await putRecord('stays',currentStay);await renderRoute('settings');});
 }
 
 async function personEditor(person=null){
@@ -252,6 +274,7 @@ screen.addEventListener('click',async e=>{
   if(t.matches('[data-import-shopping]'))return importInput.click();
   if(t.matches('[data-edit-stay]'))return stayEditor('edit');
   if(t.matches('[data-change-stay]'))return stayEditor('change');
+  if(t.matches('[data-exchange-rate]'))return exchangeRateEditor();
   if(t.matches('[data-add-person]'))return personEditor();
   if(t.matches('[data-edit-person]'))return personEditor(await getRecord('people',t.dataset.editPerson));
   if(t.matches('[data-delete-person]'))return deletePerson(t.dataset.deletePerson);
