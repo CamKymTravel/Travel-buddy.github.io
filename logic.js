@@ -1,6 +1,6 @@
-export const BUILD_VERSION = '0.9.2';
+export const BUILD_VERSION = '0.10.1';
 export const SCHEMA_VERSION = 3;
-export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Shopping','Misc'];
+export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Tickets','Shopping','Misc'];
 export const SHOPPING_STATES = ['pending','got','couldnt'];
 export const MAX_IMPORT_BYTES = 1024 * 1024;
 export const MAX_IMPORT_ITEMS = 500;

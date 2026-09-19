@@ -15,6 +15,7 @@ const launchBrand=document.querySelector('#launchBrand');
 const launchStay=document.querySelector('#launchStay');
 const navButtons=[...document.querySelectorAll('.nav-item')];
 const importInput=document.querySelector('#shoppingImportFile');
+const dialogRoot=document.querySelector('#dialogRoot');
 
 let route='home';
 let currentStay=null;
@@ -33,7 +34,103 @@ const stayRate=stay=>{const n=Number(stay?.exchangeRate);return Number.isFinite(
 const toneKey=value=>{const v=String(value||'').toLowerCase();if(v.includes('shopping'))return'shopping';if(v.includes('expense'))return'expenses';if(v.includes('setting'))return'settings';return'home';};
 const pageHead=(title,subtitle='',accent='Travel Buddy')=>`<div class="page-head head-${toneKey(accent)}"><div><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div></div>`;
 const categoryTone=category=>{const v=String(category?.name||category||'').toLowerCase();if(v.includes('fruit')||v.includes('veg'))return'teal';if(v.includes('meat'))return'copper';if(v.includes('dairy'))return'blue';if(v.includes('bakery'))return'gold';if(v.includes('pantry'))return'purple';if(v.includes('frozen'))return'ice';if(v.includes('drink'))return'cyan';if(v.includes('house'))return'green';if(v.includes('toilet'))return'rose';if(v.includes('pharmacy'))return'red';return'silver';};
-const expenseTone=category=>({Groceries:'teal','Eating Out':'gold',Transport:'blue',Entertainment:'purple',Shopping:'rose',Misc:'silver'})[category]||'silver';
+const expenseTone=category=>({Groceries:'teal','Eating Out':'gold',Transport:'blue',Entertainment:'purple',Tickets:'copper',Shopping:'rose',Misc:'silver'})[category]||'silver';
+
+
+
+const expenseCategoryIcon=category=>{
+  const path={
+    Groceries:'<path d="M7 8h10l1 11H6L7 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
+    'Eating Out':'<path d="M7 4v7M4.5 4v4a2.5 2.5 0 0 0 5 0V4M7 11v9M15 4v16M15 4c3 1 4 3 4 6h-4"/>',
+    Transport:'<rect x="4" y="6" width="16" height="10" rx="3"/><path d="M7 16v2M17 16v2M7 11h10M8 8h8"/>',
+    Entertainment:'<path d="M5 7h14l-1.5 10h-11L5 7Z"/><path d="M8 7V5h8v2M9 11l2 2 4-4"/>',
+    Tickets:'<path d="M5 7h14v3a2 2 0 0 0 0 4v3H5v-3a2 2 0 0 0 0-4V7Z"/><path d="M12 8v8"/>',
+    Shopping:'<path d="M4 6h2l2 9h9l2-6H7"/><circle cx="10" cy="19" r="1.2"/><circle cx="17" cy="19" r="1.2"/>',
+    Misc:'<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>'
+  }[category]||'<circle cx="12" cy="12" r="7"/>';
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+};
+
+const categoryArt=category=>{
+  const name=String(category?.name||category||'').toLowerCase();
+  let path='<path d="M5 12h14M12 5v14"/>';
+  if(name.includes('fruit')||name.includes('veg'))path='<path d="M12 19c-4 0-7-3-7-7 0-3 2-6 6-6 1 0 2 .3 3 1 1-2 3-3 5-3-1 3-3 5-5 5 1 1 2 3 2 5 0 4-3 7-7 7Z"/><path d="M13 7c0-2 1-4 3-5"/>';
+  else if(name.includes('meat'))path='<path d="M5 15c0-4 3-8 8-9 4-1 7 2 6 6-1 4-5 7-9 7-3 0-5-1-5-4Z"/><circle cx="14" cy="11" r="2"/>';
+  else if(name.includes('dairy'))path='<path d="M8 4h8l1 4v11H7V8l1-4Z"/><path d="M8 8h9M10 4v4"/>';
+  else if(name.includes('bakery'))path='<path d="M5 15c0-4 3-7 7-7s7 3 7 7v3H5v-3Z"/><path d="M9 8c0-2 1-3 3-4M15 8c0-2 1-3 3-4"/>';
+  else if(name.includes('pantry'))path='<rect x="6" y="4" width="12" height="16" rx="2"/><path d="M6 9h12M9 13h6"/>';
+  else if(name.includes('frozen'))path='<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M8.5 5.5 12 8l3.5-2.5M8.5 18.5 12 16l3.5 2.5"/>';
+  else if(name.includes('drink'))path='<path d="M7 5h10l-1 15H8L7 5Z"/><path d="M9 9h6M13 5l2-3"/>';
+  else if(name.includes('house'))path='<path d="M4 11 12 4l8 7v9h-6v-6h-4v6H4v-9Z"/>';
+  else if(name.includes('toilet'))path='<path d="M8 4h8l1 5H7l1-5Z"/><path d="M7 9h10v3c0 4-2 7-5 8-3-1-5-4-5-8V9Z"/>';
+  else if(name.includes('pharmacy'))path='<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5h6v3M12 11v6M9 14h6"/>';
+  else path='<path d="M5 7h14v12H5V7Z"/><path d="M8 7V5h8v2"/>';
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+};
+
+const settingsIcon=kind=>{
+  const map={
+    people:'<circle cx="9" cy="8" r="3"/><path d="M4 19c0-4 2-6 5-6s5 2 5 6M16 9a2.5 2.5 0 1 1 0-5M16 13c2.5 0 4 2 4 5"/>',
+    categories:'<path d="M4 6h6v6H4zM14 6h6v6h-6zM4 16h6v4H4zM14 16h6v4h-6z"/>',
+    regular:'<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.4l6.1-.9L12 3Z"/>',
+    custom:'<path d="M4 17.5V20h2.5L18 8.5 15.5 6 4 17.5Z"/><path d="m14.5 7 2.5 2.5"/>',
+    advanced:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10M8 4v6M16 14v6"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="17" r="2"/>',
+    transfer:'<path d="M5 7h11l-3-3M19 17H8l3 3"/>',
+    rate:'<path d="M7 6h10M12 3v18M8 10c0 2 8 1 8 4s-8 2-8 4"/>',
+    reset:'<path d="M5 8a8 8 0 1 1-1 7M5 8V3M5 8h5"/>'
+  };
+  return `<span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${map[kind]||map.advanced}</svg></span>`;
+};
+
+const TOILET_PHRASES={
+  Germany:['de','ltr','Wo ist die Toilette?'],Austria:['de','ltr','Wo ist die Toilette?'],Switzerland:['de','ltr','Wo ist die Toilette?'],
+  France:['fr','ltr','Où sont les toilettes ?'],Belgium:['fr','ltr','Où sont les toilettes ?'],Netherlands:['nl','ltr','Waar is het toilet?'],
+  Spain:['es','ltr','¿Dónde está el baño?'],Portugal:['pt','ltr','Onde fica a casa de banho?'],Italy:['it','ltr','Dov’è il bagno?'],
+  Greece:['el','ltr','Πού είναι η τουαλέτα;'],Cyprus:['el','ltr','Πού είναι η τουαλέτα;'],Hungary:['hu','ltr','Hol van a mosdó?'],Croatia:['hr','ltr','Gdje je WC?'],
+  Czechia:['cs','ltr','Kde je toaleta?'],'Czech Republic':['cs','ltr','Kde je toaleta?'],Poland:['pl','ltr','Gdzie jest toaleta?'],Russia:['ru','ltr','Где туалет?'],Ukraine:['uk','ltr','Де туалет?'],
+  Türkiye:['tr','ltr','Tuvalet nerede?'],Turkey:['tr','ltr','Tuvalet nerede?'],Egypt:['ar','rtl','أين الحمام؟'],Jordan:['ar','rtl','أين الحمام؟'],Morocco:['ar','rtl','أين الحمام؟'],Algeria:['ar','rtl','أين الحمام؟'],
+  'United Arab Emirates':['ar','rtl','أين الحمام؟'],'Saudi Arabia':['ar','rtl','أين الحمام؟'],Israel:['he','rtl','איפה השירותים?'],Japan:['ja','ltr','トイレはどこですか？'],
+  China:['zh','ltr','洗手间在哪里？'],Taiwan:['zh','ltr','洗手間在哪裡？'],'South Korea':['ko','ltr','화장실이 어디예요?'],Thailand:['th','ltr','ห้องน้ำอยู่ที่ไหน?'],Vietnam:['vi','ltr','Nhà vệ sinh ở đâu?'],
+  Indonesia:['id','ltr','Di mana toilet?'],Malaysia:['ms','ltr','Di mana tandas?'],Philippines:['fil','ltr','Nasaan ang banyo?'],India:['hi','ltr','शौचालय कहाँ है?'],
+  Mexico:['es','ltr','¿Dónde está el baño?'],Argentina:['es','ltr','¿Dónde está el baño?'],Chile:['es','ltr','¿Dónde está el baño?'],Brazil:['pt','ltr','Onde fica o banheiro?'],
+  Australia:['en','ltr',"Where’s the toilet?"],'United Kingdom':['en','ltr',"Where’s the toilet?"],'United States':['en','ltr',"Where’s the restroom?"]
+};
+const toiletPhraseFor=country=>{const [lang,dir,text]=TOILET_PHRASES[country]||['en','ltr',"Where’s the toilet?"];return{lang,dir,text};};
+
+let activeDialogCleanup=null;
+function closeDialog(value){
+  if(activeDialogCleanup){activeDialogCleanup();activeDialogCleanup=null;}
+  dialogRoot.hidden=true;dialogRoot.innerHTML='';
+  const resolver=closeDialog._resolver;closeDialog._resolver=null;
+  const origin=closeDialog._origin;closeDialog._origin=null;
+  if(origin&&origin.isConnected){try{origin.focus({preventScroll:true});}catch{}}
+  if(resolver)resolver(value);
+}
+function openDialog({title,message='',tone='info',confirmLabel='OK',cancelLabel='',html='',dismissible=true}={}){
+  if(!dialogRoot)return Promise.resolve(cancelLabel?false:true);
+  if(activeDialogCleanup)closeDialog(false);
+  const origin=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  return new Promise(resolve=>{
+    closeDialog._resolver=resolve;closeDialog._origin=origin;
+    dialogRoot.hidden=false;
+    dialogRoot.innerHTML=`<div class="dialog-backdrop"><section class="app-dialog dialog-${esc(tone)}" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-accent"></div><h2 id="dialogTitle">${esc(title)}</h2>${message?`<p>${esc(message)}</p>`:''}${html}<div class="dialog-actions">${cancelLabel?`<button class="btn secondary" type="button" data-dialog-cancel>${esc(cancelLabel)}</button>`:''}<button class="btn ${tone==='danger'?'danger':tone==='attention'?'warm':'primary'}" type="button" data-dialog-confirm>${esc(confirmLabel)}</button></div></section></div>`;
+    const backdrop=dialogRoot.querySelector('.dialog-backdrop');
+    const onClick=e=>{if(e.target.closest('[data-dialog-confirm]'))closeDialog(true);else if(e.target.closest('[data-dialog-cancel]'))closeDialog(false);else if(dismissible&&e.target===backdrop)closeDialog(cancelLabel?false:true);};
+    const onKey=e=>{if(e.key==='Escape'&&dismissible)closeDialog(cancelLabel?false:true);};
+    dialogRoot.addEventListener('click',onClick);document.addEventListener('keydown',onKey);
+    activeDialogCleanup=()=>{dialogRoot.removeEventListener('click',onClick);document.removeEventListener('keydown',onKey);};
+    requestAnimationFrame(()=>dialogRoot.querySelector('[data-dialog-confirm]')?.focus());
+  });
+}
+const showMessage=(title,message,options={})=>openDialog({title,message,...options});
+const askConfirm=(title,message,options={})=>openDialog({title,message,cancelLabel:'Cancel',confirmLabel:'Confirm',tone:'danger',...options});
+
+function showToiletPhrase(){
+  if(!currentStay)return;
+  const phrase=toiletPhraseFor(currentStay.country);
+  const html=`<div class="phrase-destination"><span class="phrase-flag">${esc(currentStay.flag||'')}</span><span><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><small>Quick phrase · offline</small></span></div><div class="phrase-english">Where’s the toilet?</div><div class="phrase-local" lang="${esc(phrase.lang)}" dir="${esc(phrase.dir)}">${esc(phrase.text)}</div>`;
+  return openDialog({title:'Where’s the toilet?',html,tone:'info',confirmLabel:'Close'});
+}
 
 function resetView(focusSelector=null){
   try{window.scrollTo({top:0,left:0,behavior:'auto'});}catch{}
@@ -129,20 +226,21 @@ function itemIcon(name,category=null,storedIcon=''){
 
 function stayHero(stay=currentStay){
   if(!stay)return'';
-  return `<section class="hero compact-hero"><div class="hero-top"><div class="flag">${esc(stay.flag||'◉')}</div><div><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill">${esc(stay.currencyCode)}</span></div></section>`;
+  return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge" aria-hidden="true">WC</span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
 }
 
 function stayStrip(){
-  return currentStay?`<div class="screen-title-strip compact"><div class="flag">${esc(currentStay.flag||'◉')}</div><div><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><small>${esc(currentStay.currencyCode)}</small></div></div>`:'';
+  return currentStay?`<div class="screen-title-strip compact"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag||'◉')}</div></div><div class="stay-strip-copy"><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><small>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</small></div></div>`:'';
 }
 
-function emptyCard(text,button,label){
-  return `<div class="card empty">${esc(text)}${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;
+function emptyCard(text,button,label,kind='empty'){
+  const icon=kind==='shopping'?'<svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg>':kind==='people'?settingsIcon('people').replace('settings-icon','empty-inline-icon'):kind==='expenses'?expenseCategoryIcon('Misc'):'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  return `<div class="card empty premium-empty"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;
 }
 
 function expenseRow(expense,origin=route,{showTransfer=true}={}){
   const secondary=expense.audAmount!==null&&expense.audAmount!==undefined?formatAud(expense.audAmount):'';
-  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)}${expense.category&&expense.category!=='Misc'?` · ${esc(expense.category)}`:''}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}">${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
+  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryIcon(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}">${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
 }
 
 async function renderHome(){
@@ -153,7 +251,7 @@ async function renderHome(){
   present(`${stayHero()}
     <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span></button>
     <button class="home-action shopping-home" data-open-shopping><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span><span><strong>Shopping List</strong><small>${shopping.length} active${couldnt?` · ${couldnt} couldn’t get`:''}</small></span></button>
-    <button class="transfer-summary" data-open-expenses><span>Expenses to transfer</span><strong>${pending.length}</strong></button>
+    <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h11l-3-3M19 17H8l3 3"/></svg></span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
     ${recent.length?`<h3 class="section-title">Recent Expenses</h3><div class="list">${recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join('')}</div>`:''}`);
 }
 
@@ -168,7 +266,7 @@ async function renderExpenses(){
     <div class="filters expense-filters" aria-label="Expense filters">
       ${[['pending','To Transfer'],['transferred','Transferred'],['all','All']].map(([value,label])=>`<button class="filter ${expenseFilter===value?'is-active':''}" aria-pressed="${expenseFilter===value?'true':'false'}" data-expense-filter="${value}">${label}</button>`).join('')}
     </div>
-    <div class="list">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':'No expenses yet','data-add-expense','Add Expense')}</div>`);
+    <div class="list">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 
 function expenseEditor(existing=null,defaults={}){
@@ -176,42 +274,68 @@ function expenseEditor(existing=null,defaults={}){
   if(!stay)return stayEditor('setup',true);
   expenseReturnRoute=defaults.returnRoute||route||'expenses';
   const defaultDate=existing?.date||defaults.date||todayAu();
-  const category=existing?.category||defaults.category||'Misc';
-  present(`${pageHead(existing?'Edit Expense':'Add Expense',existing?'Change what you need.':'Type the amount and save.','Expenses')}
+  const selectedCategory=existing?.category||defaults.category||'';
+  const editing=!!existing;
+  present(`${pageHead(editing?'Edit Expense':'Add Expense',editing?'Change what you need.':'Amount, category, save.','Expenses')}
     <form class="quick-expense-form" id="expenseForm">
       <div class="quick-amount-card">
-        <label for="expenseAmount">Amount</label>
+        <div class="amount-card-head"><label for="expenseAmount">Amount</label><span>${esc(stay.currencyCode)}</span></div>
         <div class="amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(existing.localAmount):''}" required></div>
-        <button class="btn primary full save-expense-button" type="submit">Save Expense</button>
       </div>
-      <details class="optional-details" ${existing?'open':''}>
+      <section class="expense-category-panel" aria-labelledby="categoryHeading">
+        <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">Category</strong></span><em id="categoryStatus">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
+        <input type="hidden" name="category" id="expenseCategory" value="${esc(selectedCategory)}">
+        <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div>
+      </section>
+      <button class="btn primary full save-expense-button" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}>${editing?'Save Changes':'Save Expense'}</button>
+      <details class="optional-details" ${editing?'open':''}>
         <summary>Optional details</summary>
         <div class="optional-details-body">
           <label>Date<input name="date" type="date" value="${esc(auDateToIso(defaultDate))}" required></label>
-          <label>Category<select name="category">${EXPENSE_CATEGORIES.map(c=>`<option ${c===category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
           <label>Note <span class="hint">Optional</span><input name="note" maxlength="180" placeholder="Lunch, taxi, tickets…" value="${esc(existing?.note||'')}"></label>
-          ${existing?'<p class="micro-note">Saving an edited expense marks it To Transfer again.</p>':''}
+          ${editing?'<p class="micro-note">Saving an edited expense marks it To Transfer again.</p>':''}
         </div>
       </details>
       <button class="btn secondary full" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">Cancel</button>
     </form>
-    ${existing?`<button class="btn danger full delete-below" data-delete-expense="${esc(existing.id)}">Delete Expense</button>`:''}`,
-    {subscreen:true,focusSelector:existing?null:'#expenseAmount'});
+    ${editing?`<button class="btn danger full delete-below" data-delete-expense="${esc(existing.id)}">Delete Expense</button>`:''}`,
+    {subscreen:true,focusSelector:editing?null:'#expenseAmount'});
 
   const form=screen.querySelector('#expenseForm');
+  const amountInput=screen.querySelector('#expenseAmount');
+  const categoryInput=screen.querySelector('#expenseCategory');
+  const saveButton=screen.querySelector('#saveExpenseButton');
+  const categoryStatus=screen.querySelector('#categoryStatus');
+  const updateSaveState=()=>{
+    const amount=Number(amountInput.value);
+    const validAmount=Number.isFinite(amount)&&amount>0;
+    const validCategory=EXPENSE_CATEGORIES.includes(categoryInput.value);
+    saveButton.disabled=!(validAmount&&validCategory);
+  };
+  amountInput.addEventListener('input',updateSaveState);
+  screen.querySelectorAll('[data-expense-category]').forEach(button=>button.addEventListener('click',()=>{
+    categoryInput.value=button.dataset.expenseCategory;
+    categoryStatus.textContent=button.dataset.expenseCategory;
+    screen.querySelectorAll('[data-expense-category]').forEach(choice=>{
+      const selected=choice===button;choice.classList.toggle('is-selected',selected);choice.setAttribute('aria-pressed',selected?'true':'false');
+    });
+    updateSaveState();
+  }));
+  updateSaveState();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(form));
     const dateAu=isoDateToAu(data.date);
-    if(!dateAu){alert('Choose a valid expense date.');return;}
+    if(!dateAu){await showMessage('Choose a date','Choose a valid expense date.');return;}
     const amount=Number(data.localAmount);
-    if(!Number.isFinite(amount)||amount<=0){alert(`Enter the ${stay.currencyCode} amount.`);screen.querySelector('#expenseAmount')?.focus();return;}
+    if(!Number.isFinite(amount)||amount<=0){await showMessage('Enter an amount',`Enter the ${stay.currencyCode} amount.`);amountInput.focus();return;}
+    if(!EXPENSE_CATEGORIES.includes(data.category)){await showMessage('Choose a category','Tap one category before saving.');return;}
     data.date=dateAu;
     try{
       const record=buildExpenseRecord({existing,form:data,stay});
       await putRecord('expenses',record);
       await renderRoute(expenseReturnRoute);
-    }catch(error){console.error(error);alert('That expense could not be saved. Check the amount and try again.');}
+    }catch(error){console.error(error);await showMessage('Couldn’t save expense','Check the amount and try again.');}
   });
 }
 
@@ -222,11 +346,11 @@ async function renderShopping(){
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const couldnt=items.filter(item=>item.state==='couldnt').length;
   present(`${pageHead('Shopping','','Shopping')}
-    <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-icon">＋</span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-icon">★</span>Regular Items</button></div>
+    <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.4l6.1-.9L12 3Z"/></svg></span>Regular Items</button></div>
     ${items.length?`<button class="btn finish full finish-shopping" data-finish-shopping>Finish Shopping</button>`:''}
     ${couldnt?`<div class="notice compact-notice">${couldnt} couldn’t-get item${couldnt===1?'':'s'} will stay for next time.</div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
-    <div class="shopping-list">${items.length?items.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):emptyCard('Shopping list is empty','data-add-shop','Add Item')}</div>`);
+    <div class="shopping-list">${items.length?items.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>`);
 }
 
 function shoppingRow(item,personMap,categoryMap){
@@ -238,7 +362,7 @@ function shoppingRow(item,personMap,categoryMap){
     <div class="shop-row-top">
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
         <span class="shop-item-picture" aria-hidden="true">${esc(icon)}</span>
-        <span class="shop-item-copy"><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${item.state!=='pending'?`<em class="shop-state ${item.state}">${item.state==='got'?'Got It':'Couldn’t Get'}</em>`:''}</span>
+        <span class="shop-item-copy"><small class="shop-category-chip">${esc(category?.name||'Other')}</small><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${item.state!=='pending'?`<em class="shop-state ${item.state}">${item.state==='got'?'Got It':'Couldn’t Get'}</em>`:''}</span>
       </button>
       ${person?`<div class="initials" title="${esc(person.name)}">${esc(person.initials)}</div>`:''}
     </div>
@@ -254,14 +378,14 @@ async function showAddShopping(category=null){
   if(!category){
     const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
     present(`${pageHead('Add Item','Tap a picture.','Shopping')}
-      <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${esc(categoryIcon(c))}</span><strong>${esc(c.name)}</strong></button>`).join('')}</div>
+      <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture category-line-art" aria-hidden="true">${categoryArt(c)}</span><span class="category-label"><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
       <h3 class="section-title">Meal Ideas</h3><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div>
       <button class="btn secondary full back-button" data-back-shopping>Cancel</button>`,{subscreen:true});
     return;
   }
   const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>a.name.localeCompare(b.name));
   present(`${pageHead(category.name,'Tap an item to add it.','Shopping')}
-    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><strong>${esc(item.name)}</strong></button>`).join('')||'<div class="card empty span-two">No saved items in this category yet.</div>'}</div>
+    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
     <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">Add Something Else</button>
     <button class="btn secondary full" data-add-shop>Back to Categories</button>`,{subscreen:true});
 }
@@ -283,7 +407,7 @@ async function customShoppingItemEditor(category){
     event.preventDefault();
     const form=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(form.itemName||'').trim();
-    if(!nonBlank(name,80)){alert('Enter an item name.');return;}
+    if(!nonBlank(name,80)){await showMessage('Enter an item','Enter an item name.');return;}
     const quantity=String(form.quantity||'').trim();
     const note=String(form.note||'').trim();
     if(quantity.length>30||note.length>160)return;
@@ -323,7 +447,7 @@ async function shoppingItemEditor(item){
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.itemName||'').trim();
-    if(!nonBlank(name,80)){alert('Enter an item name.');return;}
+    if(!nonBlank(name,80)){await showMessage('Enter an item','Enter an item name.');return;}
     await putRecord('shoppingItems',{...item,itemName:name,quantity:String(data.quantity||'').trim(),requesterId:data.requesterId||null,categoryId:data.categoryId,note:String(data.note||'').trim(),modifiedAt:now()});
     await renderRoute('shopping');
   });
@@ -359,7 +483,7 @@ async function importShoppingFile(file){
     const data=JSON.parse(await file.text());
     if(!validateShoppingEnvelope(data)||data.items.length>MAX_IMPORT_ITEMS)throw new Error('Invalid shopping list file');
     const [existing,imports,categories,people]=await Promise.all([getAll('shoppingItems'),getAll('imports'),getAll('categories'),getAll('people')]);
-    if(imports.some(record=>record.id===data.sourceListId)){alert('This shared list has already been imported.');return;}
+    if(imports.some(record=>record.id===data.sourceListId)){await showMessage('Already imported','This shared list has already been imported.');return;}
 
     const normalized=data.items.map(normalizeShoppingImportItem);
     const categoryByName=new Map(categories.map(category=>[category.name.toLowerCase(),category]));
@@ -397,11 +521,11 @@ async function importShoppingFile(file){
       for(const item of added)stores.shoppingItems.put(item);
       stores.imports.put({id:data.sourceListId,version:data.version,importedAt,added:result.added,skipped:result.skipped});
     });
-    alert(`Imported ${result.added} item${result.added===1?'':'s'}; skipped ${result.skipped} duplicate${result.skipped===1?'':'s'}.`);
+    await showMessage('Shopping list imported',`Imported ${result.added} item${result.added===1?'':'s'}; skipped ${result.skipped} duplicate${result.skipped===1?'':'s'}.`,{tone:'info'});
     await renderRoute('shopping');
   }catch(error){
     console.error(error);
-    alert('That file could not be imported safely. Your current list was not changed.');
+    await showMessage('Import failed','That file could not be imported safely. Your current list was not changed.',{tone:'danger'});
   }
 }
 
@@ -409,27 +533,27 @@ async function renderSettings(){
   const [people,categories,catalogue,regulars]=await Promise.all([getAll('people'),getAll('categories'),getAll('catalogue'),getAll('regularItems')]);
   present(`${pageHead('Settings','','Settings')}
     <section class="settings-section settings-current" data-tone="blue"><h2>Current Stay</h2>
-      <div class="settings-summary"><strong>${esc(currentStay.flag)} ${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</span></div>
+      <div class="settings-summary premium-stay-summary"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag)}</div></div><div><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</span></div></div>
       <div class="button-row"><button class="btn secondary" data-edit-stay>Edit Stay</button><button class="btn primary" data-change-stay>Change Stay</button></div>
     </section>
     <section class="settings-section settings-shopping" data-tone="gold"><h2>Shopping Setup</h2>
-      <button class="settings-row" data-tone="blue" data-manage-people><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></button>
-      <button class="settings-row" data-tone="gold" data-manage-categories><strong>Categories</strong><span>${categories.length}</span></button>
-      <button class="settings-row" data-tone="teal" data-manage-regulars><strong>Regular Items</strong><span>${regulars.length}</span></button>
-      <button class="settings-row" data-tone="purple" data-manage-custom><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length}</span></button>
+      <button class="settings-row" data-tone="blue" data-manage-people>${settingsIcon('people')}<span class="settings-row-copy"><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="gold" data-manage-categories>${settingsIcon('categories')}<span class="settings-row-copy"><strong>Categories</strong><span>${categories.length} available</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="teal" data-manage-regulars>${settingsIcon('regular')}<span class="settings-row-copy"><strong>Regular Items</strong><span>${regulars.length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="purple" data-manage-custom>${settingsIcon('custom')}<span class="settings-row-copy"><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </section>
     <section class="settings-section settings-advanced" data-tone="silver"><h2>More</h2>
-      <button class="settings-row" data-tone="silver" data-advanced-settings><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></button>
+      <button class="settings-row" data-tone="silver" data-advanced-settings>${settingsIcon('advanced')}<span class="settings-row-copy"><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </section>
     <p class="app-version">Travel Buddy V1 · Build ${esc(BUILD_VERSION)} · Offline local PWA</p>`);
 }
 
 async function advancedSettings(){
   present(`${pageHead('Advanced','','Settings')}
-    <div class="settings-list">
-      <button class="settings-row" data-shopping-tools><strong>Shopping List Transfer</strong><span>Manual share/import only</span></button>
-      <button class="settings-row" data-exchange-rate><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></button>
-      <button class="settings-row danger" data-reset><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></button>
+    <div class="settings-list premium-settings-list">
+      <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsIcon('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row danger" data-tone="red" data-reset>${settingsIcon('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </div>
     <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
@@ -443,12 +567,12 @@ async function stayEditor(mode='edit',force=false){
   if(force)setNavigationEnabled(false);
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
   present(`${pageHead(title,subtitle,'Settings')}
-    <form class="editor-card quick-stay" id="stayForm">
-      <label>Country<input name="country" list="countryList" required maxlength="60" autocomplete="off" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
-      <div class="auto-country" id="countryAuto">${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:'Flag and currency fill automatically.'}</div>
+    <form class="editor-card quick-stay premium-stay-editor" id="stayForm">
+      <label>Country<input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
+      <div class="auto-country ${base?'is-ready':''}" id="countryAuto" ${base?'':'hidden'}>${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:''}</div>
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
-      <label>City / Destination<input name="city" required maxlength="80" autocomplete="address-level2" value="${esc(base?.city||'')}"></label>
-      <div class="field-grid two"><label>Stay start<input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label>Stay end<input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div>
+      <label>City / Destination<input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"></label>
+      <div class="stay-date-stack"><label>Stay start<input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label>Stay end<input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div>
       <div class="editor-actions static-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</button></div>
     </form>`,{subscreen:true});
 
@@ -457,7 +581,8 @@ async function stayEditor(mode='edit',force=false){
   const auto=screen.querySelector('#countryAuto');
   const updateCountry=()=>{
     const ref=findCountry(countryInput.value);
-    auto.textContent=ref?`${ref.flag} ${ref.currencyCode} · ${ref.currencyName}`:'Choose a country from the suggestions.';
+    auto.hidden=!ref;
+    auto.textContent=ref?`${ref.flag} ${ref.currencyCode} · ${ref.currencyName}`:'';
     auto.classList.toggle('is-ready',!!ref);
   };
   countryInput.addEventListener('input',updateCountry);countryInput.addEventListener('change',updateCountry);updateCountry();
@@ -468,11 +593,11 @@ async function stayEditor(mode='edit',force=false){
     const city=String(data.city||'').trim();
     const startDate=isoDateToAu(data.startDate);
     const endDate=isoDateToAu(data.endDate);
-    if(!countryRef){alert('Choose a country from the list.');countryInput.focus();return;}
-    if(!nonBlank(city,80)){alert('Enter the city or destination.');return;}
-    if(!startDate||!endDate){alert('Choose both stay dates.');return;}
-    if(auDateToSort(endDate)<auDateToSort(startDate)){alert('Stay end date cannot be before the start date.');return;}
-    if(mode==='change'&&currentStay&&!confirm('Change to this new Current Stay? Old expenses stay unchanged.'))return;
+    if(!countryRef){await showMessage('Choose a country','Choose a country from the suggestions.');countryInput.focus();return;}
+    if(!nonBlank(city,80)){await showMessage('Enter a destination','Enter the city or destination.');return;}
+    if(!startDate||!endDate){await showMessage('Choose both dates','Choose the stay start and end dates.');return;}
+    if(auDateToSort(endDate)<auDateToSort(startDate)){await showMessage('Check the dates','Stay end date cannot be before the start date.');return;}
+    if(mode==='change'&&currentStay){const ok=await askConfirm('Change Current Stay?','Old expenses will stay unchanged.',{tone:'attention',confirmLabel:'Change Stay'});if(!ok)return;}
     const ts=now();
     const sameCurrency=base&&base.currencyCode===countryRef.currencyCode;
     const record={id:mode==='edit'&&base?base.id:id(),country:countryRef.name,city,flag:countryRef.flag,startDate,endDate,currencyName:countryRef.currencyName,currencyCode:countryRef.currencyCode,currencySymbol:countryRef.currencySymbol,exchangeRate:sameCurrency?(stayRate(base)||null):null,createdAt:mode==='edit'&&base?base.createdAt:ts,modifiedAt:ts};
@@ -491,7 +616,7 @@ async function exchangeRateEditor(){
     event.preventDefault();
     const raw=String(new FormData(event.currentTarget).get('exchangeRate')||'').trim();
     let rate=null;
-    if(raw){rate=Number(raw);if(!Number.isFinite(rate)||rate<=0){alert('Enter a valid exchange rate or leave it blank.');return;}}
+    if(raw){rate=Number(raw);if(!Number.isFinite(rate)||rate<=0){await showMessage('Check the exchange rate','Enter a valid exchange rate or leave it blank.');return;}}
     currentStay={...currentStay,exchangeRate:rate,modifiedAt:now()};
     await putRecord('stays',currentStay);
     await renderRoute('settings');
@@ -501,8 +626,8 @@ async function exchangeRateEditor(){
 async function managePeople(){
   const people=await getAll('people');
   present(`${pageHead('People','Requester initials for Shopping.','Settings')}
-    <div class="card">${people.length?people.map(person=>`<div class="manage-row"><div><strong>${esc(person.name)}</strong><div class="muted">${esc(person.initials)}</div></div><div class="mini-actions"><button class="mini" data-edit-person="${esc(person.id)}">Edit</button><button class="mini danger" data-delete-person="${esc(person.id)}">Delete</button></div></div>`).join(''):'<p class="muted">No people yet.</p>'}<button class="btn primary full add-inside-card" data-add-person>Add Person</button></div>
-    <button class="btn secondary full" data-back-settings>Back</button>`,{subscreen:true});
+    <div class="management-list">${people.length?people.map(person=>`<article class="management-card person-card" data-tone="blue"><div class="person-avatar">${esc(person.initials)}</div><div class="management-copy"><strong>${esc(person.name)}</strong><span>Initials · ${esc(person.initials)}</span></div><div class="mini-actions"><button class="mini" data-edit-person="${esc(person.id)}">Edit</button><button class="mini danger" data-delete-person="${esc(person.id)}">Delete</button></div></article>`).join(''):emptyCard('No people yet','','','people')}<button class="btn primary full" data-add-person>Add Person</button></div>
+    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function personEditor(person=null){
@@ -513,9 +638,9 @@ async function personEditor(person=null){
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
-    if(!nonBlank(name,60)){alert('Enter a name.');return;}
+    if(!nonBlank(name,60)){await showMessage('Enter a name','Enter a name.');return;}
     const all=await getAll('people');
-    if(all.some(other=>other.id!==person?.id&&other.name.trim().toLowerCase()===name.toLowerCase())){alert('That person already exists.');return;}
+    if(all.some(other=>other.id!==person?.id&&other.name.trim().toLowerCase()===name.toLowerCase())){await showMessage('Already exists','That person already exists.');return;}
     const ts=now();
     await putRecord('people',{id:person?.id||id(),name,initials:normalizeInitials(name,data.initials),createdAt:person?.createdAt||ts,modifiedAt:ts});
     await managePeople();
@@ -523,7 +648,7 @@ async function personEditor(person=null){
 }
 
 async function deletePerson(personId){
-  if(!confirm('Delete this person? Shopping items stay, but the requester link will be cleared.'))return;
+  if(!await askConfirm('Delete this person?','Shopping items stay, but the requester link will be cleared.',{confirmLabel:'Delete'}))return;
   const items=await getAll('shoppingItems');
   const changed=items.filter(item=>item.requesterId===personId).map(item=>({...item,requesterId:null,modifiedAt:now()}));
   await atomicWrite(['people','shoppingItems'],stores=>{for(const item of changed)stores.shoppingItems.put(item);stores.people.delete(personId);});
@@ -533,7 +658,7 @@ async function deletePerson(personId){
 async function manageCategories(){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="card">${ordered.map(category=>`<div class="manage-row" data-tone="${categoryTone(category)}"><div class="manage-category"><span>${esc(categoryIcon(category))}</span><strong>${esc(category.name)}</strong></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></div>`).join('')}<button class="btn secondary full add-inside-card" data-add-category>Add Category</button></div><button class="btn secondary full" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-line-art" aria-hidden="true">${categoryArt(category)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn secondary full" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function categoryEditor(category=null){
@@ -541,9 +666,9 @@ async function categoryEditor(category=null){
   screen.querySelector('#categoryForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const name=String(new FormData(event.currentTarget).get('name')||'').trim();
-    if(!nonBlank(name,60)){alert('Enter a category name.');return;}
+    if(!nonBlank(name,60)){await showMessage('Enter a category','Enter a category name.');return;}
     const categories=await getAll('categories');
-    if(categories.some(existing=>existing.id!==category?.id&&existing.name.toLowerCase()===name.toLowerCase())){alert('That category already exists.');return;}
+    if(categories.some(existing=>existing.id!==category?.id&&existing.name.toLowerCase()===name.toLowerCase())){await showMessage('Already exists','That category already exists.');return;}
     const ts=now();
     const maxSort=Math.max(1000,...categories.map(existing=>Number(existing.sortOrder)||0));
     await putRecord('categories',{id:category?.id||id(),name,icon:category?.icon||'🛒',sortOrder:category?.sortOrder??maxSort+10,builtIn:category?.builtIn||false,createdAt:category?.createdAt||ts,modifiedAt:ts});
@@ -555,8 +680,8 @@ async function deleteCategory(categoryId){
   const category=await getRecord('categories',categoryId);
   if(!category||category.builtIn)return;
   const [items,catalogue,regulars]=await Promise.all([getAll('shoppingItems'),getAll('catalogue'),getAll('regularItems')]);
-  if(items.some(item=>item.categoryId===category.id)||catalogue.some(item=>item.categoryId===category.id)||regulars.some(item=>item.categoryId===category.id)){alert('This category is still in use. Move or remove its items first.');return;}
-  if(confirm(`Delete category “${category.name}”?`))await deleteRecord('categories',category.id);
+  if(items.some(item=>item.categoryId===category.id)||catalogue.some(item=>item.categoryId===category.id)||regulars.some(item=>item.categoryId===category.id)){await showMessage('Category still in use','Move or remove its items first.');return;}
+  if(await askConfirm('Delete category?',`Delete “${category.name}”?`,{confirmLabel:'Delete'}))await deleteRecord('categories',category.id);
   await manageCategories();
 }
 
@@ -564,7 +689,7 @@ async function manageCustom(){
   const [catalogue,categories]=await Promise.all([getAll('catalogue'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=catalogue.filter(item=>!item.builtIn).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="card">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="manage-row" data-tone="${categoryTone(category)}"><div><strong>${esc(item.name)}</strong><div class="muted">${esc(category?.name||'Other')}</div></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></div>`;}).join(''):'<p class="muted">No custom items yet.</p>'}<button class="btn secondary full add-inside-card" data-add-custom>Add Custom Item</button></div><button class="btn secondary full" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function customEditor(item=null){
@@ -575,9 +700,9 @@ async function customEditor(item=null){
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
-    if(!nonBlank(name,80)){alert('Enter an item name.');return;}
+    if(!nonBlank(name,80)){await showMessage('Enter an item','Enter an item name.');return;}
     const all=await getAll('catalogue');
-    if(all.some(existing=>existing.id!==item?.id&&existing.categoryId===data.categoryId&&existing.name.toLowerCase()===name.toLowerCase())){alert('That item already exists in this category.');return;}
+    if(all.some(existing=>existing.id!==item?.id&&existing.categoryId===data.categoryId&&existing.name.toLowerCase()===name.toLowerCase())){await showMessage('Already exists','That item already exists in this category.');return;}
     const ts=now();
     await putRecord('catalogue',{id:item?.id||id(),name,categoryId:data.categoryId,builtIn:false,createdAt:item?.createdAt||ts,modifiedAt:ts});
     await manageCustom();
@@ -588,7 +713,7 @@ async function manageRegulars(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="card">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="manage-row" data-tone="${categoryTone(category)}"><div><strong>${esc(item.name)}</strong><div class="muted">${esc(category?.name||'Other')}</div></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></div>`;}).join(''):'<p class="muted">No Regular Items yet.</p>'}<button class="btn primary full add-inside-card" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function regularEditor(item=null,returnTo='settings'){
@@ -600,8 +725,8 @@ async function regularEditor(item=null,returnTo='settings'){
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
-    if(!nonBlank(name,80)){alert('Enter an item name.');return;}
-    if(regulars.some(existing=>existing.id!==item?.id&&existing.categoryId===data.categoryId&&existing.name.toLowerCase()===name.toLowerCase())){alert('That Regular Item already exists.');return;}
+    if(!nonBlank(name,80)){await showMessage('Enter an item','Enter an item name.');return;}
+    if(regulars.some(existing=>existing.id!==item?.id&&existing.categoryId===data.categoryId&&existing.name.toLowerCase()===name.toLowerCase())){await showMessage('Already exists','That Regular Item already exists.');return;}
     const ts=now();
     await putRecord('regularItems',{id:item?.id||id(),name,categoryId:data.categoryId,createdAt:item?.createdAt||ts,modifiedAt:ts});
     if(regularEditorReturn==='shopping')await showRegularItems();else await manageRegulars();
@@ -617,12 +742,12 @@ async function addRegularToList(regularId){
 }
 
 async function shoppingTools(){
-  present(`${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list"><button class="settings-row" data-share-shopping><strong>Share Shopping List</strong><span>Send a versioned list file.</span></button><button class="settings-row" data-import-shopping><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list premium-settings-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Send a versioned list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function resetTravelBuddy(){
-  if(!confirm('Reset Travel Buddy? This removes all local user data.'))return;
-  if(!confirm('Final confirmation: erase Travel Buddy local data and return to Current Stay setup?'))return;
+  if(!await askConfirm('Reset Travel Buddy?','This removes all local Travel Buddy data.',{confirmLabel:'Continue'}))return;
+  if(!await askConfirm('Final confirmation','Erase Travel Buddy local data and return to Current Stay setup?',{confirmLabel:'Erase Data'}))return;
   await resetDatabase();
   currentStay=null;
   setRoute('settings');
@@ -634,13 +759,14 @@ screen.addEventListener('click',async event=>{
   const button=event.target.closest('button');
   if(!button)return;
 
+  if(button.matches('[data-toilet-phrase]'))return showToiletPhrase();
   if(button.matches('[data-add-expense]'))return expenseEditor(null,{category:button.hasAttribute('data-groceries')?'Groceries':undefined,returnRoute:route});
   if(button.matches('[data-open-shopping]'))return renderRoute('shopping');
   if(button.matches('[data-open-expenses]'))return renderRoute('expenses');
   if(button.matches('[data-expense-filter]')){expenseFilter=button.dataset.expenseFilter;return renderExpenses();}
   if(button.matches('[data-edit-expense]'))return expenseEditor(await getRecord('expenses',button.dataset.editExpense),{returnRoute:button.dataset.returnRoute||route});
   if(button.matches('[data-toggle-transfer]')){const expense=await getRecord('expenses',button.dataset.toggleTransfer);if(expense)await putRecord('expenses',{...expense,transferred:!expense.transferred,modifiedAt:now()});return renderExpenses();}
-  if(button.matches('[data-delete-expense]')){if(confirm('Delete this expense?'))await deleteRecord('expenses',button.dataset.deleteExpense);return renderRoute(expenseReturnRoute);}
+  if(button.matches('[data-delete-expense]')){if(await askConfirm('Delete this expense?','This cannot be undone.',{confirmLabel:'Delete'}))await deleteRecord('expenses',button.dataset.deleteExpense);return renderRoute(expenseReturnRoute);}
   if(button.matches('[data-editor-cancel]'))return renderRoute(button.dataset.cancelRoute||'settings');
 
   if(button.matches('[data-add-shop]'))return showAddShopping();
@@ -651,9 +777,9 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-back-shopping]'))return renderRoute('shopping');
   if(button.matches('[data-edit-shop]'))return shoppingItemEditor(await getRecord('shoppingItems',button.dataset.editShop));
   if(button.matches('[data-shop-state]')){const item=await getRecord('shoppingItems',button.dataset.shopId);if(!item)return;const next=item.state===button.dataset.shopState?'pending':button.dataset.shopState;await putRecord('shoppingItems',{...item,state:next,modifiedAt:now()});justFinishedShopping=false;return renderShopping();}
-  if(button.matches('[data-delete-shop]')){if(confirm('Remove this shopping item?'))await deleteRecord('shoppingItems',button.dataset.deleteShop);return renderRoute('shopping');}
+  if(button.matches('[data-delete-shop]')){if(await askConfirm('Remove this item?','Remove it from the active shopping list?',{confirmLabel:'Remove'}))await deleteRecord('shoppingItems',button.dataset.deleteShop);return renderRoute('shopping');}
   if(button.matches('[data-finish-shopping]')){
-    if(!confirm('Finish shopping?\n\nPurchased items will be cleared. Items you couldn’t get and untouched items will stay.'))return;
+    if(!await askConfirm('Finish shopping?','Purchased items will be cleared. Items you couldn’t get and untouched items will stay.',{tone:'attention',confirmLabel:'Finish Shopping'}))return;
     const items=await getAll('shoppingItems');
     const next=finishShopping(items);
     const purchased=items.filter(item=>item.state==='got');
@@ -682,12 +808,12 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-manage-custom]'))return manageCustom();
   if(button.matches('[data-add-custom]'))return customEditor();
   if(button.matches('[data-edit-custom]'))return customEditor(await getRecord('catalogue',button.dataset.editCustom));
-  if(button.matches('[data-delete-custom]')){const item=await getRecord('catalogue',button.dataset.deleteCustom);if(item&&confirm(`Delete custom item “${item.name}”?`))await deleteRecord('catalogue',item.id);return manageCustom();}
+  if(button.matches('[data-delete-custom]')){const item=await getRecord('catalogue',button.dataset.deleteCustom);if(item&&await askConfirm('Delete custom item?',`Delete “${item.name}”?`,{confirmLabel:'Delete'}))await deleteRecord('catalogue',item.id);return manageCustom();}
   if(button.matches('[data-back-custom]'))return manageCustom();
   if(button.matches('[data-manage-regulars]'))return manageRegulars();
   if(button.matches('[data-add-regular-setting]'))return regularEditor(null,'settings');
   if(button.matches('[data-edit-regular]'))return regularEditor(await getRecord('regularItems',button.dataset.editRegular),'settings');
-  if(button.matches('[data-delete-regular]')){const item=await getRecord('regularItems',button.dataset.deleteRegular);if(item&&confirm(`Delete Regular Item “${item.name}”?`))await deleteRecord('regularItems',item.id);return manageRegulars();}
+  if(button.matches('[data-delete-regular]')){const item=await getRecord('regularItems',button.dataset.deleteRegular);if(item&&await askConfirm('Delete Regular Item?',`Delete “${item.name}”?`,{confirmLabel:'Delete'}))await deleteRecord('regularItems',item.id);return manageRegulars();}
   if(button.matches('[data-regular-cancel]'))return regularEditorReturn==='shopping'?showRegularItems():manageRegulars();
   if(button.matches('[data-advanced-settings]'))return advancedSettings();
   if(button.matches('[data-shopping-tools]'))return shoppingTools();

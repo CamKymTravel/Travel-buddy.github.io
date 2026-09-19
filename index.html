@@ -9,14 +9,14 @@
   <meta name="apple-mobile-web-app-title" content="Travel Buddy">
   <style>html,body{margin:0;min-height:100%;background:#071018;color:#f4f7fb}</style>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="apple-touch-icon" href="./travel-buddy-pink-180.png">
   <link rel="stylesheet" href="./styles.css">
   <title>Travel Buddy</title>
 </head>
 <body>
   <div id="launch" class="launch-screen" aria-live="polite">
     <div id="launchBrand" class="launch-stage is-visible">
-      <img class="launch-logo" src="./icon-192.png" alt="" aria-hidden="true">
+      <img class="launch-logo" src="./travel-buddy-pink-192.png" alt="" aria-hidden="true">
       <div class="launch-title">Travel Buddy</div>
     </div>
     <div id="launchStay" class="launch-stage"></div>
@@ -31,6 +31,7 @@
     </nav>
   </div>
   <input id="shoppingImportFile" type="file" accept="application/json,.json" hidden>
+  <div id="dialogRoot" class="dialog-root" hidden aria-live="assertive"></div>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
