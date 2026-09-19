@@ -1,4 +1,4 @@
-export const BUILD_VERSION = '0.10.1';
+export const BUILD_VERSION = '0.10.2';
 export const SCHEMA_VERSION = 3;
 export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Tickets','Shopping','Misc'];
 export const SHOPPING_STATES = ['pending','got','couldnt'];
@@ -86,7 +86,7 @@ export function nextShoppingOrder(items=[]) {
 }
 
 export function finishShopping(items, modifiedAt = new Date().toISOString()) {
-  return items.filter(i => i.state !== 'got').map(i => i.state === 'couldnt' ? {...i,state:'pending',modifiedAt} : {...i});
+  return items.filter(i => i.state !== 'got').map(i => ({...i,modifiedAt:i.state==='couldnt'?modifiedAt:i.modifiedAt}));
 }
 
 export function normalizeInitials(name, supplied='') {

@@ -6,6 +6,7 @@ import {
   nonBlank,buildExpenseRecord,validateShoppingEnvelope,normalizeShoppingImportItem,mergeImportedShopping
 } from './logic.js';
 import {COUNTRIES,findCountry} from './country-data.js';
+import {productArt,categoryHeroArt} from './product-art.js';
 
 const screen=document.querySelector('#screen');
 const app=document.querySelector('#app');
@@ -190,43 +191,28 @@ async function renderRoute(next=route){
   else await renderSettings();
 }
 
-function categoryIcon(category){
-  if(category?.icon)return category.icon;
-  const name=String(category?.name||category||'').toLowerCase();
-  if(name.includes('fruit')||name.includes('veg'))return'🥦';
-  if(name.includes('meat'))return'🥩';
-  if(name.includes('dairy'))return'🥛';
-  if(name.includes('bakery'))return'🥖';
-  if(name.includes('pantry'))return'🥫';
-  if(name.includes('frozen'))return'❄️';
-  if(name.includes('drink'))return'🥤';
-  if(name.includes('house'))return'🧽';
-  if(name.includes('toilet'))return'🧴';
-  if(name.includes('pharmacy'))return'💊';
-  return'🛒';
+function shoppingActionIcon(kind){
+  const path={
+    got:'<path d="m5 12 4 4L19 6"/>',
+    undo:'<path d="M9 7 4 12l5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/>',
+    unavailable:'<circle cx="12" cy="12" r="8"/><path d="m7 17 10-10"/>'
+  }[kind]||'<path d="M12 5v14M5 12h14"/>';
+  return `<span class="action-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
 }
 
-function itemIcon(name,category=null,storedIcon=''){
-  if(storedIcon)return storedIcon;
-  const text=String(name||'').toLowerCase();
-  const rules=[
-    [/apple/,'🍎'],[/banana/,'🍌'],[/orange/,'🍊'],[/grape/,'🍇'],[/strawber/,'🍓'],[/avocado/,'🥑'],[/tomato/,'🍅'],[/potato/,'🥔'],[/carrot/,'🥕'],[/broccoli/,'🥦'],[/lettuce/,'🥬'],[/onion/,'🧅'],
-    [/chicken/,'🍗'],[/bacon/,'🥓'],[/sausage/,'🌭'],[/(beef|steak|pork)/,'🥩'],[/(fish|salmon)/,'🐟'],
-    [/milk/,'🥛'],[/cheese/,'🧀'],[/yog(h)?urt/,'🥣'],[/butter/,'🧈'],[/egg/,'🥚'],
-    [/(bread|roll)/,'🍞'],[/croissant/,'🥐'],[/wrap/,'🫓'],[/muffin/,'🧁'],
-    [/rice/,'🍚'],[/pasta/,'🍝'],[/cereal/,'🥣'],[/coffee/,'☕'],[/tea/,'🍵'],[/chocolate/,'🍫'],[/snack/,'🍿'],[/tin(ned)?/,'🥫'],
-    [/pizza/,'🍕'],[/ice cream/,'🍨'],[/chip/,'🍟'],[/frozen/,'🧊'],[/water/,'💧'],[/juice/,'🧃'],[/(soft drink|soda)/,'🥤'],
-    [/(toilet paper|paper towel)/,'🧻'],[/detergent/,'🧺'],[/(dishwash|sponge|cleaning)/,'🧽'],[/bin bag/,'🗑️'],
-    [/tooth/,'🪥'],[/(shampoo|conditioner|deodorant|sunscreen|body wash)/,'🧴'],[/soap/,'🧼'],[/tissue/,'🤧'],
-    [/(pain|cold|flu|tablet|medicine)/,'💊'],[/bandage/,'🩹'],[/battery/,'🔋'],[/charger/,'🔌'],[/umbrella/,'☂️'],[/gift/,'🎁']
-  ];
-  for(const [pattern,icon] of rules)if(pattern.test(text))return icon;
-  return categoryIcon(category);
+function stayFieldIcon(kind){
+  const path={
+    country:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
+    city:'<path d="M12 21s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12Z"/><circle cx="12" cy="9" r="2"/>',
+    start:'<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16M8 14h3"/>',
+    end:'<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16M13 14h3M15 12v4"/>'
+  }[kind]||'<circle cx="12" cy="12" r="7"/>';
+  return `<span class="field-label-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
 }
 
 function stayHero(stay=currentStay){
   if(!stay)return'';
-  return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge" aria-hidden="true">WC</span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
+  return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge" aria-hidden="true"><b>WC</b><small>Phrase</small></span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
 }
 
 function stayStrip(){
@@ -252,7 +238,7 @@ async function renderHome(){
     <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span></button>
     <button class="home-action shopping-home" data-open-shopping><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span><span><strong>Shopping List</strong><small>${shopping.length} active${couldnt?` · ${couldnt} couldn’t get`:''}</small></span></button>
     <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h11l-3-3M19 17H8l3 3"/></svg></span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
-    ${recent.length?`<h3 class="section-title">Recent Expenses</h3><div class="list">${recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join('')}</div>`:''}`);
+    <h3 class="section-title">Recent Expenses</h3><div class="list">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 
 async function renderExpenses(){
@@ -346,6 +332,7 @@ async function renderShopping(){
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const couldnt=items.filter(item=>item.state==='couldnt').length;
   present(`${pageHead('Shopping','','Shopping')}
+    <div class="shopping-context"><div class="shopping-context-flag">${esc(currentStay.flag||'◉')}</div><div class="shopping-context-copy"><strong>${esc(currentStay.city)} · ${esc(currentStay.country)}</strong><span>${items.length} active · ${couldnt} couldn’t get</span></div><span class="shopping-context-code">${esc(currentStay.currencyCode)}</span></div>
     <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.4l6.1-.9L12 3Z"/></svg></span>Regular Items</button></div>
     ${items.length?`<button class="btn finish full finish-shopping" data-finish-shopping>Finish Shopping</button>`:''}
     ${couldnt?`<div class="notice compact-notice">${couldnt} couldn’t-get item${couldnt===1?'':'s'} will stay for next time.</div>`:''}
@@ -356,19 +343,19 @@ async function renderShopping(){
 function shoppingRow(item,personMap,categoryMap){
   const person=personMap.get(item.requesterId);
   const category=categoryMap.get(item.categoryId);
-  const icon=itemIcon(item.itemName,category,item.icon);
+  const art=productArt(item.itemName,category?.name||'Other');
   const meta=[item.quantity?`Qty ${item.quantity}`:'',item.note||''].filter(Boolean).join(' · ');
   return `<article class="shop-row" data-state="${esc(item.state)}" data-tone="${categoryTone(category)}">
     <div class="shop-row-top">
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
-        <span class="shop-item-picture" aria-hidden="true">${esc(icon)}</span>
+        <span class="shop-item-picture product-art" aria-hidden="true">${art}</span>
         <span class="shop-item-copy"><small class="shop-category-chip">${esc(category?.name||'Other')}</small><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${item.state!=='pending'?`<em class="shop-state ${item.state}">${item.state==='got'?'Got It':'Couldn’t Get'}</em>`:''}</span>
       </button>
       ${person?`<div class="initials" title="${esc(person.name)}">${esc(person.initials)}</div>`:''}
     </div>
     <div class="shop-actions">
-      <button class="btn ${item.state==='got'?'secondary':'success'}" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='got'?'true':'false'}">${item.state==='got'?'Undo':'Got It'}</button>
-      <button class="btn ${item.state==='couldnt'?'secondary':'unavailable'}" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${item.state==='couldnt'?'Undo':'Couldn’t Get'}</button>
+      <button class="btn ${item.state==='got'?'secondary':'success'}" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}<span>${item.state==='got'?'Undo':'Got It'}</span></button>
+      <button class="btn ${item.state==='couldnt'?'secondary':'unavailable'}" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}<span>${item.state==='couldnt'?'Undo':'Couldn’t Get'}</span></button>
     </div>
   </article>`;
 }
@@ -378,14 +365,14 @@ async function showAddShopping(category=null){
   if(!category){
     const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
     present(`${pageHead('Add Item','Tap a picture.','Shopping')}
-      <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture category-line-art" aria-hidden="true">${categoryArt(c)}</span><span class="category-label"><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
-      <h3 class="section-title">Meal Ideas</h3><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div>
+      <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
+      <details class="meal-ideas-panel"><summary><span>Meal Ideas</span><small>Optional inspiration</small></summary><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div></details>
       <button class="btn secondary full back-button" data-back-shopping>Cancel</button>`,{subscreen:true});
     return;
   }
   const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>a.name.localeCompare(b.name));
   present(`${pageHead(category.name,'Tap an item to add it.','Shopping')}
-    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
+    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category.name)}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
     <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">Add Something Else</button>
     <button class="btn secondary full" data-add-shop>Back to Categories</button>`,{subscreen:true});
 }
@@ -427,7 +414,7 @@ async function addQuickShoppingItem(catalogueId){
   const [catalogueItem,items]=await Promise.all([getRecord('catalogue',catalogueId),getAll('shoppingItems')]);
   if(!catalogueItem)return;
   const ts=now();
-  await putRecord('shoppingItems',{id:id(),itemName:catalogueItem.name,icon:catalogueItem.icon||'',categoryId:catalogueItem.categoryId,quantity:'',note:'',requesterId:null,state:'pending',order:nextShoppingOrder(items),createdAt:ts,modifiedAt:ts});
+  await putRecord('shoppingItems',{id:id(),itemName:catalogueItem.name,sourceCatalogueId:catalogueItem.id,categoryId:catalogueItem.categoryId,quantity:'',note:'',requesterId:null,state:'pending',order:nextShoppingOrder(items),createdAt:ts,modifiedAt:ts});
   await renderRoute('shopping');
 }
 
@@ -458,7 +445,7 @@ async function showRegularItems(){
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
   present(`${pageHead('Regular Items','Tap Add for the things you buy often.','Shopping')}
-    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):'<div class="card empty span-two">No Regular Items yet.</div>'}</div>
+    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
     <button class="btn warm full" data-add-regular-inline>Add Regular Item</button>
     <button class="btn secondary full" data-back-shopping>Back</button>`,{subscreen:true});
 }
@@ -568,11 +555,11 @@ async function stayEditor(mode='edit',force=false){
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
   present(`${pageHead(title,subtitle,'Settings')}
     <form class="editor-card quick-stay premium-stay-editor" id="stayForm">
-      <label>Country<input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
+      <label><span class="field-label">${stayFieldIcon('country')}<span>Country</span></span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
       <div class="auto-country ${base?'is-ready':''}" id="countryAuto" ${base?'':'hidden'}>${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:''}</div>
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
-      <label>City / Destination<input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"></label>
-      <div class="stay-date-stack"><label>Stay start<input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label>Stay end<input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div>
+      <label><span class="field-label">${stayFieldIcon('city')}<span>City / Destination</span></span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"></label>
+      <div class="stay-date-stack"><label><span class="field-label">${stayFieldIcon('start')}<span>Stay start</span></span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label><span class="field-label">${stayFieldIcon('end')}<span>Stay end</span></span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div>
       <div class="editor-actions static-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</button></div>
     </form>`,{subscreen:true});
 
@@ -689,7 +676,7 @@ async function manageCustom(){
   const [catalogue,categories]=await Promise.all([getAll('catalogue'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=catalogue.filter(item=>!item.builtIn).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function customEditor(item=null){
@@ -713,7 +700,7 @@ async function manageRegulars(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon" aria-hidden="true">${esc(itemIcon(item.name,category,item.icon))}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function regularEditor(item=null,returnTo='settings'){
