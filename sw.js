@@ -1,5 +1,5 @@
 const CACHE_PREFIX='travel-buddy-v1-';
-const CACHE='travel-buddy-v1-0.10.2';
+const CACHE='travel-buddy-v1-0.10.3';
 const PRECACHE=['./','./index.html','./manifest.webmanifest','./styles.css','./app.js','./product-art.js','./db.js','./logic.js','./country-data.js','./sw.js','./travel-buddy-pink-180.png','./travel-buddy-pink-192.png','./travel-buddy-pink-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

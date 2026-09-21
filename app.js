@@ -21,6 +21,7 @@ const dialogRoot=document.querySelector('#dialogRoot');
 let route='home';
 let currentStay=null;
 let expenseFilter='pending';
+let shoppingFilter='all';
 let expenseReturnRoute='expenses';
 let justFinishedShopping=false;
 let regularEditorReturn='settings';
@@ -117,7 +118,15 @@ function openDialog({title,message='',tone='info',confirmLabel='OK',cancelLabel=
     dialogRoot.innerHTML=`<div class="dialog-backdrop"><section class="app-dialog dialog-${esc(tone)}" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-accent"></div><h2 id="dialogTitle">${esc(title)}</h2>${message?`<p>${esc(message)}</p>`:''}${html}<div class="dialog-actions">${cancelLabel?`<button class="btn secondary" type="button" data-dialog-cancel>${esc(cancelLabel)}</button>`:''}<button class="btn ${tone==='danger'?'danger':tone==='attention'?'warm':'primary'}" type="button" data-dialog-confirm>${esc(confirmLabel)}</button></div></section></div>`;
     const backdrop=dialogRoot.querySelector('.dialog-backdrop');
     const onClick=e=>{if(e.target.closest('[data-dialog-confirm]'))closeDialog(true);else if(e.target.closest('[data-dialog-cancel]'))closeDialog(false);else if(dismissible&&e.target===backdrop)closeDialog(cancelLabel?false:true);};
-    const onKey=e=>{if(e.key==='Escape'&&dismissible)closeDialog(cancelLabel?false:true);};
+    const onKey=e=>{
+      if(e.key==='Escape'&&dismissible){closeDialog(cancelLabel?false:true);return;}
+      if(e.key!=='Tab')return;
+      const focusables=[...dialogRoot.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>!el.hidden&&el.offsetParent!==null);
+      if(!focusables.length){e.preventDefault();return;}
+      const first=focusables[0],last=focusables[focusables.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    };
     dialogRoot.addEventListener('click',onClick);document.addEventListener('keydown',onKey);
     activeDialogCleanup=()=>{dialogRoot.removeEventListener('click',onClick);document.removeEventListener('keydown',onKey);};
     requestAnimationFrame(()=>dialogRoot.querySelector('[data-dialog-confirm]')?.focus());
@@ -210,6 +219,26 @@ function stayFieldIcon(kind){
   return `<span class="field-label-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
 }
 
+function subscreenBack(label='Shopping',attr='data-back-shopping'){
+  return `<button class="subscreen-back-button" type="button" ${attr}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>${esc(label)}</span></button>`;
+}
+
+function shoppingCounts(items){
+  const got=items.filter(item=>item.state==='got').length;
+  const unavailable=items.filter(item=>item.state==='couldnt').length;
+  const pending=items.filter(item=>item.state==='pending').length;
+  return {all:items.length,pending,got,unavailable,done:got+unavailable};
+}
+
+function shoppingStateLabel(state){return state==='got'?'Got It':state==='couldnt'?"Couldn’t Get":'To Buy';}
+
+function shoppingPreviewMarkup({itemName='',categoryName='Other',requesterName='',requesterInitials='',eyebrow='Shopping Item'}={}){
+  const title=String(itemName||'').trim()||'Item name';
+  const category=String(categoryName||'Other');
+  const requester=requesterName?` · ${requesterName}`:'';
+  return `<div class="shopping-editor-preview" data-tone="${categoryTone(category)}"><span class="shopping-editor-preview-art product-art" aria-hidden="true">${productArt(title,category)}</span><span class="shopping-editor-preview-copy"><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong><em>${esc(category+requester)}</em></span>${requesterInitials?`<span class="preview-requester">${esc(requesterInitials)}</span>`:''}</div>`;
+}
+
 function stayHero(stay=currentStay){
   if(!stay)return'';
   return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge" aria-hidden="true"><b>WC</b><small>Phrase</small></span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
@@ -230,31 +259,38 @@ function expenseRow(expense,origin=route,{showTransfer=true}={}){
 }
 
 async function renderHome(){
-  const [expenses,shopping]=await Promise.all([getAll('expenses'),getAll('shoppingItems')]);
+  const [expenses,shoppingRaw,people,categories]=await Promise.all([getAll('expenses'),getAll('shoppingItems'),getAll('people'),getAll('categories')]);
+  const shopping=[...shoppingRaw].sort(shoppingSortStable);
   const pending=expenses.filter(expense=>!expense.transferred).sort(expenseSortNewest);
   const recent=[...expenses].sort(expenseSortNewest).slice(0,3);
-  const couldnt=shopping.filter(item=>item.state==='couldnt').length;
+  const counts=shoppingCounts(shopping);
+  const categoryMap=new Map(categories.map(category=>[category.id,category]));
+  const homeItems=shopping.slice(0,2);
+  const homeArt=homeItems.length?homeItems.map(item=>{const category=categoryMap.get(item.categoryId);return `<span class="home-shopping-art product-art" data-state="${esc(item.state)}" aria-hidden="true">${productArt(item.itemName,category?.name||'Other')}</span>`;}).join(''):'<span class="home-shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span>';
+  const shoppingStatus=shopping.length?`${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable`:'Ready for your next shop';
   present(`${stayHero()}
-    <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span></button>
-    <button class="home-action shopping-home" data-open-shopping><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span><span><strong>Shopping List</strong><small>${shopping.length} active${couldnt?` · ${couldnt} couldn’t get`:''}</small></span></button>
+    <div class="home-core-actions">
+      <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
+      <button class="home-action shopping-home" data-open-shopping><span class="home-shopping-pictures">${homeArt}</span><span class="home-action-copy"><strong>Shopping List</strong><small>${esc(shoppingStatus)}</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
+    </div>
     <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h11l-3-3M19 17H8l3 3"/></svg></span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
-    <h3 class="section-title">Recent Expenses</h3><div class="list">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <div class="section-title-row"><h3 class="section-title">Recent Expenses</h3><button class="section-link" type="button" data-open-expenses>View all</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
-
 async function renderExpenses(){
   const expenses=await getAll('expenses');
+  const pendingCount=expenses.filter(expense=>!expense.transferred).length;
+  const transferredCount=expenses.length-pendingCount;
   let rows=[...expenses];
   if(expenseFilter==='pending')rows=rows.filter(expense=>!expense.transferred);
   else if(expenseFilter==='transferred')rows=rows.filter(expense=>expense.transferred);
   rows.sort(expenseSortNewest);
   present(`${pageHead('Expenses','To enter later.','Expenses')}${stayStrip()}
     <button class="btn primary full quick-add-button" data-add-expense>Add Expense</button>
-    <div class="filters expense-filters" aria-label="Expense filters">
-      ${[['pending','To Transfer'],['transferred','Transferred'],['all','All']].map(([value,label])=>`<button class="filter ${expenseFilter===value?'is-active':''}" aria-pressed="${expenseFilter===value?'true':'false'}" data-expense-filter="${value}">${label}</button>`).join('')}
+    <div class="filters expense-filters" aria-label="Expense filters" aria-live="polite" aria-atomic="true">
+      ${[['pending','To Transfer',pendingCount],['transferred','Transferred',transferredCount],['all','All',expenses.length]].map(([value,label,count])=>`<button class="filter ${expenseFilter===value?'is-active':''}" aria-pressed="${expenseFilter===value?'true':'false'}" data-expense-filter="${value}">${label} <b>${count}</b></button>`).join('')}
     </div>
-    <div class="list">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <div class="list continuous-ledger">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
-
 function expenseEditor(existing=null,defaults={}){
   const stay=existing?.staySnapshot||currentStay;
   if(!stay)return stayEditor('setup',true);
@@ -262,14 +298,14 @@ function expenseEditor(existing=null,defaults={}){
   const defaultDate=existing?.date||defaults.date||todayAu();
   const selectedCategory=existing?.category||defaults.category||'';
   const editing=!!existing;
-  present(`${pageHead(editing?'Edit Expense':'Add Expense',editing?'Change what you need.':'Amount, category, save.','Expenses')}
+  present(`${subscreenBack(expenseReturnRoute==='home'?'Home':'Expenses',`data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}"`)} ${pageHead(editing?'Edit Expense':'Add Expense',editing?'Change what you need.':'Amount, category, save.','Expenses')}
     <form class="quick-expense-form" id="expenseForm">
       <div class="quick-amount-card">
         <div class="amount-card-head"><label for="expenseAmount">Amount</label><span>${esc(stay.currencyCode)}</span></div>
         <div class="amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(existing.localAmount):''}" required></div>
       </div>
       <section class="expense-category-panel" aria-labelledby="categoryHeading">
-        <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">Category</strong></span><em id="categoryStatus">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
+        <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">Category</strong></span><em id="categoryStatus" aria-live="polite" aria-atomic="true">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
         <input type="hidden" name="category" id="expenseCategory" value="${esc(selectedCategory)}">
         <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div>
       </section>
@@ -328,58 +364,65 @@ function expenseEditor(existing=null,defaults={}){
 async function renderShopping(){
   const [itemsRaw,people,categories]=await Promise.all([getAll('shoppingItems'),getAll('people'),getAll('categories')]);
   const items=[...itemsRaw].sort(shoppingSortStable);
+  const counts=shoppingCounts(items);
   const personMap=new Map(people.map(person=>[person.id,person]));
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
-  const couldnt=items.filter(item=>item.state==='couldnt').length;
+  let shown=items;
+  if(shoppingFilter==='to-buy')shown=items.filter(item=>item.state==='pending');
+  if(shoppingFilter==='done')shown=items.filter(item=>item.state!=='pending');
+  const resolvedPct=counts.all?Math.round(((counts.got+counts.unavailable)/counts.all)*100):0;
+  const gotPct=counts.all?Math.round((counts.got/counts.all)*100):0;
+  const unavailablePct=Math.max(0,resolvedPct-gotPct);
   present(`${pageHead('Shopping','','Shopping')}
-    <div class="shopping-context"><div class="shopping-context-flag">${esc(currentStay.flag||'◉')}</div><div class="shopping-context-copy"><strong>${esc(currentStay.city)} · ${esc(currentStay.country)}</strong><span>${items.length} active · ${couldnt} couldn’t get</span></div><span class="shopping-context-code">${esc(currentStay.currencyCode)}</span></div>
+    <div class="shopping-context"><div class="shopping-context-flag">${esc(currentStay.flag||'◉')}</div><div class="shopping-context-copy" aria-live="polite" aria-atomic="true"><strong>${esc(currentStay.city)} · ${esc(currentStay.country)}</strong><span>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</span></div><span class="shopping-context-code">${esc(currentStay.currencyCode)}</span><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div></div>
     <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.4l6.1-.9L12 3Z"/></svg></span>Regular Items</button></div>
-    ${items.length?`<button class="btn finish full finish-shopping" data-finish-shopping>Finish Shopping</button>`:''}
-    ${couldnt?`<div class="notice compact-notice">${couldnt} couldn’t-get item${couldnt===1?'':'s'} will stay for next time.</div>`:''}
+    ${items.length?`<div class="shopping-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}"><span>${label}</span><b>${count}</b></button>`).join('')}</div><div class="shopping-list-head"><span>${shown.length} shown</span><button class="finish-inline" type="button" data-finish-shopping ${counts.got?'':'disabled'}>Finish Shopping</button></div>`:''}
+    ${counts.unavailable?`<div class="shopping-unavailable-note"><span aria-hidden="true">${shoppingActionIcon('unavailable')}</span><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
-    <div class="shopping-list">${items.length?items.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>`);
+    <div class="shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
+    ${items.length?'<button class="btn warm full shopping-second-add" type="button" data-add-shop>Add Item</button>':''}`);
 }
-
 function shoppingRow(item,personMap,categoryMap){
   const person=personMap.get(item.requesterId);
   const category=categoryMap.get(item.categoryId);
   const art=productArt(item.itemName,category?.name||'Other');
   const meta=[item.quantity?`Qty ${item.quantity}`:'',item.note||''].filter(Boolean).join(' · ');
+  const label=shoppingStateLabel(item.state);
   return `<article class="shop-row" data-state="${esc(item.state)}" data-tone="${categoryTone(category)}">
     <div class="shop-row-top">
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
         <span class="shop-item-picture product-art" aria-hidden="true">${art}</span>
-        <span class="shop-item-copy"><small class="shop-category-chip">${esc(category?.name||'Other')}</small><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${item.state!=='pending'?`<em class="shop-state ${item.state}">${item.state==='got'?'Got It':'Couldn’t Get'}</em>`:''}</span>
+        <span class="shop-item-copy"><span class="shop-title-line"><small class="shop-category-chip">${esc(category?.name||'Other')}</small><em class="shop-state ${esc(item.state)}">${esc(label)}</em></span><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span>
       </button>
       ${person?`<div class="initials" title="${esc(person.name)}">${esc(person.initials)}</div>`:''}
     </div>
     <div class="shop-actions">
-      <button class="btn ${item.state==='got'?'secondary':'success'}" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}<span>${item.state==='got'?'Undo':'Got It'}</span></button>
-      <button class="btn ${item.state==='couldnt'?'secondary':'unavailable'}" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}<span>${item.state==='couldnt'?'Undo':'Couldn’t Get'}</span></button>
+      <button class="btn shop-state-control ${item.state==='got'?'secondary':'success'}" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}<span class="sr-only">${item.state==='got'?'Undo':'Got It'}</span></button>
+      <button class="btn shop-state-control ${item.state==='couldnt'?'secondary':'unavailable'}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}<span class="sr-only">${item.state==='couldnt'?'Undo':"Couldn’t Get"}</span></button>
     </div>
   </article>`;
 }
-
 async function showAddShopping(category=null){
   const [categories,catalogue]=await Promise.all([getAll('categories'),getAll('catalogue')]);
   if(!category){
     const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-    present(`${pageHead('Add Item','Tap a picture.','Shopping')}
+    present(`${subscreenBack('Shopping')} ${pageHead('Add Item','Tap a picture.','Shopping')}
       <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
       <details class="meal-ideas-panel"><summary><span>Meal Ideas</span><small>Optional inspiration</small></summary><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div></details>
-      <button class="btn secondary full back-button" data-back-shopping>Cancel</button>`,{subscreen:true});
+      <button class="btn secondary full back-button" data-back-shopping>Back to Shopping</button>`,{subscreen:true});
     return;
   }
   const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead(category.name,'Tap an item to add it.','Shopping')}
+  present(`${subscreenBack('Categories','data-add-shop')} ${pageHead(category.name,'Tap an item to add it.','Shopping')}
     <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category.name)}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
     <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">Add Something Else</button>
     <button class="btn secondary full" data-add-shop>Back to Categories</button>`,{subscreen:true});
 }
-
 async function customShoppingItemEditor(category){
   const [people,activeItems]=await Promise.all([getAll('people'),getAll('shoppingItems')]);
-  present(`${pageHead('Add Item','Just the name is required.','Shopping')}
+  present(`${subscreenBack(category.name,`data-back-category="${esc(category.id)}"`)} ${pageHead('Add Item','Just the name is required.','Shopping')}
+    <div class="shopping-editor-context" data-tone="${categoryTone(category)}"><span class="shopping-editor-context-icon category-line-art" aria-hidden="true">${categoryArt(category)}</span><span><small>Category</small><strong>${esc(category.name)}</strong></span></div>
+    <div id="shoppingLivePreview">${shoppingPreviewMarkup({categoryName:category.name})}</div>
     <form class="editor-card simple-shopping-editor" id="shoppingItemForm">
       <label>Item name<input id="customShoppingName" name="itemName" required maxlength="80" autocomplete="off"></label>
       <button class="btn warm full" type="submit">Add Item</button>
@@ -390,26 +433,30 @@ async function customShoppingItemEditor(category){
       </div></details>
       <button type="button" class="btn secondary full" data-back-category="${esc(category.id)}">Cancel</button>
     </form>`,{subscreen:true,focusSelector:'#customShoppingName'});
-  screen.querySelector('#shoppingItemForm').addEventListener('submit',async event=>{
+  const form=screen.querySelector('#shoppingItemForm');
+  const nameInput=form.elements.itemName, requesterSelect=form.elements.requesterId, preview=screen.querySelector('#shoppingLivePreview');
+  const refresh=()=>{const person=people.find(p=>p.id===requesterSelect.value);preview.innerHTML=shoppingPreviewMarkup({itemName:nameInput.value,categoryName:category.name,requesterName:person?.name||'',requesterInitials:person?.initials||''});};
+  nameInput.addEventListener('input',refresh);requesterSelect.addEventListener('change',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
-    const form=Object.fromEntries(new FormData(event.currentTarget));
-    const name=String(form.itemName||'').trim();
+    const data=Object.fromEntries(new FormData(event.currentTarget));
+    const name=String(data.itemName||'').trim();
     if(!nonBlank(name,80)){await showMessage('Enter an item','Enter an item name.');return;}
-    const quantity=String(form.quantity||'').trim();
-    const note=String(form.note||'').trim();
+    const quantity=String(data.quantity||'').trim();
+    const note=String(data.note||'').trim();
     if(quantity.length>30||note.length>160)return;
     const catalogue=await getAll('catalogue');
     const ts=now();
-    const record={id:id(),itemName:name,categoryId:category.id,quantity,note,requesterId:form.requesterId||null,state:'pending',order:nextShoppingOrder(activeItems),createdAt:ts,modifiedAt:ts};
+    const record={id:id(),itemName:name,categoryId:category.id,quantity,note,requesterId:data.requesterId||null,state:'pending',order:nextShoppingOrder(activeItems),createdAt:ts,modifiedAt:ts};
     const existingCatalogue=catalogue.find(item=>item.categoryId===category.id&&item.name.toLowerCase()===name.toLowerCase());
     await atomicWrite(['shoppingItems','catalogue'],stores=>{
       stores.shoppingItems.put(record);
       if(!existingCatalogue)stores.catalogue.put({id:id(),name,categoryId:category.id,builtIn:false,createdAt:ts,modifiedAt:ts});
     });
+    shoppingFilter='all';
     await renderRoute('shopping');
   });
 }
-
 async function addQuickShoppingItem(catalogueId){
   const [catalogueItem,items]=await Promise.all([getRecord('catalogue',catalogueId),getAll('shoppingItems')]);
   if(!catalogueItem)return;
@@ -421,7 +468,10 @@ async function addQuickShoppingItem(catalogueId){
 async function shoppingItemEditor(item){
   const [people,categories]=await Promise.all([getAll('people'),getAll('categories')]);
   const orderedCategories=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${pageHead('Edit Item','Tap Save when finished.','Shopping')}
+  const currentCategory=orderedCategories.find(category=>category.id===item.categoryId);
+  const currentPerson=people.find(person=>person.id===item.requesterId);
+  present(`${subscreenBack('Shopping')} ${pageHead('Edit Item','Tap Save when finished.','Shopping')}
+    <div id="shoppingEditPreview">${shoppingPreviewMarkup({itemName:item.itemName,categoryName:currentCategory?.name||'Other',requesterName:currentPerson?.name||'',requesterInitials:currentPerson?.initials||''})}</div>
     <form class="editor-card" id="shoppingEditForm">
       <label>Item name<input name="itemName" required maxlength="80" value="${esc(item.itemName)}"></label>
       <div class="field-grid two"><label>Quantity<input name="quantity" maxlength="30" value="${esc(item.quantity||'')}"></label><label>Requester<select name="requesterId"><option value="">None</option>${people.map(person=>`<option value="${esc(person.id)}" ${person.id===item.requesterId?'selected':''}>${esc(person.name)}</option>`).join('')}</select></label></div>
@@ -430,7 +480,10 @@ async function shoppingItemEditor(item){
       <div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-shopping>Cancel</button><button class="btn warm" type="submit">Save</button></div>
     </form>
     <button class="btn danger full delete-below" data-delete-shop="${esc(item.id)}">Remove Item</button>`,{subscreen:true});
-  screen.querySelector('#shoppingEditForm').addEventListener('submit',async event=>{
+  const form=screen.querySelector('#shoppingEditForm'), preview=screen.querySelector('#shoppingEditPreview');
+  const refresh=()=>{const category=orderedCategories.find(c=>c.id===form.elements.categoryId.value);const person=people.find(p=>p.id===form.elements.requesterId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.itemName.value,categoryName:category?.name||'Other',requesterName:person?.name||'',requesterInitials:person?.initials||''});};
+  form.elements.itemName.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);form.elements.requesterId.addEventListener('change',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.itemName||'').trim();
@@ -439,12 +492,11 @@ async function shoppingItemEditor(item){
     await renderRoute('shopping');
   });
 }
-
 async function showRegularItems(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Regular Items','Tap Add for the things you buy often.','Shopping')}
+  present(`${subscreenBack('Shopping')} ${pageHead('Regular Items','Tap Add for the things you buy often.','Shopping')}
     <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
     <button class="btn warm full" data-add-regular-inline>Add Regular Item</button>
     <button class="btn secondary full" data-back-shopping>Back</button>`,{subscreen:true});
@@ -536,7 +588,7 @@ async function renderSettings(){
 }
 
 async function advancedSettings(){
-  present(`${pageHead('Advanced','','Settings')}
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Advanced','','Settings')}
     <div class="settings-list premium-settings-list">
       <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
       <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsIcon('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
@@ -553,7 +605,8 @@ async function stayEditor(mode='edit',force=false){
   const countryLocked=!!(base&&existingExpenses.some(expense=>expense.stayId===base.id));
   if(force)setNavigationEnabled(false);
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
-  present(`${pageHead(title,subtitle,'Settings')}
+  present(`${force?'':subscreenBack('Settings','data-back-settings')} ${pageHead(title,subtitle,'Settings')}
+    <div class="stay-live-preview" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
     <form class="editor-card quick-stay premium-stay-editor" id="stayForm">
       <label><span class="field-label">${stayFieldIcon('country')}<span>Country</span></span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
       <div class="auto-country ${base?'is-ready':''}" id="countryAuto" ${base?'':'hidden'}>${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:''}</div>
@@ -566,13 +619,16 @@ async function stayEditor(mode='edit',force=false){
   const form=screen.querySelector('#stayForm');
   const countryInput=form.elements.country;
   const auto=screen.querySelector('#countryAuto');
+  const preview=screen.querySelector('#stayLivePreview');
+  const updatePreview=()=>{const ref=findCountry(countryInput.value);const city=String(form.elements.city.value||'').trim();const start=isoDateToAu(form.elements.startDate.value)||'Start date';const end=isoDateToAu(form.elements.endDate.value)||'End date';preview.innerHTML=`<small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(ref?.flag||'◉')}</span><span><strong>${esc(ref?.name||countryInput.value||'Choose a country')}</strong><em>${esc(city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(start)} – ${esc(end)}</div>`;};
   const updateCountry=()=>{
     const ref=findCountry(countryInput.value);
     auto.hidden=!ref;
     auto.textContent=ref?`${ref.flag} ${ref.currencyCode} · ${ref.currencyName}`:'';
     auto.classList.toggle('is-ready',!!ref);
+    updatePreview();
   };
-  countryInput.addEventListener('input',updateCountry);countryInput.addEventListener('change',updateCountry);updateCountry();
+  countryInput.addEventListener('input',updateCountry);countryInput.addEventListener('change',updateCountry);form.elements.city.addEventListener('input',updatePreview);form.elements.startDate.addEventListener('change',updatePreview);form.elements.endDate.addEventListener('change',updatePreview);updateCountry();updatePreview();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(form));
@@ -594,10 +650,9 @@ async function stayEditor(mode='edit',force=false){
     await renderRoute(force?'home':'settings');
   });
 }
-
 async function exchangeRateEditor(){
   if(!currentStay)return stayEditor('setup',true);
-  present(`${pageHead('Optional AUD Conversion','Only use this if you want an AUD figure saved too.','Settings')}
+  present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Optional AUD Conversion','Only use this if you want an AUD figure saved too.','Settings')}
     <form class="editor-card" id="rateForm"><label>1 AUD = <span class="hint">${esc(currentStay.currencyCode)}</span><input id="rateInput" name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn it off" value="${esc(stayRate(currentStay)||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true});
   screen.querySelector('#rateForm').addEventListener('submit',async event=>{
     event.preventDefault();
@@ -612,16 +667,21 @@ async function exchangeRateEditor(){
 
 async function managePeople(){
   const people=await getAll('people');
-  present(`${pageHead('People','Requester initials for Shopping.','Settings')}
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('People','Requester initials for Shopping.','Settings')}
+    <div class="management-summary-band" data-tone="blue"><span class="management-summary-icon">${settingsIcon('people')}</span><span><small>Shopping Requesters</small><strong>${people.length} ${people.length===1?'person':'people'}</strong></span></div>
     <div class="management-list">${people.length?people.map(person=>`<article class="management-card person-card" data-tone="blue"><div class="person-avatar">${esc(person.initials)}</div><div class="management-copy"><strong>${esc(person.name)}</strong><span>Initials · ${esc(person.initials)}</span></div><div class="mini-actions"><button class="mini" data-edit-person="${esc(person.id)}">Edit</button><button class="mini danger" data-delete-person="${esc(person.id)}">Delete</button></div></article>`).join(''):emptyCard('No people yet','','','people')}<button class="btn primary full" data-add-person>Add Person</button></div>
     <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function personEditor(person=null){
   personEditorReturn='people';
-  present(`${pageHead(person?'Edit Person':'Add Person','Name and initials.','Settings')}
+  present(`${subscreenBack('People','data-back-people')} ${pageHead(person?'Edit Person':'Add Person','Name and initials.','Settings')}
+    <div class="management-editor-preview" id="personPreview"><span class="person-avatar">${esc(person?.initials||'—')}</span><span><small>Requester Preview</small><strong>${esc(person?.name||'Person name')}</strong><em>${esc(person?.initials||'Initials')}</em></span></div>
     <form class="editor-card" id="personForm"><label>Name<input id="personName" name="name" required maxlength="60" value="${esc(person?.name||'')}"></label><label>Initials<input name="initials" maxlength="3" value="${esc(person?.initials||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-people>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:person?null:'#personName'});
-  screen.querySelector('#personForm').addEventListener('submit',async event=>{
+  const form=screen.querySelector('#personForm'), preview=screen.querySelector('#personPreview');
+  const refresh=()=>{const name=String(form.elements.name.value||'').trim();const initials=normalizeInitials(name,form.elements.initials.value);preview.innerHTML=`<span class="person-avatar">${esc(initials||'—')}</span><span><small>Requester Preview</small><strong>${esc(name||'Person name')}</strong><em>${esc(initials||'Initials')}</em></span>`;};
+  form.elements.name.addEventListener('input',refresh);form.elements.initials.addEventListener('input',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
@@ -633,7 +693,6 @@ async function personEditor(person=null){
     await managePeople();
   });
 }
-
 async function deletePerson(personId){
   if(!await askConfirm('Delete this person?','Shopping items stay, but the requester link will be cleared.',{confirmLabel:'Delete'}))return;
   const items=await getAll('shoppingItems');
@@ -645,12 +704,16 @@ async function deletePerson(personId){
 async function manageCategories(){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-line-art" aria-hidden="true">${categoryArt(category)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn secondary full" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-summary-band" data-tone="gold"><span class="management-summary-icon">${settingsIcon('categories')}</span><span><small>Shopping Categories</small><strong>${ordered.length} available</strong></span></div><div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-line-art" aria-hidden="true">${categoryArt(category)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn secondary full" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function categoryEditor(category=null){
-  present(`${pageHead(category?'Rename Category':'Add Category','The active shopping list stays continuous.','Shopping Setup')}<form class="editor-card" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
-  screen.querySelector('#categoryForm').addEventListener('submit',async event=>{
+  present(`${subscreenBack('Categories','data-back-categories')} ${pageHead(category?'Rename Category':'Add Category','The active shopping list stays continuous.','Shopping Setup')}
+    <div class="management-editor-preview category-editor-preview" id="categoryPreview" data-tone="${categoryTone(category?.name||'Other')}"><span class="management-preview-icon category-line-art">${categoryArt(category?.name||'Other')}</span><span><small>Category Preview</small><strong>${esc(category?.name||'Category name')}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span></div>
+    <form class="editor-card" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
+  const form=screen.querySelector('#categoryForm'), preview=screen.querySelector('#categoryPreview');
+  const refresh=()=>{const name=String(form.elements.name.value||'').trim()||'Category name';preview.dataset.tone=categoryTone(name);preview.innerHTML=`<span class="management-preview-icon category-line-art">${categoryArt(name)}</span><span><small>Category Preview</small><strong>${esc(name)}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span>`;};form.elements.name.addEventListener('input',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const name=String(new FormData(event.currentTarget).get('name')||'').trim();
     if(!nonBlank(name,60)){await showMessage('Enter a category','Enter a category name.');return;}
@@ -662,7 +725,6 @@ async function categoryEditor(category=null){
     await manageCategories();
   });
 }
-
 async function deleteCategory(categoryId){
   const category=await getRecord('categories',categoryId);
   if(!category||category.builtIn)return;
@@ -676,14 +738,16 @@ async function manageCustom(){
   const [catalogue,categories]=await Promise.all([getAll('catalogue'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=catalogue.filter(item=>!item.builtIn).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-summary-band" data-tone="purple"><span class="management-summary-icon">${settingsIcon('custom')}</span><span><small>Reusable Catalogue</small><strong>${rows.length} custom ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function customEditor(item=null){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<form class="editor-card" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
-  screen.querySelector('#customForm').addEventListener('submit',async event=>{
+  const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
+  present(`${subscreenBack('Custom Items','data-back-custom')} ${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<div id="customPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Reusable Item Preview'})}</div><form class="editor-card" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
+  const form=screen.querySelector('#customForm'), preview=screen.querySelector('#customPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Reusable Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
@@ -695,20 +759,21 @@ async function customEditor(item=null){
     await manageCustom();
   });
 }
-
 async function manageRegulars(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-summary-band" data-tone="teal"><span class="management-summary-icon">${settingsIcon('regular')}</span><span><small>Quick Add Favourites</small><strong>${rows.length} regular ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function regularEditor(item=null,returnTo='settings'){
   regularEditorReturn=returnTo;
   const [categories,regulars]=await Promise.all([getAll('categories'),getAll('regularItems')]);
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<form class="editor-card" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
-  screen.querySelector('#regularForm').addEventListener('submit',async event=>{
+  const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
+  present(`${subscreenBack(returnTo==='shopping'?'Regular Items':'Regular Items','data-regular-cancel')} ${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<div id="regularPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Regular Item Preview'})}</div><form class="editor-card" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
+  const form=screen.querySelector('#regularForm'), preview=screen.querySelector('#regularPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Regular Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const data=Object.fromEntries(new FormData(event.currentTarget));
     const name=String(data.name||'').trim();
@@ -719,7 +784,6 @@ async function regularEditor(item=null,returnTo='settings'){
     if(regularEditorReturn==='shopping')await showRegularItems();else await manageRegulars();
   });
 }
-
 async function addRegularToList(regularId){
   const [regular,items]=await Promise.all([getRecord('regularItems',regularId),getAll('shoppingItems')]);
   if(!regular)return;
@@ -729,7 +793,7 @@ async function addRegularToList(regularId){
 }
 
 async function shoppingTools(){
-  present(`${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list premium-settings-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Send a versioned list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list premium-settings-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Send a versioned list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function resetTravelBuddy(){
@@ -748,7 +812,7 @@ screen.addEventListener('click',async event=>{
 
   if(button.matches('[data-toilet-phrase]'))return showToiletPhrase();
   if(button.matches('[data-add-expense]'))return expenseEditor(null,{category:button.hasAttribute('data-groceries')?'Groceries':undefined,returnRoute:route});
-  if(button.matches('[data-open-shopping]'))return renderRoute('shopping');
+  if(button.matches('[data-open-shopping]')){shoppingFilter='all';return renderRoute('shopping');}
   if(button.matches('[data-open-expenses]'))return renderRoute('expenses');
   if(button.matches('[data-expense-filter]')){expenseFilter=button.dataset.expenseFilter;return renderExpenses();}
   if(button.matches('[data-edit-expense]'))return expenseEditor(await getRecord('expenses',button.dataset.editExpense),{returnRoute:button.dataset.returnRoute||route});
@@ -757,6 +821,7 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-editor-cancel]'))return renderRoute(button.dataset.cancelRoute||'settings');
 
   if(button.matches('[data-add-shop]'))return showAddShopping();
+  if(button.matches('[data-shopping-filter]')){shoppingFilter=button.dataset.shoppingFilter;return renderShopping();}
   if(button.matches('[data-choose-category]'))return showAddShopping(await getRecord('categories',button.dataset.chooseCategory));
   if(button.matches('[data-back-category]'))return showAddShopping(await getRecord('categories',button.dataset.backCategory));
   if(button.matches('[data-custom-shop]'))return customShoppingItemEditor(await getRecord('categories',button.dataset.customShop));
@@ -766,12 +831,16 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-shop-state]')){const item=await getRecord('shoppingItems',button.dataset.shopId);if(!item)return;const next=item.state===button.dataset.shopState?'pending':button.dataset.shopState;await putRecord('shoppingItems',{...item,state:next,modifiedAt:now()});justFinishedShopping=false;return renderShopping();}
   if(button.matches('[data-delete-shop]')){if(await askConfirm('Remove this item?','Remove it from the active shopping list?',{confirmLabel:'Remove'}))await deleteRecord('shoppingItems',button.dataset.deleteShop);return renderRoute('shopping');}
   if(button.matches('[data-finish-shopping]')){
-    if(!await askConfirm('Finish shopping?','Purchased items will be cleared. Items you couldn’t get and untouched items will stay.',{tone:'attention',confirmLabel:'Finish Shopping'}))return;
     const items=await getAll('shoppingItems');
+    const counts=shoppingCounts(items);
+    if(!counts.got){await showMessage('Nothing marked Got It','Mark at least one item Got It before finishing this shop.');return;}
+    const kept=items.length-counts.got;
+    const detail=`${counts.got} bought item${counts.got===1?'':'s'} will be cleared. ${kept} item${kept===1?'':'s'} will stay${counts.unavailable?`, including ${counts.unavailable} unavailable`:''}.`;
+    if(!await askConfirm('Finish shopping?',detail,{tone:'attention',confirmLabel:'Finish Shopping'}))return;
     const next=finishShopping(items);
     const purchased=items.filter(item=>item.state==='got');
     await atomicWrite('shoppingItems',stores=>{for(const item of purchased)stores.shoppingItems.delete(item.id);for(const item of next)stores.shoppingItems.put(item);});
-    justFinishedShopping=true;
+    justFinishedShopping=true;shoppingFilter='all';
     return renderShopping();
   }
   if(button.matches('[data-shop-expense]')){justFinishedShopping=false;return expenseEditor(null,{category:'Groceries',returnRoute:'shopping'});}
