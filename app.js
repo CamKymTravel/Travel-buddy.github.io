@@ -300,27 +300,35 @@ function expenseEditor(existing=null,defaults={}){
   const defaultDate=existing?.date||defaults.date||todayAu();
   const selectedCategory=existing?.category||defaults.category||'';
   const editing=!!existing;
-  present(`${subscreenBack(expenseReturnRoute==='home'?'Home':'Expenses',`data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}"`)} ${pageHead(editing?'Edit Expense':'Add Expense',editing?'Change what you need.':'Amount, category, save.','Expenses')}
-    <form class="quick-expense-form" id="expenseForm">
-      <div class="quick-amount-card">
-        <div class="amount-card-head"><label for="expenseAmount">Amount</label><span>${esc(stay.currencyCode)}</span></div>
-        <div class="amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(existing.localAmount):''}" required></div>
+  const rate=stayRate(stay);
+  const initialAud=existing&&rate?Number(existing.localAmount)/rate:null;
+  present(`${subscreenBack(expenseReturnRoute==='home'?'Home':'Expenses',`data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}"`)} ${pageHead(editing?'Edit Expense':'Add Expense',editing?'Update this spend.':'Fast local spend capture.','Expenses')}
+    <form class="quick-expense-form expense-premium-form" id="expenseForm">
+      <div class="expense-stay-context" aria-label="Current stay">
+        <span class="expense-stay-flag" aria-hidden="true">${esc(stay.flag||'🌍')}</span>
+        <span class="expense-stay-copy"><small>Current stay</small><strong>${esc(stay.city||stay.country||'Current stay')}</strong><em>${esc(stay.country||'')} · ${esc(stay.currencyCode)}</em></span>
+        <span class="expense-rate-chip">${rate?`1 AUD = ${esc(rate)} ${esc(stay.currencyCode)}`:`${esc(stay.currencyCode)} only`}</span>
       </div>
-      <section class="expense-category-panel" aria-labelledby="categoryHeading">
-        <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">Category</strong></span><em id="categoryStatus" aria-live="polite" aria-atomic="true">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
-        <input type="hidden" name="category" id="expenseCategory" value="${esc(selectedCategory)}">
-        <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div>
+      <section class="quick-amount-card premium-amount-card" aria-labelledby="amountHeading">
+        <div class="amount-card-head"><span><small>Local spend</small><label id="amountHeading" for="expenseAmount">Amount</label></span><b>${esc(stay.currencyCode)}</b></div>
+        <div class="amount-entry premium-amount-entry"><span class="amount-code">${esc(stay.currencyCode)}</span><input id="expenseAmount" name="localAmount" type="number" min="0.01" step="any" inputmode="decimal" autocomplete="off" placeholder="0" value="${existing?esc(existing.localAmount):''}" required></div>
+        <div class="expense-amount-foot"><span>Enter what you paid locally</span><strong id="expenseAudPreview" aria-live="polite">${rate?(initialAud?formatAud(initialAud):'AUD —'):'AUD conversion off'}</strong></div>
       </section>
-      <button class="btn primary full save-expense-button" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}>${editing?'Save Changes':'Save Expense'}</button>
-      <details class="optional-details" ${editing?'open':''}>
-        <summary>Optional details</summary>
+      <section class="expense-category-panel premium-category-panel" aria-labelledby="categoryHeading">
+        <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">What was it for?</strong></span><em id="categoryStatus" aria-live="polite" aria-atomic="true">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
+        <input type="hidden" name="category" id="expenseCategory" value="${esc(selectedCategory)}">
+        <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryIcon(category)}</span><span class="expense-choice-copy"><strong>${esc(category)}</strong><small>${category==='Groceries'?'Food & supermarket':category==='Eating Out'?'Cafés & restaurants':category==='Transport'?'Taxi, train & fuel':category==='Entertainment'?'Fun & activities':category==='Tickets'?'Entry & attractions':category==='Shopping'?'Things you bought':'Anything else'}</small></span></button>`).join('')}</div>
+      </section>
+      <button class="btn primary full save-expense-button premium-save-expense" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}><span class="save-expense-icon" aria-hidden="true">✓</span>${editing?'Save Changes':'Save Expense'}</button>
+      <details class="optional-details premium-optional-details" ${editing?'open':''}>
+        <summary><span><small>Optional</small><strong>Date & note</strong></span></summary>
         <div class="optional-details-body">
           <label>Date<input name="date" type="date" value="${esc(auDateToIso(defaultDate))}" required></label>
           <label>Note <span class="hint">Optional</span><input name="note" maxlength="180" placeholder="Lunch, taxi, tickets…" value="${esc(existing?.note||'')}"></label>
           ${editing?'<p class="micro-note">Saving an edited expense marks it To Transfer again.</p>':''}
         </div>
       </details>
-      <button class="btn secondary full" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">Cancel</button>
+      <button class="btn secondary full expense-cancel-button" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">Cancel</button>
     </form>
     ${editing?`<button class="btn danger full delete-below" data-delete-expense="${esc(existing.id)}">Delete Expense</button>`:''}`,
     {subscreen:true,focusSelector:editing?null:'#expenseAmount'});
@@ -330,11 +338,13 @@ function expenseEditor(existing=null,defaults={}){
   const categoryInput=screen.querySelector('#expenseCategory');
   const saveButton=screen.querySelector('#saveExpenseButton');
   const categoryStatus=screen.querySelector('#categoryStatus');
+  const audPreview=screen.querySelector('#expenseAudPreview');
   const updateSaveState=()=>{
     const amount=Number(amountInput.value);
     const validAmount=Number.isFinite(amount)&&amount>0;
     const validCategory=EXPENSE_CATEGORIES.includes(categoryInput.value);
     saveButton.disabled=!(validAmount&&validCategory);
+    if(audPreview){audPreview.textContent=rate?(validAmount?formatAud(amount/rate):'AUD —'):'AUD conversion off';}
   };
   amountInput.addEventListener('input',updateSaveState);
   screen.querySelectorAll('[data-expense-category]').forEach(button=>button.addEventListener('click',()=>{
@@ -384,7 +394,7 @@ async function renderShopping(){
     ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add</button><button class="finish-inline" type="button" data-finish-shopping ${counts.got?'':'disabled'}>Finish</button></div>`:''}
     ${counts.unavailable?`<div class="shopping-unavailable-note"><span aria-hidden="true">${shoppingActionIcon('unavailable')}</span><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
-    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
+    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
     ${items.length?'<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add Item</button>':''}`);
 }
 function shoppingRow(item,personMap,categoryMap){
@@ -930,7 +940,7 @@ async function autoLaunch(){
     if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
   }catch(error){
     console.error(error);
-    document.body.innerHTML='<main style="padding:calc(env(safe-area-inset-top) + 24px) 24px 24px;color:white;background:#071018;min-height:100vh">Travel Buddy could not start safely. Close any other Travel Buddy tab and reopen the app.</main>';
+    document.body.innerHTML='<main class="startup-failure"><section><img src="./travel-buddy-pink-192.png" alt="" aria-hidden="true"><p class="eyebrow">Travel Buddy</p><h1>Couldn’t start safely</h1><p>Close any other Travel Buddy tab, then reopen the app.</p><small>Your saved travel data has not been deliberately cleared.</small></section></main>';
   }
 }
 
