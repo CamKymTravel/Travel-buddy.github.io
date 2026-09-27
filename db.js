@@ -30,7 +30,8 @@ const CATALOGUE_SEEDS = [
   ['Laundry detergent','Household','🧺'],['Dishwashing liquid','Household','🧽'],['Dishwasher tablets','Household','🧽'],['Paper towel','Household','🧻'],['Toilet paper','Household','🧻'],['Bin bags','Household','🗑️'],['Cleaning spray','Household','🧴'],['Sponges','Household','🧽'],
   ['Toothpaste','Toiletries','🪥'],['Toothbrush','Toiletries','🪥'],['Shampoo','Toiletries','🧴'],['Conditioner','Toiletries','🧴'],['Soap','Toiletries','🧼'],['Body wash','Toiletries','🧴'],['Deodorant','Toiletries','🧴'],['Tissues','Toiletries','🤧'],['Sunscreen','Toiletries','🧴'],
   ['Pain relief','Pharmacy','💊'],['Bandages','Pharmacy','🩹'],['Antiseptic','Pharmacy','🧴'],['Cold & flu','Pharmacy','💊'],
-  ['Batteries','Other','🔋'],['Phone charger','Other','🔌'],['Umbrella','Other','☂️'],['Gift','Other','🎁']
+  ['Batteries','Other','🔋'],['Phone charger','Other','🔌'],['Umbrella','Other','☂️'],['Gift','Other','🎁'],
+  ['Sour Cream','Dairy','🥣'],['Plant Milk','Dairy','🥛'],['Cottage Cheese','Dairy','🥣'],['Ice Cream','Dairy','🍨']
 ];
 
 function ensureStore(db,name,options){

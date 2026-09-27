@@ -33,6 +33,7 @@ const esc=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt
 const id=()=>crypto.randomUUID();
 const now=()=>new Date().toISOString();
 const stayRate=stay=>{const n=Number(stay?.exchangeRate);return Number.isFinite(n)&&n>0?n:null;};
+const shortAuDate=value=>{const m=String(value||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return String(value||'');const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${Number(m[1])} ${names[Number(m[2])-1]||m[2]} ${m[3]}`;};
 const toneKey=value=>{const v=String(value||'').toLowerCase();if(v.includes('shopping'))return'shopping';if(v.includes('expense'))return'expenses';if(v.includes('setting'))return'settings';return'home';};
 const pageHead=(title,subtitle='',accent='Travel Buddy')=>`<div class="page-head head-${toneKey(accent)}"><div><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div></div>`;
 const categoryTone=category=>{const v=String(category?.name||category||'').toLowerCase();if(v.includes('fruit')||v.includes('veg'))return'teal';if(v.includes('meat'))return'copper';if(v.includes('dairy'))return'blue';if(v.includes('bakery'))return'gold';if(v.includes('pantry'))return'purple';if(v.includes('frozen'))return'ice';if(v.includes('drink'))return'cyan';if(v.includes('house'))return'green';if(v.includes('toilet'))return'rose';if(v.includes('pharmacy'))return'red';return'silver';};
@@ -250,7 +251,8 @@ function stayStrip(){
 
 function emptyCard(text,button,label,kind='empty'){
   const icon=kind==='shopping'?'<svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg>':kind==='people'?settingsIcon('people').replace('settings-icon','empty-inline-icon'):kind==='expenses'?expenseCategoryIcon('Misc'):'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
-  return `<div class="card empty premium-empty"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;
+  const emptyTone=kind==='shopping'?'gold':kind==='people'?'blue':kind==='expenses'?'blue':'silver';
+  return `<div class="card empty premium-empty" data-tone="${emptyTone}"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;
 }
 
 function expenseRow(expense,origin=route,{showTransfer=true}={}){
@@ -266,7 +268,7 @@ async function renderHome(){
   const counts=shoppingCounts(shopping);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const homeItems=shopping.slice(0,2);
-  const homeArt=homeItems.length?homeItems.map(item=>{const category=categoryMap.get(item.categoryId);return `<span class="home-shopping-art product-art" data-state="${esc(item.state)}" aria-hidden="true">${productArt(item.itemName,category?.name||'Other')}</span>`;}).join(''):'<span class="home-shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span>';
+  const homeArt=homeItems.length?homeItems.map(item=>{const category=categoryMap.get(item.categoryId);return `<span class="home-shopping-art product-art" data-item-name="${esc(item.itemName)}" data-state="${esc(item.state)}" aria-hidden="true">${productArt(item.itemName,category?.name||'Other')}</span>`;}).join(''):'<span class="home-shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span>';
   const shoppingStatus=shopping.length?`${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable`:'Ready for your next shop';
   present(`${stayHero()}
     <div class="home-core-actions">
@@ -373,48 +375,47 @@ async function renderShopping(){
   const resolvedPct=counts.all?Math.round(((counts.got+counts.unavailable)/counts.all)*100):0;
   const gotPct=counts.all?Math.round((counts.got/counts.all)*100):0;
   const unavailablePct=Math.max(0,resolvedPct-gotPct);
-  present(`${pageHead('Shopping','','Shopping')}
-    <div class="shopping-context"><div class="shopping-context-flag">${esc(currentStay.flag||'◉')}</div><div class="shopping-context-copy" aria-live="polite" aria-atomic="true"><strong>${esc(currentStay.city)} · ${esc(currentStay.country)}</strong><span>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</span></div><span class="shopping-context-code">${esc(currentStay.currencyCode)}</span><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div></div>
-    <div class="shopping-primary-actions"><button class="btn warm" data-add-shop><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Add Item</button><button class="btn secondary" data-regular-items><span class="button-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.4l6.1-.9L12 3Z"/></svg></span>Regular Items</button></div>
-    ${items.length?`<div class="shopping-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}"><span>${label}</span><b>${count}</b></button>`).join('')}</div><div class="shopping-list-head"><span>${shown.length} shown</span><button class="finish-inline" type="button" data-finish-shopping ${counts.got?'':'disabled'}>Finish Shopping</button></div>`:''}
+  const stayDate=shortAuDate(currentStay.startDate);
+  present(`<header class="shopping-screen-head">
+      <div class="shopping-screen-title"><p class="eyebrow">Shopping</p><h1>My Shopping List</h1><p>${esc(currentStay.city)}, ${esc(currentStay.country)}</p><span>${esc(stayDate)}</span></div>
+      <button class="shopping-head-menu" type="button" data-regular-items aria-label="Regular Items"><span aria-hidden="true">•••</span></button>
+    </header>
+    ${items.length?`<div class="shopping-filterbar target-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}"><span>${label}</span><b>${count}</b></button>`).join('')}</div>`:''}
+    ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add</button><button class="finish-inline" type="button" data-finish-shopping ${counts.got?'':'disabled'}>Finish</button></div>`:''}
     ${counts.unavailable?`<div class="shopping-unavailable-note"><span aria-hidden="true">${shoppingActionIcon('unavailable')}</span><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
-    <div class="shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
-    ${items.length?'<button class="btn warm full shopping-second-add" type="button" data-add-shop>Add Item</button>':''}`);
+    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
+    ${items.length?'<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add Item</button>':''}`);
 }
 function shoppingRow(item,personMap,categoryMap){
   const person=personMap.get(item.requesterId);
   const category=categoryMap.get(item.categoryId);
   const art=productArt(item.itemName,category?.name||'Other');
-  const meta=[item.quantity?`Qty ${item.quantity}`:'',item.note||''].filter(Boolean).join(' · ');
-  const label=shoppingStateLabel(item.state);
-  return `<article class="shop-row" data-state="${esc(item.state)}" data-tone="${categoryTone(category)}">
-    <div class="shop-row-top">
+  const meta=[item.quantity||'',item.note||''].filter(Boolean).join(' · ');
+  const stateText=item.state==='couldnt'?`<small class="shop-state-note">Couldn’t get · keep for next time</small>`:'';
+  return `<article class="shop-row target-shop-row" data-state="${esc(item.state)}" data-tone="${categoryTone(category)}">
+      <button class="shop-check-control" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}"><span class="shop-check-mark" aria-hidden="true">${item.state==='got'?'✓':''}</span></button>
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
-        <span class="shop-item-picture product-art" aria-hidden="true">${art}</span>
-        <span class="shop-item-copy"><span class="shop-title-line"><small class="shop-category-chip">${esc(category?.name||'Other')}</small><em class="shop-state ${esc(item.state)}">${esc(label)}</em></span><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}</span>
+        <span class="shop-item-picture product-art" data-item-name="${esc(item.itemName)}" aria-hidden="true">${art}</span>
+        <span class="shop-item-copy"><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${stateText}</span>
+        ${person?`<span class="initials target-initials" title="${esc(person.name)}">${esc(person.initials)}</span>`:''}
       </button>
-      ${person?`<div class="initials" title="${esc(person.name)}">${esc(person.initials)}</div>`:''}
-    </div>
-    <div class="shop-actions">
-      <button class="btn shop-state-control ${item.state==='got'?'secondary':'success'}" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}<span class="sr-only">${item.state==='got'?'Undo':'Got It'}</span></button>
-      <button class="btn shop-state-control ${item.state==='couldnt'?'secondary':'unavailable'}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}<span class="sr-only">${item.state==='couldnt'?'Undo':"Couldn’t Get"}</span></button>
-    </div>
-  </article>`;
+      <button class="shop-couldnt-control ${item.state==='couldnt'?'is-active':''}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}"><span class="shop-grip-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12M6 12h12M6 16h12"/></svg></span></button>
+    </article>`;
 }
 async function showAddShopping(category=null){
   const [categories,catalogue]=await Promise.all([getAll('categories'),getAll('catalogue')]);
   if(!category){
     const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
     present(`${subscreenBack('Shopping')} ${pageHead('Add Item','Tap a picture.','Shopping')}
-      <div class="category-grid">${ordered.map(c=>`<button class="category-box" data-tone="${categoryTone(c)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
+      <div class="category-grid">${ordered.map(c=>`<button class="category-box ${c.name==='Other'?'category-other':''}" data-tone="${categoryTone(c)}" data-category-name="${esc(c.name)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
       <details class="meal-ideas-panel"><summary><span>Meal Ideas</span><small>Optional inspiration</small></summary><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div></details>
       <button class="btn secondary full back-button" data-back-shopping>Back to Shopping</button>`,{subscreen:true});
     return;
   }
-  const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>a.name.localeCompare(b.name));
+  const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   present(`${subscreenBack('Categories','data-add-shop')} ${pageHead(category.name,'Tap an item to add it.','Shopping')}
-    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category.name)}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
+    <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-category-name="${esc(category.name)}" data-item-name="${esc(item.name)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category.name)}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
     <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">Add Something Else</button>
     <button class="btn secondary full" data-add-shop>Back to Categories</button>`,{subscreen:true});
 }
@@ -497,7 +498,7 @@ async function showRegularItems(){
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
   present(`${subscreenBack('Shopping')} ${pageHead('Regular Items','Tap Add for the things you buy often.','Shopping')}
-    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
+    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
     <button class="btn warm full" data-add-regular-inline>Add Regular Item</button>
     <button class="btn secondary full" data-back-shopping>Back</button>`,{subscreen:true});
 }
@@ -588,8 +589,10 @@ async function renderSettings(){
 }
 
 async function advancedSettings(){
+  const shoppingItems=await getAll('shoppingItems');
   present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Advanced','','Settings')}
-    <div class="settings-list premium-settings-list">
+    <div class="utility-summary-band" data-tone="silver"><span class="utility-summary-icon">${settingsIcon('advanced')}</span><span><small>Offline Controls</small><strong>Local tools for this phone</strong><em>${shoppingItems.length} shopping item${shoppingItems.length===1?'':'s'} · ${stayRate(currentStay)?'AUD conversion on':'AUD conversion off'}</em></span></div>
+    <div class="settings-list premium-settings-list advanced-tool-list">
       <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
       <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsIcon('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
       <button class="settings-row danger" data-tone="red" data-reset>${settingsIcon('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
@@ -605,14 +608,14 @@ async function stayEditor(mode='edit',force=false){
   const countryLocked=!!(base&&existingExpenses.some(expense=>expense.stayId===base.id));
   if(force)setNavigationEnabled(false);
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
-  present(`${force?'':subscreenBack('Settings','data-back-settings')} ${pageHead(title,subtitle,'Settings')}
-    <div class="stay-live-preview" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
-    <form class="editor-card quick-stay premium-stay-editor" id="stayForm">
-      <label><span class="field-label">${stayFieldIcon('country')}<span>Country</span></span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><datalist id="countryList">${options}</datalist></label>
+  present(`${force?'':subscreenBack('Settings','data-back-settings')} <div class="stay-editor-head">${pageHead(title,subtitle,'Settings')}</div>
+    <div class="stay-live-preview ${mode==='setup'?'setup-preview-hidden':''}" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
+    <form class="editor-card quick-stay premium-stay-editor target-stay-editor" id="stayForm">
+      <label class="stay-field"><span class="field-label"><span>Country</span></span><span class="stay-control"><span class="stay-control-prefix country-prefix" id="countryPrefix">${base?.flag?esc(base.flag):stayFieldIcon('country')}</span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><span class="stay-control-chevron" aria-hidden="true">⌄</span></span><datalist id="countryList">${options}</datalist></label>
       <div class="auto-country ${base?'is-ready':''}" id="countryAuto" ${base?'':'hidden'}>${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:''}</div>
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
-      <label><span class="field-label">${stayFieldIcon('city')}<span>City / Destination</span></span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"></label>
-      <div class="stay-date-stack"><label><span class="field-label">${stayFieldIcon('start')}<span>Stay start</span></span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></label><label><span class="field-label">${stayFieldIcon('end')}<span>Stay end</span></span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></label></div>
+      <label class="stay-field"><span class="field-label"><span>City / Destination</span></span><span class="stay-control"><span class="stay-control-prefix">${stayFieldIcon('city')}</span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"><span class="stay-control-chevron" aria-hidden="true">›</span></span></label>
+      <div class="stay-date-stack"><label class="stay-field"><span class="field-label"><span>Stay start</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('start')}</span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></span></label><label class="stay-field"><span class="field-label"><span>Stay end</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('end')}</span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></span></label></div>
       <div class="editor-actions static-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</button></div>
     </form>`,{subscreen:true});
 
@@ -620,12 +623,14 @@ async function stayEditor(mode='edit',force=false){
   const countryInput=form.elements.country;
   const auto=screen.querySelector('#countryAuto');
   const preview=screen.querySelector('#stayLivePreview');
+  const countryPrefix=screen.querySelector('#countryPrefix');
   const updatePreview=()=>{const ref=findCountry(countryInput.value);const city=String(form.elements.city.value||'').trim();const start=isoDateToAu(form.elements.startDate.value)||'Start date';const end=isoDateToAu(form.elements.endDate.value)||'End date';preview.innerHTML=`<small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(ref?.flag||'◉')}</span><span><strong>${esc(ref?.name||countryInput.value||'Choose a country')}</strong><em>${esc(city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(start)} – ${esc(end)}</div>`;};
   const updateCountry=()=>{
     const ref=findCountry(countryInput.value);
     auto.hidden=!ref;
     auto.textContent=ref?`${ref.flag} ${ref.currencyCode} · ${ref.currencyName}`:'';
     auto.classList.toggle('is-ready',!!ref);
+    if(countryPrefix)countryPrefix.innerHTML=ref?esc(ref.flag):stayFieldIcon('country');
     updatePreview();
   };
   countryInput.addEventListener('input',updateCountry);countryInput.addEventListener('change',updateCountry);form.elements.city.addEventListener('input',updatePreview);form.elements.startDate.addEventListener('change',updatePreview);form.elements.endDate.addEventListener('change',updatePreview);updateCountry();updatePreview();
@@ -652,14 +657,16 @@ async function stayEditor(mode='edit',force=false){
 }
 async function exchangeRateEditor(){
   if(!currentStay)return stayEditor('setup',true);
+  const rate=stayRate(currentStay);
   present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Optional AUD Conversion','Only use this if you want an AUD figure saved too.','Settings')}
-    <form class="editor-card" id="rateForm"><label>1 AUD = <span class="hint">${esc(currentStay.currencyCode)}</span><input id="rateInput" name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn it off" value="${esc(stayRate(currentStay)||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true});
+    <div class="rate-preview-card" data-tone="teal"><span class="rate-preview-icon">${settingsIcon('rate')}</span><span class="rate-preview-copy"><small>Current Stay Currency</small><strong>AUD ↔ ${esc(currentStay.currencyCode)}</strong><em>${esc(currentStay.country)} · ${esc(currentStay.city)}${rate?` · 1 AUD = ${esc(rate)} ${esc(currentStay.currencyCode)}`:' · Conversion is off'}</em></span></div>
+    <form class="editor-card rate-editor-card" id="rateForm"><label><span class="rate-label-row"><span>1 AUD =</span><span class="hint">${esc(currentStay.currencyCode)}</span></span><input id="rateInput" name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn it off" value="${esc(rate||'')}"></label><p class="editor-help">Enter the fixed rate you want Travel Buddy to use for this stay. Leave it blank to keep AUD conversion off.</p><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true});
   screen.querySelector('#rateForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const raw=String(new FormData(event.currentTarget).get('exchangeRate')||'').trim();
-    let rate=null;
-    if(raw){rate=Number(raw);if(!Number.isFinite(rate)||rate<=0){await showMessage('Check the exchange rate','Enter a valid exchange rate or leave it blank.');return;}}
-    currentStay={...currentStay,exchangeRate:rate,modifiedAt:now()};
+    let nextRate=null;
+    if(raw){nextRate=Number(raw);if(!Number.isFinite(nextRate)||nextRate<=0){await showMessage('Check the exchange rate','Enter a valid exchange rate or leave it blank.');return;}}
+    currentStay={...currentStay,exchangeRate:nextRate,modifiedAt:now()};
     await putRecord('stays',currentStay);
     await renderRoute('settings');
   });
@@ -676,10 +683,10 @@ async function managePeople(){
 async function personEditor(person=null){
   personEditorReturn='people';
   present(`${subscreenBack('People','data-back-people')} ${pageHead(person?'Edit Person':'Add Person','Name and initials.','Settings')}
-    <div class="management-editor-preview" id="personPreview"><span class="person-avatar">${esc(person?.initials||'—')}</span><span><small>Requester Preview</small><strong>${esc(person?.name||'Person name')}</strong><em>${esc(person?.initials||'Initials')}</em></span></div>
+    <div class="management-editor-preview" id="personPreview" data-tone="blue"><span class="person-avatar">${person?.initials?esc(person.initials):settingsIcon('people')}</span><span><small>Requester Preview</small><strong>${esc(person?.name||'Person name')}</strong><em>${esc(person?.initials||'Initials')}</em></span></div>
     <form class="editor-card" id="personForm"><label>Name<input id="personName" name="name" required maxlength="60" value="${esc(person?.name||'')}"></label><label>Initials<input name="initials" maxlength="3" value="${esc(person?.initials||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-people>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:person?null:'#personName'});
   const form=screen.querySelector('#personForm'), preview=screen.querySelector('#personPreview');
-  const refresh=()=>{const name=String(form.elements.name.value||'').trim();const initials=normalizeInitials(name,form.elements.initials.value);preview.innerHTML=`<span class="person-avatar">${esc(initials||'—')}</span><span><small>Requester Preview</small><strong>${esc(name||'Person name')}</strong><em>${esc(initials||'Initials')}</em></span>`;};
+  const refresh=()=>{const name=String(form.elements.name.value||'').trim();const initials=normalizeInitials(name,form.elements.initials.value);preview.innerHTML=`<span class="person-avatar">${initials?esc(initials):settingsIcon('people')}</span><span><small>Requester Preview</small><strong>${esc(name||'Person name')}</strong><em>${esc(initials||'Initials')}</em></span>`;};
   form.elements.name.addEventListener('input',refresh);form.elements.initials.addEventListener('input',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -704,15 +711,15 @@ async function deletePerson(personId){
 async function manageCategories(){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-summary-band" data-tone="gold"><span class="management-summary-icon">${settingsIcon('categories')}</span><span><small>Shopping Categories</small><strong>${ordered.length} available</strong></span></div><div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-line-art" aria-hidden="true">${categoryArt(category)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn secondary full" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-summary-band" data-tone="gold"><span class="management-summary-icon">${settingsIcon('categories')}</span><span><small>Shopping Categories</small><strong>${ordered.length} available</strong></span></div><div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-product-art" aria-hidden="true">${categoryHeroArt(category.name)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn warm full shopping-setup-primary" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function categoryEditor(category=null){
   present(`${subscreenBack('Categories','data-back-categories')} ${pageHead(category?'Rename Category':'Add Category','The active shopping list stays continuous.','Shopping Setup')}
-    <div class="management-editor-preview category-editor-preview" id="categoryPreview" data-tone="${categoryTone(category?.name||'Other')}"><span class="management-preview-icon category-line-art">${categoryArt(category?.name||'Other')}</span><span><small>Category Preview</small><strong>${esc(category?.name||'Category name')}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span></div>
-    <form class="editor-card" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
+    <div class="management-editor-preview category-editor-preview" id="categoryPreview" data-tone="${categoryTone(category?.name||'Other')}"><span class="management-preview-icon category-product-art">${categoryHeroArt(category?.name||'Other')}</span><span><small>Category Preview</small><strong>${esc(category?.name||'Category name')}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span></div>
+    <form class="editor-card shopping-setup-editor" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
   const form=screen.querySelector('#categoryForm'), preview=screen.querySelector('#categoryPreview');
-  const refresh=()=>{const name=String(form.elements.name.value||'').trim()||'Category name';preview.dataset.tone=categoryTone(name);preview.innerHTML=`<span class="management-preview-icon category-line-art">${categoryArt(name)}</span><span><small>Category Preview</small><strong>${esc(name)}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span>`;};form.elements.name.addEventListener('input',refresh);refresh();
+  const refresh=()=>{const name=String(form.elements.name.value||'').trim()||'Category name';preview.dataset.tone=categoryTone(name);preview.innerHTML=`<span class="management-preview-icon category-product-art">${categoryHeroArt(name)}</span><span><small>Category Preview</small><strong>${esc(name)}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span>`;};form.elements.name.addEventListener('input',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
     const name=String(new FormData(event.currentTarget).get('name')||'').trim();
@@ -738,14 +745,14 @@ async function manageCustom(){
   const [catalogue,categories]=await Promise.all([getAll('catalogue'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=catalogue.filter(item=>!item.builtIn).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-summary-band" data-tone="purple"><span class="management-summary-icon">${settingsIcon('custom')}</span><span><small>Reusable Catalogue</small><strong>${rows.length} custom ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn secondary full" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-summary-band" data-tone="purple"><span class="management-summary-icon">${settingsIcon('custom')}</span><span><small>Reusable Catalogue</small><strong>${rows.length} custom ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function customEditor(item=null){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
-  present(`${subscreenBack('Custom Items','data-back-custom')} ${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<div id="customPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Reusable Item Preview'})}</div><form class="editor-card" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
+  present(`${subscreenBack('Custom Items','data-back-custom')} ${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<div id="customPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Reusable Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
   const form=screen.querySelector('#customForm'), preview=screen.querySelector('#customPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Reusable Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -763,7 +770,7 @@ async function manageRegulars(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-summary-band" data-tone="teal"><span class="management-summary-icon">${settingsIcon('regular')}</span><span><small>Quick Add Favourites</small><strong>${rows.length} regular ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn primary full" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-summary-band" data-tone="teal"><span class="management-summary-icon">${settingsIcon('regular')}</span><span><small>Quick Add Favourites</small><strong>${rows.length} regular ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function regularEditor(item=null,returnTo='settings'){
@@ -771,7 +778,7 @@ async function regularEditor(item=null,returnTo='settings'){
   const [categories,regulars]=await Promise.all([getAll('categories'),getAll('regularItems')]);
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
-  present(`${subscreenBack(returnTo==='shopping'?'Regular Items':'Regular Items','data-regular-cancel')} ${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<div id="regularPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Regular Item Preview'})}</div><form class="editor-card" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
+  present(`${subscreenBack(returnTo==='shopping'?'Regular Items':'Regular Items','data-regular-cancel')} ${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<div id="regularPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Regular Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
   const form=screen.querySelector('#regularForm'), preview=screen.querySelector('#regularPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Regular Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -793,7 +800,13 @@ async function addRegularToList(regularId){
 }
 
 async function shoppingTools(){
-  present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}<div class="settings-list premium-settings-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Send a versioned list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  const items=await getAll('shoppingItems');
+  const counts=shoppingCounts(items);
+  present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}
+    <div class="utility-summary-band" data-tone="gold"><span class="utility-summary-icon">${settingsIcon('transfer')}</span><span><small>Current Shopping List</small><strong>${items.length} item${items.length===1?'':'s'} ready to share</strong><em>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</em></span></div>
+    <div class="settings-list premium-settings-list transfer-tool-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Create a versioned Travel Buddy list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div>
+    <div class="transfer-safety-note"><strong>Manual and local</strong><span>Nothing syncs automatically. Imports merge into the current list and keep existing items.</span></div>
+    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
 }
 
 async function resetTravelBuddy(){
@@ -896,18 +909,24 @@ async function autoLaunch(){
     const elapsed=performance.now()-started;
     if(elapsed<brandMinimum)await delay(brandMinimum-elapsed);
 
+    const stageHandoff=420;
     launchBrand.classList.remove('is-visible');
-    await delay(320);
+    await delay(stageHandoff);
     if(currentStay){
       launchStay.innerHTML=`<div class="launch-stay-flag">${esc(currentStay.flag||'◉')}</div><div class="launch-stay-country">${esc(currentStay.country)}</div><div class="launch-stay-city">${esc(currentStay.city)}</div><div class="launch-stay-dates">${esc(currentStay.startDate)} – ${esc(currentStay.endDate)}</div>`;
       launchStay.classList.add('is-visible');
       await delay(1550);
       launchStay.classList.remove('is-visible');
-      await delay(360);
+      await delay(stageHandoff);
     }
-    launch.remove();
+
+    /* Prepare the real app behind the launch layer, then fade the launch away. */
     app.hidden=false;
     if(!currentStay){setRoute('settings');setNavigationEnabled(false);await stayEditor('setup',true);}else{setNavigationEnabled(true);await renderRoute('home');}
+    await delay(40);
+    launch.classList.add('is-exiting');
+    await delay(440);
+    launch.remove();
     if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
   }catch(error){
     console.error(error);
