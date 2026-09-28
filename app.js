@@ -45,6 +45,18 @@ const pageHeadVisual=tone=>{
   return `<span class="page-head-visual" aria-hidden="true">${art}</span>`;
 };
 const pageHead=(title,subtitle='',accent='Travel Buddy')=>{const tone=toneKey(accent);return `<div class="page-head head-${tone}"><div class="page-head-copy"><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>${pageHeadVisual(tone)}</div>`;};
+const sectionBadgeVisual=kind=>{
+  const art={
+    recent:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="7" width="26" height="34" rx="7" fill="#14556f"/><path d="M17 17h14M17 24h10M17 31h12" stroke="#9ce7f5" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="35" r="7" fill="#35b9e6"/><path d="M35 31v8M31 35h8" stroke="#f6fdff" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+    current:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42s13-12 13-23a13 13 0 1 0-26 0c0 11 13 23 13 23Z" fill="#2d88aa"/><circle cx="24" cy="19" r="6" fill="#f4c756"/></svg>`,
+    shopping:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="14" height="14" rx="4" fill="#55cdb8"/><rect x="27" y="7" width="14" height="14" rx="4" fill="#e2b547"/><rect x="7" y="27" width="14" height="14" rx="4" fill="#68b7e5"/><rect x="27" y="27" width="14" height="14" rx="4" fill="#ad83df"/></svg>`,
+    more:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32M8 24h32M8 34h32" stroke="#9fb6c5" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="14" r="5" fill="#5ec9df"/><circle cx="31" cy="24" r="5" fill="#b387e5"/><circle cx="15" cy="34" r="5" fill="#e1b44c"/></svg>`,
+    pending:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="13" width="29" height="22" rx="6" fill="#b57a20"/><circle cx="36" cy="34" r="8" fill="#edb229"/><path d="M32 34h8M37 30l4 4-4 4" stroke="#fff6d6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    transferred:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 23 41 8 31 41 23 29 7 23Z" fill="#35bda3"/><circle cx="35" cy="35" r="8" fill="#217d6d"/><path d="m31 35 3 3 5-7" fill="none" stroke="#effff9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    all:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="26" width="8" height="14" rx="3" fill="#8f67d9"/><rect x="20" y="18" width="8" height="22" rx="3" fill="#b878e7"/><rect x="32" y="9" width="8" height="31" rx="3" fill="#d58cf0"/></svg>`
+  }[kind]||'';
+  return `<span class="section-badge section-badge-${esc(kind)}" aria-hidden="true">${art}</span>`;
+};
 const categoryTone=category=>{const v=String(category?.name||category||'').toLowerCase();if(v.includes('fruit')||v.includes('veg'))return'teal';if(v.includes('meat'))return'copper';if(v.includes('dairy'))return'blue';if(v.includes('bakery'))return'gold';if(v.includes('pantry'))return'purple';if(v.includes('frozen'))return'ice';if(v.includes('drink'))return'cyan';if(v.includes('house'))return'green';if(v.includes('toilet'))return'rose';if(v.includes('pharmacy'))return'red';return'silver';};
 const expenseTone=category=>({Groceries:'teal','Eating Out':'gold',Transport:'blue',Entertainment:'purple',Tickets:'copper',Shopping:'rose',Misc:'silver'})[category]||'silver';
 
@@ -76,7 +88,7 @@ const expenseCategoryArt=category=>{
   return art||`<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="#7f93a5"/><circle cx="32" cy="32" r="5" fill="#eef6fb"/></svg>`;
 };
 
-const expenseCategoryVisual=category=>`<span class="expense-illustration" aria-hidden="true">${expenseCategoryArt(category)}</span><span class="expense-line-badge" aria-hidden="true">${expenseCategoryIcon(category)}</span>`;
+const expenseCategoryVisual=category=>`<span class="expense-illustration" aria-hidden="true">${expenseCategoryArt(category)}</span>`;
 
 const expenseStatusIcon=kind=>{
   const path={
@@ -165,7 +177,19 @@ const miniActionVisual=kind=>{
   return `<span class="mini-action-visual mini-action-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
 };
 
-const toiletVisual=()=>`<span class="wc-visual" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="5" y="5" width="38" height="38" rx="13" fill="#215b72"/><circle cx="18" cy="16" r="4" fill="#73d8eb"/><circle cx="31" cy="16" r="4" fill="#e3b84f"/><path d="M13 35v-9c0-4 2-6 5-6s5 2 5 6v9M26 35v-9c0-4 2-6 5-6s5 2 5 6v9" fill="none" stroke="#f4fbff" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+const directionVisual=kind=>{
+  const path=kind==='down'?'<path d="m8 10 4 4 4-4"/>':'<path d="m9 6 6 6-6 6"/>';
+  return `<span class="direction-visual direction-${esc(kind||'next')}" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
+};
+
+const toiletVisual=()=>`<span class="wc-visual" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="13" fill="#164d65"/><rect x="8" y="8" width="32" height="25" rx="8" fill="#216f8a"/><text x="24" y="25" text-anchor="middle" font-size="15" font-weight="900" fill="#f4fbff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">WC</text><path d="M19 36h12l4 5v-5h1a4 4 0 0 0 4-4v-2" fill="#e4b84d"/><circle cx="16" cy="37" r="3" fill="#67d2e8"/></svg></span>`;
+
+const optionalPanelVisual=kind=>{
+  const art=kind==='expense'
+    ?'<rect x="10" y="9" width="36" height="38" rx="9" fill="#195f79"/><path d="M19 20h18M19 28h12" stroke="#a6ebf7" stroke-width="3.5" stroke-linecap="round"/><circle cx="40" cy="41" r="10" fill="#d7a842"/><path d="M40 35v12M34 41h12" stroke="#fff7dc" stroke-width="2.7" stroke-linecap="round"/>'
+    :'<path d="M12 16h32v30H12z" fill="#8c6b25" rx="8"/><circle cx="22" cy="26" r="5" fill="#55cdb8"/><circle cx="34" cy="26" r="5" fill="#d9839e"/><path d="M19 37h18" stroke="#fff0bd" stroke-width="3.5" stroke-linecap="round"/><circle cx="44" cy="43" r="9" fill="#2c8f79"/><path d="M44 38v10M39 43h10" stroke="#effff9" stroke-width="2.5" stroke-linecap="round"/>';
+  return `<span class="optional-panel-visual optional-panel-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 56 56">${art}</svg></span>`;
+};
 
 const settingsVisual=kind=>{
   const art={
@@ -176,7 +200,10 @@ const settingsVisual=kind=>{
     advanced:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 21h44M14 36h44M14 51h44" stroke="#9fb6c6" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#5ec9df"/><circle cx="47" cy="36" r="8" fill="#b387e5"/><circle cx="24" cy="51" r="8" fill="#e1b44c"/></svg>`,
     transfer:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="15" width="32" height="42" rx="7" fill="#d09a2d"/><path d="M21 27h16M21 36h11" stroke="#fff0bd" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="48" r="14" fill="#2aa891"/><path d="M43 48h15M53 42l6 6-6 6" fill="none" stroke="#effff9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     rate:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="26" cy="30" r="17" fill="#2f9b88"/><circle cx="47" cy="43" r="17" fill="#4d99c4"/><path d="M20 30h12M26 21v18M41 43h12M47 34v18" stroke="#eafff8" stroke-width="4" stroke-linecap="round"/><path d="M38 19c8 1 13 5 16 11M34 54c-8-1-13-5-16-11" fill="none" stroke="#bdeef6" stroke-width="3" stroke-linecap="round"/></svg>`,
-    reset:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M19 23a24 24 0 1 1-5 25" fill="none" stroke="#d66d77" stroke-width="7" stroke-linecap="round"/><path d="M18 12v14H4" fill="none" stroke="#f3aab1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 24v16" stroke="#ffe6e8" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="49" r="3" fill="#ffe6e8"/></svg>`
+    reset:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M19 23a24 24 0 1 1-5 25" fill="none" stroke="#d66d77" stroke-width="7" stroke-linecap="round"/><path d="M18 12v14H4" fill="none" stroke="#f3aab1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 24v16" stroke="#ffe6e8" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="49" r="3" fill="#ffe6e8"/></svg>`,
+    share:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="14" width="34" height="44" rx="8" fill="#9d6b1f"/><path d="M20 27h18M20 36h13" stroke="#fff0bf" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="23" r="7" fill="#e8bd52"/><circle cx="58" cy="39" r="7" fill="#5cc9df"/><circle cx="48" cy="54" r="7" fill="#7bd3a3"/><path d="m53 28 3 5M54 45l-3 4" stroke="#fff9df" stroke-width="3" stroke-linecap="round"/></svg>`,
+    import:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="14" y="13" width="44" height="46" rx="9" fill="#176b64"/><path d="M36 16v25m-9-9 9 9 9-9" fill="none" stroke="#c9fff4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 49h26" stroke="#effffb" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="20" r="8" fill="#5ec9df"/></svg>`,
+    local:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="20" y="8" width="32" height="56" rx="9" fill="#40586a"/><rect x="24" y="15" width="24" height="36" rx="5" fill="#102631"/><circle cx="36" cy="57" r="3" fill="#a8c1cf"/><path d="M29 27h14M29 34h10" stroke="#73d7e9" stroke-width="4" stroke-linecap="round"/><path d="M50 15c7 4 11 10 11 18M54 12c9 5 14 13 14 23" fill="none" stroke="#dfb64d" stroke-width="3" stroke-linecap="round"/></svg>`
   }[kind]||'';
   return `<span class="settings-icon premium-settings-visual" aria-hidden="true">${art}</span>`;
 };
@@ -347,6 +374,27 @@ function shoppingFilterVisual(kind){
   return `<span class="shopping-filter-visual shopping-filter-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
 }
 
+const mealIdeasVisual=()=>`<span class="meal-ideas-visual" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="25" fill="#2a220f"/><ellipse cx="34" cy="39" rx="19" ry="9" fill="#e4b650"/><ellipse cx="34" cy="36" rx="15" ry="6" fill="#fff0bd"/><path d="M23 34c5-7 11-8 17-5 4 2 7 5 9 8" fill="none" stroke="#df7046" stroke-width="5" stroke-linecap="round"/><circle cx="34" cy="28" r="3" fill="#df5649"/><path d="M39 25c5-4 9-3 12 0-5 2-8 2-12 0Z" fill="#67c97a"/><path d="M17 18v19M13 18v9c0 4 2 6 4 6s4-2 4-6v-9M17 37v10" fill="none" stroke="#f5d169" stroke-width="3.2" stroke-linecap="round"/></svg></span>`;
+
+const mealIdeaVisual=idea=>{
+  const art={
+    'Pasta night':'<ellipse cx="32" cy="40" rx="21" ry="10" fill="#f2cf73"/><path d="M17 36c7-8 15-10 25-5 4 2 7 5 9 9" fill="none" stroke="#d96f47" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="28" r="4" fill="#d94e47"/><path d="M40 25c5-4 9-3 12 0-4 3-8 3-12 0Z" fill="#64c980"/>',
+    'Tacos':'<path d="M12 42c3-16 13-25 27-25 9 0 16 4 20 12-16-3-29 2-39 15Z" fill="#efc85e"/><path d="M20 37c8-8 17-10 29-8" stroke="#c76545" stroke-width="5" stroke-linecap="round"/><circle cx="31" cy="28" r="4" fill="#69c87d"/><circle cx="41" cy="25" r="3" fill="#e05a4b"/>',
+    'Stir-fry':'<path d="M13 36h46c-4 14-12 21-23 21S17 50 13 36Z" fill="#4b7f95"/><path d="M19 31h34" stroke="#b5e8f2" stroke-width="4" stroke-linecap="round"/><circle cx="29" cy="30" r="6" fill="#65c77b"/><circle cx="40" cy="28" r="5" fill="#e0ae49"/><path d="M48 13 34 32" stroke="#d69c4b" stroke-width="4" stroke-linecap="round"/>',
+    'BBQ':'<rect x="15" y="28" width="42" height="9" rx="4" fill="#647a89"/><path d="M22 37 18 55M50 37l4 18M29 37v18M43 37v18" stroke="#9fb2bd" stroke-width="4" stroke-linecap="round"/><path d="M25 22c2-7 7-11 12-15 1 7 7 10 7 17" fill="#e86d4d"/><path d="M32 25c2-5 5-7 8-9" stroke="#ffd267" stroke-width="4" stroke-linecap="round"/>',
+    'Salad night':'<path d="M13 37h46c-3 13-12 20-23 20S16 50 13 37Z" fill="#397f67"/><circle cx="27" cy="29" r="8" fill="#67c879"/><circle cx="39" cy="27" r="7" fill="#88d46f"/><circle cx="47" cy="33" r="5" fill="#e45c53"/><circle cx="33" cy="35" r="5" fill="#e2bd4f"/>',
+    'Breakfast for dinner':'<circle cx="30" cy="32" r="18" fill="#f5f0df"/><circle cx="30" cy="32" r="8" fill="#e6b33f"/><rect x="42" y="17" width="8" height="31" rx="4" fill="#d46e58"/><rect x="52" y="19" width="6" height="27" rx="3" fill="#e08b65"/>'
+  }[idea]||'<circle cx="32" cy="32" r="20" fill="#d9ad4e"/>';
+  return `<span class="meal-idea-art" aria-hidden="true"><svg viewBox="0 0 64 64">${art}</svg></span>`;
+};
+
+const shoppingNoticeArt=kind=>{
+  const art=kind==='finished'
+    ?'<circle cx="36" cy="36" r="27" fill="#1f795d"/><path d="m21 37 9 9 21-22" fill="none" stroke="#eafff5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="20" r="8" fill="#e1b64f"/>'
+    :'<circle cx="36" cy="36" r="27" fill="#8a5f22"/><path d="M20 20 52 52M52 20 20 52" stroke="#fff0c5" stroke-width="6" stroke-linecap="round"/><circle cx="54" cy="18" r="7" fill="#5dc9df"/>';
+  return `<span class="shopping-notice-art shopping-notice-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 72 72">${art}</svg></span>`;
+};
+
 function shoppingCounts(items){
   const got=items.filter(item=>item.state==='got').length;
   const unavailable=items.filter(item=>item.state==='couldnt').length;
@@ -369,7 +417,7 @@ function stayHero(stay=currentStay){
 }
 
 function stayStrip(){
-  return currentStay?`<div class="screen-title-strip compact"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag||'◉')}</div></div><div class="stay-strip-copy"><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><small>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</small></div></div>`:'';
+  return currentStay?`<div class="screen-title-strip compact"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag||'◉')}</div></div><div class="stay-strip-copy"><small>Current stay</small><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span class="stay-strip-meta">${esc(currentStay.startDate)} – ${esc(currentStay.endDate)}</span></div><span class="stay-strip-currency" aria-label="Currency ${esc(currentStay.currencyCode)}">${esc(currentStay.currencyCode)}</span></div>`:'';
 }
 
 function emptyCard(text,button,label,kind='empty'){
@@ -381,7 +429,7 @@ function emptyCard(text,button,label,kind='empty'){
 
 function expenseRow(expense,origin=route,{showTransfer=true}={}){
   const secondary=expense.audAmount!==null&&expense.audAmount!==undefined?formatAud(expense.audAmount):'';
-  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryVisual(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span><span class="expense-row-chevron" aria-hidden="true">›</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}"><span class="transfer-button-icon" aria-hidden="true">${expenseStatusIcon(expense.transferred?'transferred':'pending')}</span>${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
+  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryVisual(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span><span class="expense-row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}"><span class="transfer-button-icon" aria-hidden="true">${expenseStatusIcon(expense.transferred?'transferred':'pending')}</span>${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
 }
 
 async function renderHome(){
@@ -396,11 +444,11 @@ async function renderHome(){
   const shoppingStatus=shopping.length?`${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable`:'Ready for your next shop';
   present(`${stayHero()}
     <div class="home-core-actions">
-      <button class="home-action expense-home" data-add-expense><span class="home-action-icon premium-home-expense-art" aria-hidden="true">${expenseStatusArt('add')}</span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
-      <button class="home-action shopping-home" data-open-shopping><span class="home-shopping-pictures">${homeArt}</span><span class="home-action-copy"><strong>Shopping List</strong><small>${esc(shoppingStatus)}</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
+      <button class="home-action expense-home" data-add-expense><span class="home-action-icon premium-home-expense-art" aria-hidden="true">${expenseStatusArt('add')}</span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="home-action shopping-home" data-open-shopping><span class="home-shopping-pictures">${homeArt}</span><span class="home-action-copy"><strong>Shopping List</strong><small>${esc(shoppingStatus)}</small></span><span class="home-action-arrow" aria-hidden="true">${directionVisual('next')}</span></button>
     </div>
     <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon premium-transfer-art" aria-hidden="true">${expenseStatusArt('pending')}</span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
-    <div class="section-title-row"><h3 class="section-title">Recent Expenses</h3><button class="section-link premium-section-link" type="button" data-open-expenses><span>View all</span>${miniActionVisual('view')}</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <div class="section-title-row"><h3 class="section-title premium-section-title">${sectionBadgeVisual('recent')}<span>Recent Expenses</span></h3><button class="section-link premium-section-link" type="button" data-open-expenses><span>View all</span>${miniActionVisual('view')}</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 async function renderExpenses(){
   const expenses=await getAll('expenses');
@@ -414,11 +462,11 @@ async function renderExpenses(){
   const listTitle=expenseFilter==='pending'?'To Transfer':expenseFilter==='transferred'?'Transferred':'Recent Expenses';
   const listHint=expenseFilter==='pending'?'Waiting to enter later':expenseFilter==='transferred'?'Already entered':'Newest first';
   present(`${pageHead('Expenses','Quick local spending capture.','Expenses')}${stayStrip()}
-    <button class="btn primary full quick-add-button premium-add-expense-hero" data-add-expense><span class="quick-add-leading-icon" aria-hidden="true">${expenseStatusArt('add')}</span><span class="quick-add-copy"><strong>Add Expense</strong><small>Fast ${esc(currentStay.currencyCode)} capture</small></span><span class="quick-add-chevron" aria-hidden="true">›</span></button>
+    <button class="btn primary full quick-add-button premium-add-expense-hero" data-add-expense><span class="quick-add-leading-icon" aria-hidden="true">${expenseStatusArt('add')}</span><span class="quick-add-copy"><strong>Add Expense</strong><small>Fast ${esc(currentStay.currencyCode)} capture</small></span><span class="quick-add-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
     <div class="expense-overview-band" aria-label="Expense filters">
-      ${summary.map(([value,label,count])=>`<button type="button" class="expense-overview-card ${expenseFilter===value?'is-active':''}" data-expense-filter="${value}" aria-pressed="${expenseFilter===value?'true':'false'}"><span class="expense-overview-icon" aria-hidden="true">${expenseStatusArt(value)}</span><span class="expense-overview-number">${count}</span><span class="expense-overview-label">${label}</span><span class="expense-overview-chevron" aria-hidden="true">›</span></button>`).join('')}
+      ${summary.map(([value,label,count])=>`<button type="button" class="expense-overview-card ${expenseFilter===value?'is-active':''}" data-expense-filter="${value}" aria-pressed="${expenseFilter===value?'true':'false'}"><span class="expense-overview-icon" aria-hidden="true">${expenseStatusArt(value)}</span><span class="expense-overview-number">${count}</span><span class="expense-overview-label">${label}</span><span class="expense-overview-chevron" aria-hidden="true">${directionVisual('next')}</span></button>`).join('')}
     </div>
-    <div class="section-title-row expense-list-title"><div><h3 class="section-title">${listTitle}</h3><span>${listHint}</span></div><b>${rows.length}</b></div>
+    <div class="section-title-row expense-list-title"><div><h3 class="section-title premium-section-title">${sectionBadgeVisual(expenseFilter==='pending'?'pending':expenseFilter==='transferred'?'transferred':'all')}<span>${listTitle}</span></h3><span>${listHint}</span></div><b>${rows.length}</b></div>
     <div class="list continuous-ledger expense-ledger-shell">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 function expenseEditor(existing=null,defaults={}){
@@ -449,7 +497,7 @@ function expenseEditor(existing=null,defaults={}){
       </section>
       <button class="btn primary full save-expense-button premium-save-expense" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}>${buttonVisual('save')}<span>${editing?'Save Changes':'Save Expense'}</span></button>
       <details class="optional-details premium-optional-details" ${editing?'open':''}>
-        <summary><span><small>Optional</small><strong>Date & note</strong></span></summary>
+        <summary>${optionalPanelVisual('expense')}<span class="optional-summary-copy"><small>Optional</small><strong>Date & note</strong></span></summary>
         <div class="optional-details-body">
           <label>Date<input name="date" type="date" value="${esc(auDateToIso(defaultDate))}" required></label>
           <label>Note <span class="hint">Optional</span><input name="note" maxlength="180" placeholder="Lunch, taxi, tickets…" value="${esc(existing?.note||'')}"></label>
@@ -521,8 +569,8 @@ async function renderShopping(){
     </header>
     ${items.length?`<div class="shopping-filterbar target-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}">${shoppingFilterVisual(value)}<span>${label}</span><b>${count}</b></button>`).join('')}</div>`:''}
     ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add premium-shop-action" type="button" data-add-shop>${miniActionVisual('add')}<span>Add</span></button><button class="finish-inline premium-shop-action" type="button" data-finish-shopping ${counts.got?'':'disabled'}>${miniActionVisual('finish')}<span>Finish</span></button></div>`:''}
-    ${counts.unavailable?`<div class="shopping-unavailable-note"><span aria-hidden="true">${shoppingActionIcon('unavailable')}</span><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></div>`:''}
-    ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>${buttonVisual('add')}<span>Add Grocery Expense</span></button></div>`:''}
+    ${counts.unavailable?`<div class="shopping-unavailable-note premium-shopping-notice">${shoppingNoticeArt('unavailable')}<span class="shopping-notice-copy"><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></span></div>`:''}
+    ${justFinishedShopping?`<div class="finished-shop-card premium-shopping-finished">${shoppingNoticeArt('finished')}<span class="shopping-notice-copy"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span></span><button class="btn primary full" data-shop-expense>${buttonVisual('add')}<span>Add Grocery Expense</span></button></div>`:''}
     <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty premium-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 72 72"><rect x="14" y="15" width="44" height="42" rx="14" fill="#162d39"/><path d="M21 28h22M49 28h3M21 44h3M30 44h22" fill="none" stroke="#8fd8e8" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="28" r="6" fill="#d7a842"/><circle cx="27" cy="44" r="6" fill="#55cdb8"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
     ${items.length?`<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop>${buttonVisual('add')}<span>Add Item</span></button>`:''}`);
 }
@@ -536,7 +584,7 @@ function shoppingRow(item,personMap,categoryMap){
       <button class="shop-check-control premium-shop-row-action" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}</button>
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
         <span class="shop-item-picture product-art" data-item-name="${esc(item.itemName)}" aria-hidden="true">${art}</span>
-        <span class="shop-item-copy"><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${stateText}</span>
+        <span class="shop-item-copy"><span class="shop-category-chip">${esc(category?.name||'Other')}</span><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${stateText}</span>
         ${person?`<span class="initials target-initials" title="${esc(person.name)}">${esc(person.initials)}</span>`:''}
       </button>
       <button class="shop-couldnt-control premium-shop-row-action ${item.state==='couldnt'?'is-active':''}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}</button>
@@ -547,8 +595,8 @@ async function showAddShopping(category=null){
   if(!category){
     const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
     present(`${subscreenBack('Shopping')} ${pageHead('Add Item','Tap a picture.','Shopping')}
-      <div class="category-grid">${ordered.map(c=>`<button class="category-box ${c.name==='Other'?'category-other':''}" data-tone="${categoryTone(c)}" data-category-name="${esc(c.name)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
-      <details class="meal-ideas-panel"><summary><span>Meal Ideas</span><small>Optional inspiration</small></summary><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div></details>
+      <div class="category-grid">${ordered.map(c=>`<button class="category-box ${c.name==='Other'?'category-other':''}" data-tone="${categoryTone(c)}" data-category-name="${esc(c.name)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong>${directionVisual('next')}</span></button>`).join('')}</div>
+      <details class="meal-ideas-panel"><summary>${mealIdeasVisual()}<span class="meal-ideas-copy"><strong>Meal Ideas</strong><small>Optional inspiration</small></span></summary><div class="meal-ideas premium-meal-ideas">${mealIdeas.map(idea=>`<span class="meal-idea-tile">${mealIdeaVisual(idea)}<strong>${esc(idea)}</strong></span>`).join('')}</div></details>
       <button class="btn secondary full back-button" data-back-shopping>${buttonVisual('back')}<span>Back to Shopping</span></button>`,{subscreen:true});
     return;
   }
@@ -566,7 +614,7 @@ async function customShoppingItemEditor(category){
     <form class="editor-card simple-shopping-editor" id="shoppingItemForm">
       <label>Item name<input id="customShoppingName" name="itemName" required maxlength="80" autocomplete="off"></label>
       <button class="btn warm full" type="submit">${buttonVisual('add')}<span>Add Item</span></button>
-      <details class="optional-details"><summary>Optional details</summary><div class="optional-details-body">
+      <details class="optional-details shopping-optional-details"><summary>${optionalPanelVisual('shopping')}<span class="optional-summary-copy"><small>Optional</small><strong>Quantity, requester & note</strong></span></summary><div class="optional-details-body">
         <label>Quantity<input name="quantity" maxlength="30"></label>
         <label>Requester<select name="requesterId"><option value="">None</option>${people.map(person=>`<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('')}</select></label>
         <label>Note<input name="note" maxlength="160"></label>
@@ -711,18 +759,18 @@ async function importShoppingFile(file){
 async function renderSettings(){
   const [people,categories,catalogue,regulars]=await Promise.all([getAll('people'),getAll('categories'),getAll('catalogue'),getAll('regularItems')]);
   present(`${pageHead('Settings','','Settings')}
-    <section class="settings-section settings-current" data-tone="blue"><h2>Current Stay</h2>
-      <div class="settings-summary premium-stay-summary"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag)}</div></div><div><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</span></div></div>
+    <section class="settings-section settings-current" data-tone="blue"><h2 class="premium-settings-section-title">${sectionBadgeVisual('current')}<span>Current Stay</span></h2>
+      <div class="settings-summary premium-stay-summary"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag)}</div></div><div class="settings-stay-copy"><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)}</span></div><span class="settings-stay-currency">${esc(currentStay.currencyCode)}</span></div>
       <div class="button-row"><button class="btn secondary" data-edit-stay>${buttonVisual('edit')}<span>Edit Stay</span></button><button class="btn primary" data-change-stay>${buttonVisual('change')}<span>Change Stay</span></button></div>
     </section>
-    <section class="settings-section settings-shopping" data-tone="gold"><h2>Shopping Setup</h2>
-      <button class="settings-row" data-tone="blue" data-manage-people>${settingsVisual('people')}<span class="settings-row-copy"><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="gold" data-manage-categories>${settingsVisual('categories')}<span class="settings-row-copy"><strong>Categories</strong><span>${categories.length} available</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="teal" data-manage-regulars>${settingsVisual('regular')}<span class="settings-row-copy"><strong>Regular Items</strong><span>${regulars.length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="purple" data-manage-custom>${settingsVisual('custom')}<span class="settings-row-copy"><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+    <section class="settings-section settings-shopping" data-tone="gold"><h2 class="premium-settings-section-title">${sectionBadgeVisual('shopping')}<span>Shopping Setup</span></h2>
+      <button class="settings-row" data-tone="blue" data-manage-people>${settingsVisual('people')}<span class="settings-row-copy"><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="settings-row" data-tone="gold" data-manage-categories>${settingsVisual('categories')}<span class="settings-row-copy"><strong>Categories</strong><span>${categories.length} available</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="settings-row" data-tone="teal" data-manage-regulars>${settingsVisual('regular')}<span class="settings-row-copy"><strong>Regular Items</strong><span>${regulars.length} saved</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="settings-row" data-tone="purple" data-manage-custom>${settingsVisual('custom')}<span class="settings-row-copy"><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length} saved</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
     </section>
-    <section class="settings-section settings-advanced" data-tone="silver"><h2>More</h2>
-      <button class="settings-row" data-tone="silver" data-advanced-settings>${settingsVisual('advanced')}<span class="settings-row-copy"><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+    <section class="settings-section settings-advanced" data-tone="silver"><h2 class="premium-settings-section-title">${sectionBadgeVisual('more')}<span>More</span></h2>
+      <button class="settings-row" data-tone="silver" data-advanced-settings>${settingsVisual('advanced')}<span class="settings-row-copy"><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
     </section>
     <p class="app-version">Travel Buddy V1 · Build ${esc(BUILD_VERSION)} · Offline local PWA</p>`);
 }
@@ -730,11 +778,11 @@ async function renderSettings(){
 async function advancedSettings(){
   const shoppingItems=await getAll('shoppingItems');
   present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Advanced','','Settings')}
-    <div class="utility-summary-band" data-tone="silver"><span class="utility-summary-icon">${settingsVisual('advanced')}</span><span><small>Offline Controls</small><strong>Local tools for this phone</strong><em>${shoppingItems.length} shopping item${shoppingItems.length===1?'':'s'} · ${stayRate(currentStay)?'AUD conversion on':'AUD conversion off'}</em></span></div>
+    <div class="utility-summary-band" data-tone="silver"><span class="utility-summary-icon">${settingsVisual('local')}</span><span><small>Offline Controls</small><strong>Local tools for this phone</strong><em>${shoppingItems.length} shopping item${shoppingItems.length===1?'':'s'} · ${stayRate(currentStay)?'AUD conversion on':'AUD conversion off'}</em></span></div>
     <div class="settings-list premium-settings-list advanced-tool-list">
-      <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsVisual('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row danger" data-tone="red" data-reset>${settingsVisual('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsVisual('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
+      <button class="settings-row danger" data-tone="red" data-reset>${settingsVisual('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>
     </div>
     <button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
@@ -748,12 +796,12 @@ async function stayEditor(mode='edit',force=false){
   if(force)setNavigationEnabled(false);
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
   present(`${force?'':subscreenBack('Settings','data-back-settings')} <div class="stay-editor-head">${pageHead(title,subtitle,'Settings')}</div>
-    <div class="stay-live-preview ${mode==='setup'?'setup-preview-hidden':''}" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
+    <div class="stay-live-preview ${mode==='setup'?'setup-preview-hidden':''}" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span>${base?.currencyCode?`<b class="stay-preview-currency">${esc(base.currencyCode)}</b>`:''}</div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
     <form class="editor-card quick-stay premium-stay-editor target-stay-editor" id="stayForm">
-      <label class="stay-field"><span class="field-label"><span>Country</span></span><span class="stay-control"><span class="stay-control-prefix country-prefix" id="countryPrefix">${base?.flag?esc(base.flag):stayFieldIcon('country')}</span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><span class="stay-control-chevron" aria-hidden="true">⌄</span></span><datalist id="countryList">${options}</datalist></label>
+      <label class="stay-field"><span class="field-label"><span>Country</span></span><span class="stay-control"><span class="stay-control-prefix country-prefix" id="countryPrefix">${base?.flag?esc(base.flag):stayFieldIcon('country')}</span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><span class="stay-control-chevron" aria-hidden="true">${directionVisual('down')}</span></span><datalist id="countryList">${options}</datalist></label>
       <div class="auto-country ${base?'is-ready':''}" id="countryAuto" ${base?'':'hidden'}>${base?`${esc(base.flag)} ${esc(base.currencyCode)} · ${esc(base.currencyName)}`:''}</div>
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
-      <label class="stay-field"><span class="field-label"><span>City / Destination</span></span><span class="stay-control"><span class="stay-control-prefix">${stayFieldIcon('city')}</span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"><span class="stay-control-chevron" aria-hidden="true">›</span></span></label>
+      <label class="stay-field"><span class="field-label"><span>City / Destination</span></span><span class="stay-control"><span class="stay-control-prefix">${stayFieldIcon('city')}</span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"><span class="stay-control-chevron" aria-hidden="true">${directionVisual('next')}</span></span></label>
       <div class="stay-date-stack"><label class="stay-field"><span class="field-label"><span>Stay start</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('start')}</span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></span></label><label class="stay-field"><span class="field-label"><span>Stay end</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('end')}</span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></span></label></div>
       <div class="editor-actions static-actions">${force?'':`<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">${buttonVisual('cancel')}<span>Cancel</span></button>`}<button class="btn primary" type="submit">${buttonVisual(mode==='change'?'change':'save')}<span>${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</span></button></div>
     </form>`,{subscreen:true});
@@ -763,7 +811,7 @@ async function stayEditor(mode='edit',force=false){
   const auto=screen.querySelector('#countryAuto');
   const preview=screen.querySelector('#stayLivePreview');
   const countryPrefix=screen.querySelector('#countryPrefix');
-  const updatePreview=()=>{const ref=findCountry(countryInput.value);const city=String(form.elements.city.value||'').trim();const start=isoDateToAu(form.elements.startDate.value)||'Start date';const end=isoDateToAu(form.elements.endDate.value)||'End date';preview.innerHTML=`<small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(ref?.flag||'◉')}</span><span><strong>${esc(ref?.name||countryInput.value||'Choose a country')}</strong><em>${esc(city||'City / Destination')}</em></span></div><div class="stay-preview-dates">${esc(start)} – ${esc(end)}</div>`;};
+  const updatePreview=()=>{const ref=findCountry(countryInput.value);const city=String(form.elements.city.value||'').trim();const start=isoDateToAu(form.elements.startDate.value)||'Start date';const end=isoDateToAu(form.elements.endDate.value)||'End date';preview.innerHTML=`<small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(ref?.flag||'◉')}</span><span><strong>${esc(ref?.name||countryInput.value||'Choose a country')}</strong><em>${esc(city||'City / Destination')}</em></span>${ref?.currencyCode?`<b class="stay-preview-currency">${esc(ref.currencyCode)}</b>`:''}</div><div class="stay-preview-dates">${esc(start)} – ${esc(end)}</div>`;};
   const updateCountry=()=>{
     const ref=findCountry(countryInput.value);
     auto.hidden=!ref;
@@ -943,8 +991,8 @@ async function shoppingTools(){
   const counts=shoppingCounts(items);
   present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}
     <div class="utility-summary-band" data-tone="gold"><span class="utility-summary-icon">${settingsVisual('transfer')}</span><span><small>Current Shopping List</small><strong>${items.length} item${items.length===1?'':'s'} ready to share</strong><em>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</em></span></div>
-    <div class="settings-list premium-settings-list transfer-tool-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Create a versioned Travel Buddy list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div>
-    <div class="transfer-safety-note"><strong>Manual and local</strong><span>Nothing syncs automatically. Imports merge into the current list and keep existing items.</span></div>
+    <div class="settings-list premium-settings-list transfer-tool-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsVisual('share')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Create a versioned Travel Buddy list file.</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsVisual('import')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">${directionVisual('next')}</span></button></div>
+    <div class="transfer-safety-note"><span class="transfer-safety-icon" aria-hidden="true">${settingsVisual('local')}</span><span class="transfer-safety-copy"><strong>Manual and local</strong><span>Nothing syncs automatically. Imports merge into the current list and keep existing items.</span></span></div>
     <button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
