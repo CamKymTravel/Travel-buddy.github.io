@@ -2872,3 +2872,1142 @@ html,body{background:linear-gradient(180deg,#061019 0%,#07121b 55%,#061019 100%)
 @media(max-width:375px){
   .expense-category-choice[data-tone="purple"]>span:last-child{font-size:11px!important;letter-spacing:-.025em!important}
 }
+
+/* PASS_BB — colourful easy-use expense uplift */
+.expense-overview-band{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin:0 0 13px!important;
+}
+.expense-overview-card{
+  position:relative!important;
+  min-width:0!important;
+  min-height:118px!important;
+  padding:12px 10px 11px!important;
+  border-radius:21px!important;
+  color:#f7fcff!important;
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr)!important;
+  grid-template-rows:52px auto!important;
+  gap:3px 8px!important;
+  align-items:center!important;
+  text-align:left!important;
+  overflow:hidden!important;
+  border:1px solid #416375!important;
+  background:linear-gradient(155deg,#142532,#091720 75%,#07121a)!important;
+}
+.expense-overview-card::before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;top:0!important;bottom:0!important;width:4px!important;
+  background:var(--expense-summary,#6ecfe5)!important;
+}
+.expense-overview-card::after{
+  content:""!important;
+  position:absolute!important;
+  left:13px!important;right:18px!important;top:0!important;height:2px!important;
+  border-radius:0 0 99px 99px!important;
+  background:linear-gradient(90deg,var(--expense-summary,#6ecfe5),transparent)!important;
+  opacity:.8!important;
+}
+.expense-overview-card:nth-child(1){--expense-summary:#f0bd4a;border-color:#80662b!important;background:linear-gradient(155deg,#2b2111,#12140f 72%,#0a1117)!important}
+.expense-overview-card:nth-child(2){--expense-summary:#51ddcf;border-color:#397f79!important;background:linear-gradient(155deg,#0c2d2c,#0a171b 72%,#081219)!important}
+.expense-overview-card:nth-child(3){--expense-summary:#c47be9;border-color:#76518e!important;background:linear-gradient(155deg,#281733,#12131d 72%,#09121a)!important}
+.expense-overview-card.is-active{
+  border-color:var(--expense-summary)!important;
+  transform:translateY(-1px)!important;
+}
+.expense-overview-icon{
+  width:48px!important;height:48px!important;border-radius:15px!important;
+  display:grid!important;place-items:center!important;
+  border:1px solid color-mix(in srgb,var(--expense-summary) 62%,#48606c)!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--expense-summary) 22%,#0a1720),#09141c 68%)!important;
+  color:var(--expense-summary)!important;
+}
+.expense-overview-icon svg{width:28px!important;height:28px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.expense-overview-number{font-size:30px!important;line-height:1!important;font-weight:950!important;letter-spacing:-.055em!important;color:#fff!important}
+.expense-overview-label{grid-column:1/3!important;font-size:12.5px!important;line-height:1.08!important;font-weight:900!important;letter-spacing:-.02em!important;color:#f4fbff!important;padding-left:2px!important}
+.expense-overview-chevron{position:absolute!important;right:9px!important;bottom:7px!important;color:var(--expense-summary)!important;font-size:22px!important;line-height:1!important;opacity:.85!important}
+
+.premium-add-expense-hero{
+  position:relative!important;
+  overflow:hidden!important;
+  min-height:82px!important;
+  display:grid!important;
+  grid-template-columns:58px minmax(0,1fr) 30px!important;
+  gap:12px!important;
+  align-items:center!important;
+  text-align:left!important;
+  padding:0 15px!important;
+  margin:0 0 13px!important;
+  border-radius:23px!important;
+  border:1px solid #6ad7f4!important;
+  background:linear-gradient(135deg,#35bce9 0%,#2299dd 48%,#176fbd 100%)!important;
+  color:#fff!important;
+}
+.premium-add-expense-hero::before{content:""!important;position:absolute!important;inset:0!important;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,0) 42%)!important;pointer-events:none!important}
+.premium-add-expense-hero .quick-add-leading-icon{
+  position:relative!important;z-index:1!important;
+  width:58px!important;height:58px!important;border-radius:19px!important;
+  display:grid!important;place-items:center!important;
+  border:1px solid rgba(255,255,255,.42)!important;
+  background:linear-gradient(145deg,rgba(7,56,86,.18),rgba(5,31,50,.3))!important;
+}
+.premium-add-expense-hero .quick-add-leading-icon svg{width:34px!important;height:34px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.premium-add-expense-hero .quick-add-copy{position:relative!important;z-index:1!important;display:grid!important;gap:4px!important;min-width:0!important}
+.premium-add-expense-hero .quick-add-copy strong{font-size:21px!important;line-height:1!important;letter-spacing:-.035em!important}
+.premium-add-expense-hero .quick-add-copy small{font-size:11.5px!important;line-height:1.2!important;color:rgba(255,255,255,.86)!important;font-weight:750!important}
+.premium-add-expense-hero .quick-add-chevron{position:relative!important;z-index:1!important;font-size:34px!important;line-height:1!important;color:#c7f5ff!important;justify-self:end!important}
+
+.expense-list-title{margin:4px 0 9px!important;align-items:end!important}
+.expense-list-title>div{display:grid!important;gap:2px!important}
+.expense-list-title .section-title{margin:0!important;font-size:21px!important;letter-spacing:-.03em!important}
+.expense-list-title span{font-size:10px!important;color:#8da5b4!important;font-weight:750!important}
+.expense-list-title>b{display:grid!important;place-items:center!important;min-width:32px!important;height:32px!important;border-radius:999px!important;border:1px solid #3b6478!important;background:#0c1a24!important;color:#bce8f5!important;font-size:12px!important}
+
+.expense-ledger-shell{gap:10px!important}
+.continuous-ledger>.expense-row{
+  position:relative!important;
+  padding:11px!important;
+  border-radius:21px!important;
+  border:1px solid color-mix(in srgb,var(--tone,#8eacba) 46%,#344d5d)!important;
+  border-left:4px solid var(--tone,#8eacba)!important;
+  background:linear-gradient(105deg,color-mix(in srgb,var(--tone-bg,#111923) 90%,#10212b) 0%,#0b1821 42%,#08131b 100%)!important;
+  overflow:hidden!important;
+}
+.continuous-ledger>.expense-row::after{content:""!important;position:absolute!important;left:13px!important;right:60%!important;top:0!important;height:2px!important;background:linear-gradient(90deg,var(--tone,#8eacba),transparent)!important;opacity:.72!important;pointer-events:none!important}
+.expense-open{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:64px minmax(0,1fr) auto 20px!important;
+  gap:10px!important;
+  align-items:center!important;
+}
+.expense-category-icon{
+  position:relative!important;
+  width:64px!important;height:64px!important;border-radius:19px!important;
+  display:grid!important;place-items:center!important;
+  border:1px solid color-mix(in srgb,var(--tone,#91b1bf) 60%,#34505f)!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tone,#91b1bf) 16%,#10242d),#08151d 68%)!important;
+  color:var(--tone,#b9d2dc)!important;
+  overflow:hidden!important;
+}
+.expense-category-icon .expense-emoji{font-size:35px!important;line-height:1!important;filter:saturate(1.08)!important;transform:translateY(-1px)!important}
+.expense-category-icon .expense-line-badge{position:absolute!important;right:3px!important;bottom:3px!important;width:19px!important;height:19px!important;border-radius:7px!important;display:grid!important;place-items:center!important;background:#07131b!important;border:1px solid color-mix(in srgb,var(--tone,#91b1bf) 64%,#38515e)!important;color:var(--tone,#b9d2dc)!important}
+.expense-category-icon .expense-line-badge svg{width:12px!important;height:12px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.expense-copy{min-width:0!important}
+.expense-copy strong{font-size:16px!important;line-height:1.05!important;letter-spacing:-.02em!important}
+.expense-copy small{font-size:10.5px!important;line-height:1.3!important;color:#9bb0bd!important;margin-top:5px!important}
+.expense-row .amount{padding-left:9px!important;border-left:1px solid #294654!important;min-width:74px!important}
+.expense-row .amount strong{font-size:17px!important;line-height:1!important;color:#fff!important;white-space:nowrap!important}
+.expense-row .amount small{font-size:10px!important;line-height:1.2!important;color:#8eacbb!important;margin-top:5px!important;white-space:nowrap!important}
+.expense-row-chevron{font-size:25px!important;line-height:1!important;color:var(--tone,#8fb6c6)!important;opacity:.88!important;justify-self:end!important}
+.expense-row>.transfer-button{
+  width:auto!important;
+  margin:9px 0 0 74px!important;
+  min-width:130px!important;
+  min-height:44px!important;
+  padding:0 13px!important;
+  border-radius:999px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+  font-size:10px!important;text-transform:uppercase!important;letter-spacing:.07em!important;font-weight:950!important;
+}
+.transfer-button-icon{width:20px!important;height:20px!important;display:grid!important;place-items:center!important}
+.transfer-button-icon svg{width:18px!important;height:18px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.transfer-button.transfer-wait{border-color:#4d90a8!important;background:linear-gradient(180deg,#15394a,#102633)!important;color:#dff8ff!important}
+.transfer-button.is-done{border-color:#4e9266!important;background:linear-gradient(180deg,#163624,#10231a)!important;color:#d6ffe4!important}
+
+/* Add Expense — deliberately large, colourful category targets */
+.expense-category-panel.premium-category-panel{
+  position:relative!important;overflow:hidden!important;
+  border-radius:23px!important;padding:14px!important;
+  border:1px solid #466173!important;
+  background:linear-gradient(155deg,#13232f,#0a161f 72%,#08131b)!important;
+}
+.expense-category-panel.premium-category-panel::before{content:""!important;position:absolute!important;left:14px!important;right:14px!important;top:0!important;height:3px!important;border-radius:0 0 99px 99px!important;background:linear-gradient(90deg,#51dfd0,#f2c45b,#64bfff,#b98aed,#ef93b5)!important;opacity:.9!important}
+.premium-category-panel .expense-section-head{margin-bottom:13px!important}
+.premium-category-panel .expense-section-head strong{font-size:22px!important;line-height:1!important;letter-spacing:-.035em!important}
+.premium-category-panel .expense-section-head small{font-size:9px!important;color:#88afbf!important}
+.premium-category-panel .expense-section-head em{font-size:10px!important;padding:7px 11px!important;border:1px solid #3d5a69!important;border-radius:999px!important;background:#091720!important;color:#dcecf4!important}
+.premium-category-panel .expense-category-grid{gap:10px!important}
+.premium-category-panel .expense-category-choice{
+  min-height:106px!important;
+  position:relative!important;overflow:hidden!important;
+  display:grid!important;
+  grid-template-columns:66px minmax(0,1fr) 18px!important;
+  gap:10px!important;
+  align-items:center!important;
+  padding:11px 11px 11px 9px!important;
+  border-radius:19px!important;
+  border:1px solid color-mix(in srgb,var(--tone,#9aabb8) 55%,#3b5260)!important;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--tone-bg,#111923) 92%,#14242c),#09151d 78%)!important;
+}
+.premium-category-panel .expense-category-choice::before{width:4px!important}
+.premium-category-panel .expense-category-choice::after{content:"›"!important;justify-self:end!important;font-size:24px!important;line-height:1!important;color:var(--tone,#aebfca)!important;opacity:.76!important}
+.premium-category-panel .expense-category-choice.is-selected{border-color:var(--tone,#9aabb8)!important;transform:translateY(-1px)!important}
+.premium-category-panel .expense-choice-icon{
+  position:relative!important;
+  width:66px!important;height:66px!important;border-radius:19px!important;
+  display:grid!important;place-items:center!important;
+  border:1px solid color-mix(in srgb,var(--tone,#9aabb8) 62%,#37515f)!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tone,#9aabb8) 16%,#10242d),#08151d 68%)!important;
+  color:var(--tone,#b8cad4)!important;overflow:hidden!important;
+}
+.premium-category-panel .expense-choice-icon .expense-emoji{font-size:38px!important;line-height:1!important;filter:saturate(1.08)!important}
+.premium-category-panel .expense-choice-icon .expense-line-badge{position:absolute!important;right:4px!important;bottom:4px!important;width:20px!important;height:20px!important;border-radius:7px!important;display:grid!important;place-items:center!important;background:#07131a!important;border:1px solid color-mix(in srgb,var(--tone,#9aabb8) 62%,#38515f)!important}
+.premium-category-panel .expense-choice-icon .expense-line-badge svg{width:12px!important;height:12px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.premium-category-panel .expense-choice-copy{min-width:0!important}
+.premium-category-panel .expense-choice-copy strong{font-size:15.5px!important;line-height:1.05!important;letter-spacing:-.025em!important}
+.premium-category-panel .expense-choice-copy small{font-size:10px!important;line-height:1.23!important;color:#9aafba!important;margin-top:4px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){grid-column:1/-1!important;grid-template-columns:66px minmax(0,1fr) 18px!important}
+
+.expense-stay-context{min-height:78px!important;padding:10px 11px!important;border-radius:20px!important;border-color:#437990!important;background:linear-gradient(145deg,#102b38,#091820 78%)!important}
+.expense-stay-flag{width:52px!important;height:52px!important;border-radius:16px!important;font-size:29px!important}
+.expense-stay-copy small{font-size:9px!important;color:#68cee3!important;letter-spacing:.13em!important}
+.expense-stay-copy strong{font-size:18px!important;line-height:1!important}
+.expense-stay-copy em{font-size:10px!important;margin-top:4px!important}
+.expense-rate-chip{font-size:9.5px!important;padding:7px 10px!important;border-radius:999px!important}
+.premium-amount-card{padding:15px!important;border-radius:23px!important;border-color:#4b94a8!important;background:linear-gradient(150deg,#123846,#0a202a 54%,#07151d 100%)!important}
+.premium-amount-entry{border-radius:18px!important;border-color:#5296aa!important}
+.premium-amount-entry .amount-code{font-size:20px!important;padding-left:17px!important;color:#82e0ee!important}
+.premium-amount-entry input{min-height:84px!important;font-size:48px!important}
+.expense-amount-foot{margin-top:9px!important}.expense-amount-foot strong{font-size:13px!important;color:#c8f2fb!important}
+.premium-save-expense{min-height:64px!important;border-radius:20px!important;font-size:18px!important}
+.save-expense-icon{font-size:20px!important}
+.premium-optional-details{border-radius:19px!important;border-color:#3f5968!important}.premium-optional-details summary{min-height:58px!important}
+.expense-cancel-button{min-height:54px!important;border-radius:18px!important}
+
+/* Home carries the same friendly colour language */
+.home-core-actions .home-action{min-height:94px!important;border-radius:22px!important;padding:13px 14px!important;grid-template-columns:62px minmax(0,1fr) 34px!important;gap:12px!important}
+.home-core-actions .home-action-icon{width:62px!important;height:62px!important;border-radius:19px!important}
+.home-core-actions .home-action-icon svg{width:33px!important;height:33px!important}
+.home-core-actions .home-action strong{font-size:20px!important}
+.home-core-actions .home-action small{font-size:11px!important;margin-top:5px!important}
+.home-core-actions .expense-home{background:linear-gradient(145deg,#123143,#0b1922 74%,#08131a)!important;border-color:#397d9b!important}
+.home-core-actions .shopping-home{background:linear-gradient(145deg,#2a2412,#111711 74%,#08131a)!important;border-color:#8b7434!important}
+.home-core-actions .home-action-arrow{width:34px!important;height:34px!important;font-size:24px!important}
+.premium-transfer{min-height:70px!important;border-radius:20px!important;background:linear-gradient(145deg,#172734,#0b1720 80%)!important;border-color:#4a6676!important}
+.premium-transfer .transfer-icon{width:46px!important;height:46px!important;border-radius:14px!important}
+.premium-transfer .transfer-copy strong{font-size:16px!important}.premium-transfer .transfer-copy small{font-size:10.5px!important}.premium-transfer .transfer-count{font-size:29px!important}
+
+@media(max-width:390px){
+  .expense-overview-band{gap:7px!important}
+  .expense-overview-card{min-height:110px!important;padding:10px 8px!important;grid-template-columns:43px minmax(0,1fr)!important;grid-template-rows:48px auto!important;gap:3px 6px!important}
+  .expense-overview-icon{width:43px!important;height:43px!important;border-radius:14px!important}.expense-overview-icon svg{width:25px!important;height:25px!important}
+  .expense-overview-number{font-size:27px!important}.expense-overview-label{font-size:11.5px!important}.expense-overview-chevron{font-size:20px!important;right:7px!important}
+  .premium-add-expense-hero{grid-template-columns:52px minmax(0,1fr) 26px!important;min-height:76px!important;gap:10px!important;padding:0 12px!important}.premium-add-expense-hero .quick-add-leading-icon{width:52px!important;height:52px!important}.premium-add-expense-hero .quick-add-copy strong{font-size:19px!important}.premium-add-expense-hero .quick-add-copy small{font-size:10.5px!important}
+  .expense-open{grid-template-columns:58px minmax(0,1fr) auto 17px!important;gap:8px!important}.expense-category-icon{width:58px!important;height:58px!important;border-radius:17px!important}.expense-category-icon .expense-emoji{font-size:32px!important}.expense-row .amount{min-width:66px!important;padding-left:7px!important}.expense-row .amount strong{font-size:15px!important}.expense-row-chevron{font-size:22px!important}
+  .expense-row>.transfer-button{margin-left:66px!important;min-width:122px!important}
+  .premium-category-panel .expense-category-choice{min-height:98px!important;grid-template-columns:60px minmax(0,1fr) 17px!important;gap:8px!important;padding:9px 9px 9px 8px!important}.premium-category-panel .expense-choice-icon{width:60px!important;height:60px!important}.premium-category-panel .expense-choice-icon .expense-emoji{font-size:35px!important}.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){grid-template-columns:60px minmax(0,1fr) 17px!important}
+  .premium-category-panel .expense-choice-copy strong{font-size:14px!important}.premium-category-panel .expense-choice-copy small{font-size:9px!important}
+  .premium-amount-entry input{font-size:43px!important}
+  .home-core-actions .home-action{grid-template-columns:58px minmax(0,1fr) 32px!important;min-height:90px!important}.home-core-actions .home-action-icon{width:58px!important;height:58px!important}
+}
+
+/* PASS_BB — carry the colourful phone-first treatment through Settings and managers */
+.settings-section{
+  border-radius:22px!important;
+  padding:14px!important;
+  border-color:color-mix(in srgb,var(--tone,#9aaab7) 42%,#314a59)!important;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--tone-bg,#111b24) 88%,#13252e),#09151d 78%)!important;
+}
+.settings-section>h2{font-size:12px!important;letter-spacing:.14em!important;margin-bottom:11px!important;color:color-mix(in srgb,var(--tone,#c2d0d8) 70%,#e4edf2)!important}
+.settings-section>h2::before{width:31px!important;height:3px!important;background:var(--tone,#9aaab7)!important}
+.settings-current{--tone:#63c7e0!important;--tone-bg:#103040!important;border-color:#417a91!important;background:linear-gradient(150deg,#113545,#0a1b25 72%,#08131b)!important}
+.settings-shopping{--tone:#e0b84d!important;--tone-bg:#2b2412!important;border-color:#75622f!important;background:linear-gradient(150deg,#262111,#101610 76%,#08131b)!important}
+.settings-advanced{--tone:#a8b8c5!important;--tone-bg:#19242d!important;border-color:#506270!important}
+.premium-stay-summary{
+  min-height:88px!important;
+  grid-template-columns:62px minmax(0,1fr)!important;
+  gap:13px!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  border:1px solid #477f96!important;
+  background:linear-gradient(145deg,#123342,#091922 80%)!important;
+}
+.premium-stay-summary .mini-flag{width:62px!important;height:62px!important;border-radius:18px!important;border-color:#4c8ca6!important;background:#08151d!important}
+.premium-stay-summary .flag{font-size:36px!important}
+.premium-stay-summary strong{font-size:18px!important;line-height:1.04!important;letter-spacing:-.025em!important}
+.premium-stay-summary span{font-size:11px!important;line-height:1.28!important;color:#a1b7c3!important;margin-top:5px!important}
+.settings-current .button-row{gap:9px!important;margin-top:10px!important}
+.settings-current .button-row .btn{min-height:54px!important;border-radius:17px!important;font-size:14px!important;font-weight:900!important}
+.settings-current .button-row .btn.primary{background:linear-gradient(180deg,#36a9df,#247eb7)!important;border-color:#55bee8!important}
+.settings-current .button-row .btn.secondary{border-color:#49788d!important;background:#0d202a!important;color:#d5edf6!important}
+
+.settings-shopping .settings-row,.settings-advanced .settings-row{
+  min-height:86px!important;
+  padding:12px!important;
+  border-radius:19px!important;
+  border-left-width:4px!important;
+  grid-template-columns:60px minmax(0,1fr) 34px!important;
+  gap:12px!important;
+}
+.settings-row .settings-icon{
+  width:60px!important;height:60px!important;border-radius:18px!important;
+  border:1px solid color-mix(in srgb,var(--tone,#9aaab8) 58%,#35505f)!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tone,#9aaab8) 14%,#10222b),#08151d 70%)!important;
+  color:var(--tone,#c4d1d8)!important;
+}
+.settings-row .settings-icon svg{width:31px!important;height:31px!important;stroke-width:1.8!important}
+.settings-row-copy strong{font-size:17px!important;line-height:1.05!important;letter-spacing:-.024em!important}
+.settings-row-copy>span{font-size:11px!important;line-height:1.27!important;color:#9bb0bc!important;margin-top:5px!important}
+.settings-row .row-chevron{width:34px!important;height:34px!important;font-size:22px!important;border-color:color-mix(in srgb,var(--tone,#9aaab8) 46%,#36505f)!important;color:var(--tone,#afc4cf)!important}
+
+.utility-summary-band,.rate-preview-card,.management-summary-band{
+  min-height:104px!important;
+  grid-template-columns:70px minmax(0,1fr)!important;
+  gap:14px!important;
+  padding:14px!important;
+  border-radius:22px!important;
+}
+.utility-summary-icon,.rate-preview-icon,.management-summary-icon{
+  width:68px!important;height:68px!important;border-radius:20px!important;
+  border-width:1px!important;border-style:solid!important;
+  border-color:color-mix(in srgb,var(--tone,#a7b6c1) 58%,#36505f)!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tone,#a7b6c1) 14%,#10222b),#08151d 70%)!important;
+}
+.utility-summary-icon svg,.rate-preview-icon svg,.management-summary-icon svg{width:34px!important;height:34px!important;stroke-width:1.8!important}
+.utility-summary-band small,.rate-preview-copy small,.management-summary-band small{font-size:10px!important;line-height:1.1!important;letter-spacing:.13em!important}
+.utility-summary-band strong,.rate-preview-copy strong,.management-summary-band strong{font-size:20px!important;line-height:1.04!important;letter-spacing:-.025em!important}
+.utility-summary-band em,.rate-preview-copy em{font-size:11px!important;line-height:1.3!important;color:#9cb0bc!important;margin-top:4px!important}
+
+.advanced-tool-list,.transfer-tool-list{gap:10px!important}
+.advanced-tool-list .settings-row,.transfer-tool-list .settings-row{
+  min-height:92px!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  grid-template-columns:62px minmax(0,1fr) 34px!important;
+  gap:12px!important;
+  border-left-width:4px!important;
+}
+.advanced-tool-list .settings-row .settings-icon,.transfer-tool-list .settings-row .settings-icon{width:62px!important;height:62px!important;border-radius:18px!important}
+.advanced-tool-list .settings-row-copy strong,.transfer-tool-list .settings-row-copy strong{font-size:17px!important;line-height:1.05!important}
+.advanced-tool-list .settings-row-copy>span,.transfer-tool-list .settings-row-copy>span{font-size:11px!important;line-height:1.28!important;color:#9db0bc!important}
+
+.management-list{gap:10px!important}
+.management-card{
+  min-height:96px!important;
+  grid-template-columns:64px minmax(0,1fr) auto!important;
+  gap:12px!important;
+  padding:12px!important;
+  border-radius:20px!important;
+  border-left-width:4px!important;
+}
+.management-item-icon,.person-avatar{
+  width:64px!important;height:64px!important;border-radius:19px!important;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tone,#9aabb8) 14%,#10222b),#08151d 70%)!important;
+}
+.management-item-icon svg,.person-avatar svg{width:32px!important;height:32px!important}
+.management-copy strong{font-size:16.5px!important;line-height:1.06!important;letter-spacing:-.02em!important}
+.management-copy span{font-size:11px!important;line-height:1.27!important;color:#9bb0bc!important;margin-top:5px!important}
+.management-card .mini-actions{gap:6px!important}
+.management-card .mini-actions .mini{min-height:46px!important;min-width:58px!important;border-radius:13px!important;font-size:10.5px!important;padding:0 9px!important}
+.shopping-setup-primary{min-height:58px!important;border-radius:18px!important;font-size:15px!important}
+
+.stay-live-preview{min-height:118px!important;padding:14px!important;border-radius:22px!important}
+.stay-preview-flag{width:58px!important;height:58px!important;border-radius:17px!important;font-size:34px!important}
+.stay-preview-main strong{font-size:19px!important}.stay-preview-main em{font-size:12px!important}.stay-preview-dates{font-size:11px!important}
+.premium-stay-editor{padding:14px!important;border-radius:22px!important}
+.premium-stay-editor .field-label{font-size:11px!important;letter-spacing:.07em!important;margin-bottom:7px!important}
+.premium-stay-editor .stay-control{min-height:66px!important;border-radius:18px!important}
+.premium-stay-editor .stay-control-prefix{width:52px!important;height:52px!important;border-radius:15px!important}
+.premium-stay-editor .stay-control-prefix svg{width:27px!important;height:27px!important}
+.premium-stay-editor input{font-size:16px!important}
+.premium-stay-editor .editor-actions .btn{min-height:56px!important;border-radius:17px!important;font-size:14px!important}
+
+@media(max-width:390px){
+  .settings-shopping .settings-row,.settings-advanced .settings-row{grid-template-columns:54px minmax(0,1fr) 31px!important;gap:9px!important;min-height:80px!important;padding:10px!important}.settings-row .settings-icon{width:54px!important;height:54px!important}.settings-row .settings-icon svg{width:28px!important;height:28px!important}.settings-row-copy strong{font-size:15.5px!important}.settings-row-copy>span{font-size:10.5px!important}
+  .utility-summary-band,.rate-preview-card,.management-summary-band{grid-template-columns:62px minmax(0,1fr)!important;gap:11px!important;min-height:96px!important;padding:12px!important}.utility-summary-icon,.rate-preview-icon,.management-summary-icon{width:60px!important;height:60px!important}.utility-summary-band strong,.rate-preview-copy strong,.management-summary-band strong{font-size:18px!important}
+  .advanced-tool-list .settings-row,.transfer-tool-list .settings-row{grid-template-columns:56px minmax(0,1fr) 30px!important;min-height:86px!important;gap:9px!important;padding:10px!important}.advanced-tool-list .settings-row .settings-icon,.transfer-tool-list .settings-row .settings-icon{width:56px!important;height:56px!important}
+  .management-card{grid-template-columns:58px minmax(0,1fr) auto!important;gap:9px!important;min-height:90px!important;padding:10px!important}.management-item-icon,.person-avatar{width:58px!important;height:58px!important}.management-copy strong{font-size:15px!important}.management-copy span{font-size:10.5px!important}.management-card .mini-actions .mini{min-width:54px!important;padding:0 7px!important;font-size:10px!important}
+}
+
+/* PASS_BB — Add Expense category tiles use the same large-picture rhythm as Shopping */
+.premium-category-panel .expense-category-choice{
+  min-height:148px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  padding:12px 10px 13px!important;
+  text-align:center!important;
+}
+.premium-category-panel .expense-category-choice::after{
+  position:absolute!important;
+  right:9px!important;
+  bottom:8px!important;
+  font-size:22px!important;
+}
+.premium-category-panel .expense-choice-icon{width:76px!important;height:76px!important;border-radius:21px!important;flex:0 0 auto!important}
+.premium-category-panel .expense-choice-icon .expense-emoji{font-size:45px!important}
+.premium-category-panel .expense-choice-icon .expense-line-badge{width:22px!important;height:22px!important}
+.premium-category-panel .expense-choice-copy{display:grid!important;gap:4px!important;width:100%!important;justify-items:center!important}
+.premium-category-panel .expense-choice-copy strong{font-size:16px!important;line-height:1.08!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.premium-category-panel .expense-choice-copy small{font-size:10.5px!important;line-height:1.18!important;max-width:14ch!important;text-align:center!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){
+  min-height:96px!important;
+  display:grid!important;
+  grid-template-columns:70px minmax(0,1fr) 22px!important;
+  grid-template-rows:1fr!important;
+  gap:12px!important;
+  text-align:left!important;
+  padding:10px 13px!important;
+}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd) .expense-choice-icon{width:68px!important;height:68px!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd) .expense-choice-copy{justify-items:start!important;text-align:left!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd) .expense-choice-copy small{max-width:none!important;text-align:left!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd)::after{position:static!important;justify-self:end!important;align-self:center!important}
+@media(max-width:390px){
+  .premium-category-panel .expense-category-choice{min-height:140px!important;padding:10px 8px 12px!important;gap:8px!important}
+  .premium-category-panel .expense-choice-icon{width:70px!important;height:70px!important}.premium-category-panel .expense-choice-icon .expense-emoji{font-size:41px!important}
+  .premium-category-panel .expense-choice-copy strong{font-size:15px!important}.premium-category-panel .expense-choice-copy small{font-size:9.8px!important}
+  .premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){min-height:92px!important;grid-template-columns:64px minmax(0,1fr) 20px!important;gap:10px!important}.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd) .expense-choice-icon{width:62px!important;height:62px!important}
+}
+.empty.premium-empty[data-tone="blue"] .empty-icon{position:relative!important;overflow:hidden!important}
+.empty-expense-emoji{font-size:48px!important;line-height:1!important}
+.empty-expense-plus{position:absolute!important;right:9px!important;bottom:8px!important;width:25px!important;height:25px!important;border-radius:9px!important;display:grid!important;place-items:center!important;background:#143b4d!important;border:1px solid #52b3d4!important;color:#9feaff!important;font-size:18px!important;font-weight:900!important;line-height:1!important}
+
+/* PASS_BC candidate — high-visual quality pass, flat premium only */
+/* Expense artwork: dedicated multi-colour vectors replace platform emoji variance. */
+.expense-illustration{width:100%;height:100%;display:grid;place-items:center;line-height:0}
+.expense-illustration svg{width:88%;height:88%;display:block;overflow:visible}
+.expense-category-icon .expense-illustration svg{width:52px!important;height:52px!important}
+.premium-category-panel .expense-choice-icon .expense-illustration svg{width:66px!important;height:66px!important}
+.expense-category-icon,.premium-category-panel .expense-choice-icon{isolation:isolate}
+.expense-category-icon .expense-line-badge,.premium-category-panel .expense-choice-icon .expense-line-badge{z-index:2}
+
+/* Stronger, friendlier phone navigation without changing the four-screen structure. */
+.bottom-nav{border-top-color:#355164!important;background:linear-gradient(180deg,#07131c,#061019)!important}
+.nav-item{min-height:62px!important;color:#7f95a5!important}
+.nav-item .nav-icon{width:38px!important;height:36px!important;border:1px solid transparent!important;border-radius:12px!important;background:#08141d!important}
+.nav-item .nav-icon svg{width:26px!important;height:26px!important;stroke-width:1.9!important}
+.nav-item b{font-size:11px!important;font-weight:900!important;letter-spacing:.01em!important}
+.nav-item.is-active{background:transparent!important;border:0!important;outline:0!important}
+.app-shell[data-route="home"] .nav-item.is-active{color:#7dd7ef!important}
+.app-shell[data-route="home"] .nav-item.is-active .nav-icon{border-color:#407b95!important;background:#0d2632!important;color:#8ce3f6!important}
+.app-shell[data-route="expenses"] .nav-item.is-active{color:#67d2e8!important}
+.app-shell[data-route="expenses"] .nav-item.is-active .nav-icon{border-color:#438ba0!important;background:#0c2933!important;color:#7fe3f4!important}
+.app-shell[data-route="shopping"] .nav-item.is-active{color:#e3b94f!important}
+.app-shell[data-route="shopping"] .nav-item.is-active .nav-icon{border-color:#8b6d2f!important;background:#2b210f!important;color:#f0ca64!important}
+.app-shell[data-route="settings"] .nav-item.is-active{color:#bdcbd5!important}
+.app-shell[data-route="settings"] .nav-item.is-active .nav-icon{border-color:#607688!important;background:#172531!important;color:#cfdae2!important}
+
+/* Shopping main screen: larger working controls and product visuals, still dense. */
+.shopping-head-menu{width:48px!important;height:48px!important;min-height:48px!important;border-radius:15px!important;border-color:#725c2d!important;background:linear-gradient(180deg,#221d12,#111710)!important;color:#e8c66a!important;font-size:19px!important}
+.target-filterbar{min-height:54px!important;padding:5px!important;border-radius:17px!important;border-color:#485b66!important;background:#081720!important}
+.target-filterbar .shopping-filter{min-height:44px!important;border-radius:12px!important;font-size:11px!important;font-weight:900!important}
+.target-filterbar .shopping-filter b{min-width:22px!important;height:22px!important;font-size:10px!important}
+.shopping-status-rail{min-height:54px!important;gap:7px!important}
+.shopping-top-add,.finish-inline{min-height:46px!important;border-radius:14px!important;font-size:11px!important;font-weight:950!important;padding:0 13px!important}
+.shopping-top-add{border-color:#9d7a2f!important;background:linear-gradient(180deg,#8d6a20,#6f5016)!important;color:#fff3c8!important}
+.finish-inline{border-color:#4d8766!important;background:linear-gradient(180deg,#24553e,#193d2e)!important;color:#dff9e8!important}
+.target-shopping-list.has-items{border-radius:20px!important;border-color:#405663!important;overflow:hidden!important}
+.target-shopping-list.has-items .target-shop-row{min-height:82px!important;grid-template-columns:48px minmax(0,1fr) 48px!important;padding:7px 8px!important;border-bottom-color:#294250!important;background:linear-gradient(90deg,color-mix(in srgb,var(--tone-bg,#0b1720) 72%,#091720),#081720 46%)!important}
+.target-shopping-list.has-items .shop-check-control,.target-shopping-list.has-items .shop-couldnt-control{width:44px!important;height:44px!important;min-height:44px!important;border-radius:14px!important}
+.target-shopping-list.has-items .shop-item-main{grid-template-columns:62px minmax(0,1fr) auto!important;gap:10px!important}
+.target-shopping-list.has-items .shop-item-picture.product-art{width:60px!important;height:60px!important;border-radius:17px!important;border:1px solid color-mix(in srgb,var(--tone,#d8ad4d) 46%,#35505e)!important}
+.target-shopping-list.has-items .shop-item-copy strong{font-size:17px!important;line-height:1.05!important}
+.target-shopping-list.has-items .shop-item-copy>small,.target-shopping-list.has-items .shop-state-note{font-size:10.5px!important;line-height:1.25!important}
+.target-shopping-list.has-items .target-initials{width:36px!important;height:36px!important;font-size:10.5px!important}
+
+/* Category chooser/catalogue — preserve rich item art but increase framing quality. */
+.category-grid{gap:11px!important}
+.category-box{border-radius:21px!important;border-width:1px!important;border-left-width:4px!important;padding:10px!important;min-height:164px!important}
+.category-box .category-picture{height:100px!important;border-radius:18px!important;border-color:color-mix(in srgb,var(--tone,#d8ad4d) 58%,#304b59)!important}
+.category-box .category-label{padding:1px 5px 3px!important}
+.category-box .category-label strong{font-size:17px!important;line-height:1.08!important}
+.catalogue-grid{gap:10px!important}
+.catalogue-tile{min-height:150px!important;border-radius:20px!important;border-color:color-mix(in srgb,var(--tone,#d8ad4d) 54%,#324d5b)!important}
+.catalogue-tile .catalogue-picture.product-art{width:92px!important;height:92px!important;border-radius:18px!important}
+.catalogue-tile strong{font-size:16px!important;line-height:1.08!important}
+.custom-shop-button,.target-bottom-add{min-height:58px!important;border-radius:18px!important;font-size:15px!important}
+
+/* Secondary screens and dialogs get the same visual standard as primary screens. */
+.subscreen-back-button{width:48px!important;height:48px!important;min-height:48px!important;border-radius:15px!important;border-color:#3b596a!important;background:linear-gradient(180deg,#0e202b,#091720)!important}
+.subscreen-back-button svg{width:25px!important;height:25px!important;stroke-width:2.1!important}
+.app-shell[data-route="shopping"].subscreen-mode .subscreen-back-button{border-color:#735c2d!important;color:#ebc661!important;background:linear-gradient(180deg,#211c11,#11170f)!important}
+.app-shell[data-route="expenses"].subscreen-mode .subscreen-back-button{border-color:#3e7b91!important;color:#7ed9eb!important;background:linear-gradient(180deg,#102b36,#091a22)!important}
+.app-shell[data-route="settings"].subscreen-mode .subscreen-back-button{border-color:#536979!important;color:#bdccd6!important;background:linear-gradient(180deg,#172631,#0b1821)!important}
+.app-dialog{border-radius:23px!important;border-color:#506c7d!important;background:linear-gradient(155deg,#142630,#0a161e 78%)!important;padding:20px!important}
+.app-dialog::before{content:"";position:absolute;left:16px;right:58%;top:0;height:3px;border-radius:0 0 99px 99px;background:#62c9df}
+.app-dialog.dialog-attention::before{background:#d8ad4d}.app-dialog.dialog-danger::before{background:#dc7b84}
+.app-dialog h2{font-size:24px!important;line-height:1!important;letter-spacing:-.035em!important}
+.app-dialog>p{font-size:13px!important;line-height:1.4!important;color:#a9bbc6!important}
+.dialog-actions .btn{min-height:54px!important;border-radius:16px!important;font-size:13px!important}
+
+/* Readability floor for decorative labels touched by this pass. */
+.shopping-screen-title .eyebrow,.expense-stay-copy small,.premium-category-panel .expense-section-head small,
+.utility-summary-band small,.rate-preview-copy small,.management-summary-band small{font-size:10px!important}
+
+@media(max-width:390px){
+  .nav-item .nav-icon{width:36px!important;height:34px!important}.nav-item .nav-icon svg{width:24px!important;height:24px!important}
+  .target-shopping-list.has-items .target-shop-row{min-height:78px!important;grid-template-columns:46px minmax(0,1fr) 46px!important;padding:6px!important}
+  .target-shopping-list.has-items .shop-item-main{grid-template-columns:58px minmax(0,1fr) auto!important;gap:8px!important}
+  .target-shopping-list.has-items .shop-item-picture.product-art{width:56px!important;height:56px!important}
+  .category-box{min-height:156px!important}.category-box .category-picture{height:94px!important}
+  .catalogue-tile{min-height:142px!important}.catalogue-tile .catalogue-picture.product-art{width:86px!important;height:86px!important}
+  .expense-category-icon .expense-illustration svg{width:48px!important;height:48px!important}
+  .premium-category-panel .expense-choice-icon .expense-illustration svg{width:60px!important;height:60px!important}
+}
+
+/* PASS_BD candidate — premium multicolour status art and final phone-scale visual lift */
+.expense-status-art{width:100%;height:100%;display:grid;place-items:center;line-height:0;pointer-events:none}
+.expense-status-art svg{width:100%;height:100%;display:block;overflow:visible}
+.expense-overview-icon .expense-status-art{width:48px!important;height:48px!important}
+.expense-overview-icon .expense-status-art svg{width:48px!important;height:48px!important}
+.quick-add-leading-icon .expense-status-art{width:54px!important;height:54px!important}
+.quick-add-leading-icon .expense-status-art svg{width:54px!important;height:54px!important}
+.premium-home-expense-art{padding:3px!important;overflow:hidden!important}
+.premium-home-expense-art .expense-status-art{width:58px!important;height:58px!important}
+.premium-home-expense-art .expense-status-art svg{width:58px!important;height:58px!important}
+.premium-transfer-art{padding:2px!important;overflow:hidden!important;background:#111a22!important}
+.premium-transfer-art .expense-status-art{width:44px!important;height:44px!important}
+.premium-transfer-art .expense-status-art svg{width:44px!important;height:44px!important}
+.empty.premium-empty[data-tone="blue"] .empty-icon .expense-status-art{width:76px!important;height:76px!important}
+.empty.premium-empty[data-tone="blue"] .empty-icon .expense-status-art svg{width:76px!important;height:76px!important}
+
+/* richer primary screen separation without adding decorative dead controls */
+.expense-list-title{margin-top:16px!important;margin-bottom:9px!important;align-items:end!important}
+.expense-list-title>div{display:grid!important;gap:3px!important;min-width:0!important}
+.expense-list-title .section-title{font-size:22px!important;line-height:1!important;letter-spacing:-.035em!important}
+.expense-list-title span{font-size:10px!important;text-transform:uppercase!important;letter-spacing:.095em!important;color:#8fa9b8!important;font-weight:900!important}
+.expense-list-title>b{min-width:34px!important;height:34px!important;border-radius:12px!important;display:grid!important;place-items:center!important;border:1px solid #3d6072!important;background:#0b1b25!important;color:#dff7ff!important;font-size:13px!important}
+
+/* visual hierarchy: keep every main expense affordance large and distinct */
+.expense-overview-card{min-height:122px!important;border-radius:21px!important;padding:11px 10px!important}
+.expense-overview-card .expense-overview-icon{width:54px!important;height:54px!important;border-radius:17px!important;background:#08151d!important}
+.expense-overview-card:nth-child(1) .expense-overview-icon{border-color:#9b6d24!important;background:#241a0d!important}
+.expense-overview-card:nth-child(2) .expense-overview-icon{border-color:#318e7d!important;background:#0b2823!important}
+.expense-overview-card:nth-child(3) .expense-overview-icon{border-color:#7653a4!important;background:#21132d!important}
+.expense-overview-number{font-size:31px!important;line-height:.95!important;letter-spacing:-.055em!important}
+.expense-overview-label{font-size:12.5px!important;line-height:1.05!important}
+.expense-overview-card.is-active{border-width:2px!important}
+
+.premium-add-expense-hero{min-height:84px!important;border-radius:23px!important;grid-template-columns:62px minmax(0,1fr) 28px!important;gap:12px!important;padding:0 15px!important}
+.premium-add-expense-hero .quick-add-leading-icon{width:60px!important;height:60px!important;border-radius:19px!important;background:#075f86!important;border-color:#9feaff!important}
+.premium-add-expense-hero .quick-add-copy strong{font-size:21px!important;line-height:1!important;letter-spacing:-.035em!important}
+.premium-add-expense-hero .quick-add-copy small{font-size:11px!important;margin-top:4px!important}
+.premium-add-expense-hero .quick-add-chevron{font-size:32px!important;line-height:1!important;color:#d8f8ff!important}
+
+/* expense ledger rows: larger art, calm copy, strong local-currency priority */
+.continuous-ledger>.expense-row{min-height:92px!important;border-radius:21px!important;padding:12px!important}
+.expense-open{grid-template-columns:66px minmax(0,1fr) auto 20px!important;gap:11px!important}
+.expense-category-icon{width:64px!important;height:64px!important;border-radius:19px!important}
+.expense-category-icon .expense-illustration svg{width:58px!important;height:58px!important}
+.expense-category-icon .expense-line-badge{width:21px!important;height:21px!important;right:4px!important;bottom:4px!important;border-radius:7px!important}
+.expense-category-icon .expense-line-badge svg{width:12px!important;height:12px!important}
+.expense-copy strong{font-size:16.5px!important;line-height:1.05!important;letter-spacing:-.02em!important}
+.expense-copy small{font-size:10.5px!important;line-height:1.3!important;margin-top:5px!important}
+.expense-row .amount{min-width:78px!important}
+.expense-row .amount strong{font-size:17px!important;line-height:1!important}
+.expense-row .amount small{font-size:10.5px!important;margin-top:5px!important}
+.expense-row-chevron{font-size:25px!important;color:var(--tone,#adc2cc)!important;opacity:.9!important}
+.expense-row>.transfer-button{min-height:46px!important;min-width:132px!important;margin-left:74px!important;border-radius:14px!important;font-size:10px!important;letter-spacing:.075em!important}
+.transfer-button-icon svg{width:18px!important;height:18px!important}
+
+/* Add Expense category art is deliberately the largest icon treatment in the app. */
+.premium-category-panel .expense-category-grid{gap:11px!important}
+.premium-category-panel .expense-category-choice{min-height:112px!important;border-radius:20px!important;grid-template-columns:72px minmax(0,1fr) 20px!important;gap:11px!important;padding:11px 11px 11px 9px!important}
+.premium-category-panel .expense-choice-icon{width:72px!important;height:72px!important;border-radius:21px!important}
+.premium-category-panel .expense-choice-icon .expense-illustration svg{width:68px!important;height:68px!important}
+.premium-category-panel .expense-choice-icon .expense-line-badge{width:22px!important;height:22px!important;right:4px!important;bottom:4px!important;border-radius:7px!important}
+.premium-category-panel .expense-choice-icon .expense-line-badge svg{width:13px!important;height:13px!important}
+.premium-category-panel .expense-choice-copy strong{font-size:16px!important;line-height:1.04!important}
+.premium-category-panel .expense-choice-copy small{font-size:10.5px!important;line-height:1.27!important}
+.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){grid-template-columns:72px minmax(0,1fr) 20px!important}
+
+/* Home expense entry and transfer status now use the same premium art family. */
+.home-core-actions .expense-home .home-action-icon{width:66px!important;height:66px!important;border-radius:20px!important;background:#0c2936!important;border-color:#438da5!important}
+.home-core-actions .expense-home{grid-template-columns:66px minmax(0,1fr) 34px!important}
+.premium-transfer .transfer-icon{width:52px!important;height:52px!important;border-radius:16px!important;border-color:#765a25!important}
+.premium-transfer{grid-template-columns:52px minmax(0,1fr) auto!important;gap:12px!important;padding:10px 13px!important}
+
+/* Settings/management visual consistency: more substantial icon frames at phone scale. */
+.settings-row .settings-icon{width:60px!important;height:60px!important;border-radius:18px!important}
+.settings-row .settings-icon svg{width:32px!important;height:32px!important}
+.settings-shopping .settings-row,.settings-advanced .settings-row{grid-template-columns:60px minmax(0,1fr) 34px!important;min-height:88px!important;gap:11px!important;padding:11px 12px!important}
+.management-card{grid-template-columns:64px minmax(0,1fr) auto!important;min-height:98px!important;gap:11px!important;padding:11px!important}
+.management-item-icon,.person-avatar{width:64px!important;height:64px!important;border-radius:18px!important}
+.management-copy strong{font-size:16px!important;line-height:1.05!important}
+.management-copy span{font-size:10.8px!important;margin-top:5px!important}
+.management-summary-band{min-height:80px!important;border-radius:20px!important}
+.management-summary-icon{width:56px!important;height:56px!important;border-radius:17px!important}
+.management-summary-icon .settings-icon{width:54px!important;height:54px!important}
+
+@media(max-width:390px){
+  .expense-overview-card{min-height:114px!important;padding:9px 8px!important}.expense-overview-card .expense-overview-icon{width:50px!important;height:50px!important}.expense-overview-icon .expense-status-art,.expense-overview-icon .expense-status-art svg{width:45px!important;height:45px!important}.expense-overview-number{font-size:28px!important}.expense-overview-label{font-size:11.5px!important}
+  .premium-add-expense-hero{min-height:80px!important;grid-template-columns:56px minmax(0,1fr) 24px!important;padding:0 12px!important}.premium-add-expense-hero .quick-add-leading-icon{width:55px!important;height:55px!important}.quick-add-leading-icon .expense-status-art,.quick-add-leading-icon .expense-status-art svg{width:50px!important;height:50px!important}.premium-add-expense-hero .quick-add-copy strong{font-size:19.5px!important}
+  .expense-open{grid-template-columns:60px minmax(0,1fr) auto 18px!important;gap:8px!important}.expense-category-icon{width:60px!important;height:60px!important}.expense-category-icon .expense-illustration svg{width:54px!important;height:54px!important}.expense-row>.transfer-button{margin-left:68px!important}
+  .premium-category-panel .expense-category-choice{min-height:104px!important;grid-template-columns:64px minmax(0,1fr) 18px!important;gap:9px!important;padding:9px 9px 9px 8px!important}.premium-category-panel .expense-choice-icon{width:64px!important;height:64px!important}.premium-category-panel .expense-choice-icon .expense-illustration svg{width:60px!important;height:60px!important}.premium-category-panel .expense-category-grid .expense-category-choice:last-child:nth-child(odd){grid-template-columns:64px minmax(0,1fr) 18px!important}
+  .home-core-actions .expense-home{grid-template-columns:60px minmax(0,1fr) 32px!important}.home-core-actions .expense-home .home-action-icon{width:60px!important;height:60px!important}.premium-home-expense-art .expense-status-art,.premium-home-expense-art .expense-status-art svg{width:52px!important;height:52px!important}
+  .settings-shopping .settings-row,.settings-advanced .settings-row{grid-template-columns:54px minmax(0,1fr) 31px!important;min-height:82px!important;gap:9px!important;padding:10px!important}.settings-row .settings-icon{width:54px!important;height:54px!important}.settings-row .settings-icon svg{width:29px!important;height:29px!important}
+  .management-card{grid-template-columns:58px minmax(0,1fr) auto!important;min-height:92px!important;gap:9px!important;padding:10px!important}.management-item-icon,.person-avatar{width:58px!important;height:58px!important}.management-copy strong{font-size:15px!important}.management-card .mini-actions .mini{min-width:52px!important}
+}
+
+/* PASS_BE candidate — dedicated colour artwork for Settings/Advanced utilities */
+.premium-settings-visual{padding:4px!important;overflow:hidden!important;isolation:isolate!important}
+.premium-settings-visual svg{width:100%!important;height:100%!important;display:block!important;fill:unset!important;stroke:unset!important;stroke-width:initial!important;overflow:visible!important}
+.settings-row[data-tone="blue"] .premium-settings-visual{border-color:#4384a0!important;background:#0d2b38!important}
+.settings-row[data-tone="gold"] .premium-settings-visual{border-color:#8f7131!important;background:#2a210f!important}
+.settings-row[data-tone="teal"] .premium-settings-visual{border-color:#3b8e7f!important;background:#0c2924!important}
+.settings-row[data-tone="purple"] .premium-settings-visual{border-color:#71549d!important;background:#21152c!important}
+.settings-row[data-tone="silver"] .premium-settings-visual{border-color:#5f7484!important;background:#172530!important}
+.settings-row[data-tone="red"] .premium-settings-visual{border-color:#81464e!important;background:#2a1519!important}
+.management-summary-icon>.premium-settings-visual,.utility-summary-icon>.premium-settings-visual,.rate-preview-icon>.premium-settings-visual{width:100%!important;height:100%!important;border:0!important;border-radius:inherit!important;background:transparent!important;padding:2px!important}
+.management-summary-icon>.premium-settings-visual svg,.utility-summary-icon>.premium-settings-visual svg,.rate-preview-icon>.premium-settings-visual svg{width:100%!important;height:100%!important}
+.utility-summary-icon{overflow:hidden!important}.rate-preview-icon{overflow:hidden!important}
+
+/* PASS_BF candidate — Command Centre visual alignment: brighter, crisp, high-quality, still flat-premium */
+:root{
+  --tb-cyan:#72dff1;
+  --tb-blue:#64bff2;
+  --tb-teal:#62d3bd;
+  --tb-gold:#edc55f;
+  --tb-purple:#b596ef;
+  --tb-rose:#e591aa;
+  --tb-green:#82d79e;
+  --tb-copper:#e09a6d;
+}
+[data-tone="teal"]{--tone:var(--tb-teal);--tone-border:#438b7c;--tone-bg:#102a26}
+[data-tone="copper"]{--tone:var(--tb-copper);--tone-border:#8a6045;--tone-bg:#2a1b14}
+[data-tone="blue"]{--tone:var(--tb-blue);--tone-border:#477f9f;--tone-bg:#102837}
+[data-tone="gold"]{--tone:var(--tb-gold);--tone-border:#8a7137;--tone-bg:#2a220f}
+[data-tone="purple"]{--tone:var(--tb-purple);--tone-border:#6e5a93;--tone-bg:#22182f}
+[data-tone="ice"]{--tone:#97ddea;--tone-border:#56808b;--tone-bg:#132830}
+[data-tone="cyan"]{--tone:var(--tb-cyan);--tone-border:#458694;--tone-bg:#102a30}
+[data-tone="green"]{--tone:var(--tb-green);--tone-border:#4e825f;--tone-bg:#12291b}
+[data-tone="rose"]{--tone:var(--tb-rose);--tone-border:#875767;--tone-bg:#2b1821}
+[data-tone="red"]{--tone:#ef8585;--tone-border:#8a4e4e;--tone-bg:#2c1717}
+[data-tone="silver"]{--tone:#c0ccd5;--tone-border:#687a88;--tone-bg:#19242d}
+
+/* Premium screen headers: substantial visual anchor, same family as Command Centre widgets. */
+.page-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 62px!important;
+  gap:14px!important;
+  align-items:center!important;
+  padding-right:0!important;
+  min-height:82px!important;
+}
+.page-head-copy{min-width:0!important}
+.page-head-visual{
+  width:60px!important;height:60px!important;border-radius:19px!important;display:grid!important;place-items:center!important;
+  border:1px solid #3e6477!important;background:#0b1b25!important;overflow:hidden!important;justify-self:end!important;
+}
+.page-head-visual svg{width:56px!important;height:56px!important;display:block!important;overflow:visible!important}
+.head-expenses .page-head-visual{border-color:#45879d!important;background:#0d2b37!important}
+.head-shopping .page-head-visual{border-color:#8a7135!important;background:#2a210f!important}
+.head-settings .page-head-visual{border-color:#637786!important;background:#172630!important}
+.head-home .page-head-visual{border-color:#45879d!important;background:#0d2934!important}
+.page-head::before{display:none!important}
+.page-head::after{width:92px!important;height:3px!important;background:linear-gradient(90deg,currentColor,rgba(255,255,255,0))!important;opacity:.88!important}
+.head-expenses{color:var(--tb-cyan)!important}.head-shopping{color:var(--tb-gold)!important}.head-settings{color:#c0ccd5!important}.head-home{color:var(--tb-cyan)!important}
+.page-head h1{color:#f5fbff!important}.page-head p:not(.eyebrow){color:#aebfca!important}
+
+/* Command Centre-like widgets: bright identity bar, rich dark body, no glow/shadow. */
+.settings-section,.utility-summary-band,.rate-preview-card,.management-summary-band,.screen-title-strip,.premium-transfer,.home-action,.expense-overview-card,.expense-row,.category-box,.catalogue-tile,.regular-card,.management-card{
+  position:relative!important;
+}
+.settings-section[data-tone]::before,.utility-summary-band[data-tone]::before,.rate-preview-card[data-tone]::before,.management-summary-band[data-tone]::before{
+  content:""!important;position:absolute!important;left:14px!important;right:42%!important;top:0!important;height:3px!important;border-radius:0 0 99px 99px!important;background:var(--tone)!important;opacity:.92!important;
+}
+.settings-section[data-tone]{border:1px solid var(--tone-border)!important;background:linear-gradient(150deg,color-mix(in srgb,var(--tone-bg) 92%,#12222c),#09151d 78%)!important;border-radius:22px!important;padding:14px!important;overflow:hidden!important}
+.settings-section[data-tone]>h2{color:var(--tone)!important;font-size:12px!important;letter-spacing:.12em!important;text-transform:uppercase!important;margin:2px 2px 12px!important}
+.settings-section.settings-current{--tone:var(--tb-blue);--tone-border:#477f9f;--tone-bg:#102837}
+.settings-section.settings-shopping{--tone:var(--tb-gold);--tone-border:#8a7137;--tone-bg:#2a220f}
+.settings-section.settings-advanced{--tone:#b8c7d2;--tone-border:#657887;--tone-bg:#19242d}
+
+.settings-shopping .settings-row[data-tone],.settings-advanced .settings-row[data-tone],.premium-settings-list .settings-row[data-tone]{
+  border-width:1px!important;border-color:var(--tone-border)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tone-bg) 92%,#101c26),#09151d 80%)!important;
+}
+.settings-shopping .settings-row[data-tone]::before,.settings-advanced .settings-row[data-tone]::before,.premium-settings-list .settings-row[data-tone]::before{
+  content:""!important;position:absolute!important;left:0!important;top:10px!important;bottom:10px!important;width:4px!important;border-radius:0 99px 99px 0!important;background:var(--tone)!important;opacity:1!important;
+}
+.settings-row-copy strong{color:#f3f8fc!important}
+.settings-row-copy>span{color:#aabcc7!important}
+.row-chevron{color:var(--tone,#afc3cf)!important;opacity:.95!important}
+
+/* Keep visual artwork vivid and large without relying on platform emoji. */
+.premium-settings-visual{width:60px!important;height:60px!important;padding:3px!important}
+.premium-settings-visual svg{width:56px!important;height:56px!important}
+.management-summary-icon>.premium-settings-visual,.utility-summary-icon>.premium-settings-visual,.rate-preview-icon>.premium-settings-visual{width:100%!important;height:100%!important}
+
+/* Home adopts the same brighter widget identities used in Command Centre. */
+.home-core-actions .expense-home{--tone:var(--tb-cyan);border-color:#43869d!important;background:linear-gradient(145deg,#102c38,#091720 78%)!important}
+.home-core-actions .shopping-home{--tone:var(--tb-gold);border-color:#877039!important;background:linear-gradient(145deg,#2a2212,#0c171d 78%)!important}
+.home-core-actions .home-action::before{height:4px!important;left:13px!important;right:55%!important;top:0!important;background:var(--tone)!important;opacity:.95!important}
+.home-action-copy strong{color:#f7fbff!important}
+.home-action-copy small{color:#acc0cb!important}
+.premium-transfer{border-color:#8a7138!important;background:linear-gradient(145deg,#271f11,#0c171e 78%)!important}
+.premium-transfer::before{content:""!important;position:absolute!important;left:13px!important;right:62%!important;top:0!important;height:3px!important;background:var(--tb-gold)!important;border-radius:0 0 99px 99px!important}
+.premium-transfer .transfer-count{color:#ffe79c!important}
+
+/* Shopping/category presentation: retain high-resolution product art but make the card identities brighter. */
+.category-box[data-tone],.catalogue-tile[data-tone],.regular-card[data-tone],.management-card[data-tone]{border-color:color-mix(in srgb,var(--tone) 56%,#3f5665)!important}
+.category-box[data-tone]::before,.catalogue-tile[data-tone]::before,.regular-card[data-tone]::before,.management-card[data-tone]::before{
+  content:""!important;position:absolute!important;left:10px!important;right:52%!important;top:0!important;height:3px!important;border-radius:0 0 99px 99px!important;background:var(--tone)!important;opacity:.86!important;pointer-events:none!important;
+}
+.category-label strong,.catalogue-tile strong,.management-copy strong{color:#f5faff!important}
+.category-label small,.management-copy span{color:#aebfca!important}
+
+/* Expense visuals: brighten borders/art frames while keeping the dark premium body. */
+.expense-overview-card:nth-child(1){border-color:#4a8da2!important;background:linear-gradient(150deg,#11303c,#091821 78%)!important}
+.expense-overview-card:nth-child(2){border-color:#4b8d68!important;background:linear-gradient(150deg,#132d20,#091817 78%)!important}
+.expense-overview-card:nth-child(3){border-color:#7e61a8!important;background:linear-gradient(150deg,#251a33,#0e1720 78%)!important}
+.expense-overview-card:nth-child(1)::before{background:var(--tb-cyan)!important}
+.expense-overview-card:nth-child(2)::before{background:var(--tb-green)!important}
+.expense-overview-card:nth-child(3)::before{background:var(--tb-purple)!important}
+.expense-overview-number{color:#f8fcff!important}.expense-overview-label{color:#c2d2dc!important}
+.continuous-ledger>.expense-row{border-color:color-mix(in srgb,var(--tone) 48%,#36505f)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tone-bg) 86%,#11212a),#08151d 82%)!important}
+.expense-category-icon,.premium-category-panel .expense-choice-icon{border-color:color-mix(in srgb,var(--tone) 58%,#35515f)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tone-bg) 92%,#10222b),#07141c)!important}
+.premium-category-panel .expense-category-choice{border-color:color-mix(in srgb,var(--tone) 55%,#3c5360)!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tone-bg) 94%,#111f28),#08151d 78%)!important}
+.premium-category-panel .expense-category-choice.is-selected{border-width:2px!important;border-color:var(--tone)!important}
+
+/* Dialogs and editor cards inherit the same polished dark/colour system. */
+.dialog-panel,.editor-card,.optional-details,.premium-amount-card,.expense-stay-context,.stay-live-preview,.premium-stay-editor{
+  border-color:#405e70!important;background:linear-gradient(150deg,#111f2b,#09151d 80%)!important;
+}
+.btn.primary{border-color:#5bbce0!important;background:linear-gradient(180deg,#2d9dd5,#247fb6)!important;color:#fff!important}
+.btn.warm{border-color:#9a7938!important;background:linear-gradient(180deg,#b98526,#8d651f)!important;color:#fff8e1!important}
+.btn.secondary{border-color:#4c6575!important;background:linear-gradient(180deg,#172733,#101c25)!important;color:#e8f1f6!important}
+
+@media(max-width:390px){
+  .page-head{grid-template-columns:minmax(0,1fr) 54px!important;gap:10px!important;min-height:74px!important}
+  .page-head-visual{width:52px!important;height:52px!important;border-radius:17px!important}.page-head-visual svg{width:49px!important;height:49px!important}
+  .page-head h1{font-size:31px!important}
+  .settings-section[data-tone]{padding:12px!important;border-radius:20px!important}
+  .premium-settings-visual{width:54px!important;height:54px!important}.premium-settings-visual svg{width:50px!important;height:50px!important}
+}
+
+/* PASS_BG candidate — visual art consistency across Shopping and stay setup */
+.shopping-screen-head{
+  grid-template-columns:minmax(0,1fr) 60px 48px!important;
+  gap:10px!important;
+  align-items:center!important;
+  min-height:78px!important;
+  margin-bottom:14px!important;
+}
+.shopping-title-visual{
+  width:58px!important;height:58px!important;border-radius:18px!important;display:grid!important;place-items:center!important;
+  border:1px solid #8c7137!important;background:linear-gradient(150deg,#2d2513,#111810)!important;overflow:hidden!important;
+}
+.shopping-title-visual svg{width:54px!important;height:54px!important;display:block!important;overflow:visible!important}
+.shopping-head-menu{padding:0!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.shopping-menu-art{width:40px!important;height:40px!important;display:grid!important;place-items:center!important}
+.shopping-menu-art svg{width:36px!important;height:36px!important;display:block!important}
+
+/* Small operational shopping icons are now proper coloured artwork, not generic line marks. */
+.action-line-icon.premium-action-icon{
+  width:28px!important;height:28px!important;display:grid!important;place-items:center!important;line-height:0!important;
+}
+.action-line-icon.premium-action-icon svg{width:28px!important;height:28px!important;display:block!important;stroke:none!important;fill:unset!important;overflow:visible!important}
+.shop-state-control .premium-action-icon{width:31px!important;height:31px!important}
+.shop-state-control .premium-action-icon svg{width:31px!important;height:31px!important}
+.shopping-unavailable-note .premium-action-icon{width:32px!important;height:32px!important}
+.shopping-unavailable-note .premium-action-icon svg{width:32px!important;height:32px!important}
+
+/* Stronger, bright state controls with the same crisp widget palette as Command Centre. */
+.target-shopping-list .shop-check-control{border-color:#3e8d77!important;background:linear-gradient(180deg,#173d32,#10291f)!important}
+.target-shopping-list .shop-couldnt-control{border-color:#8d5664!important;background:linear-gradient(180deg,#3a1d26,#27151d)!important}
+.target-shopping-list .shop-state-control[aria-pressed="true"]{border-width:2px!important}
+.shopping-unavailable-note{border-color:#855361!important;background:linear-gradient(145deg,#301923,#0e171e 78%)!important;border-radius:18px!important}
+.finished-shop-card{border-color:#4c8662!important;background:linear-gradient(145deg,#153121,#0b1815 78%)!important;border-radius:20px!important}
+
+/* Stay editor field graphics now have individual, bright travel identities. */
+.field-label-icon{width:28px!important;height:28px!important;border-radius:9px!important;display:inline-grid!important;place-items:center!important;border:1px solid #476274!important;background:#0b1922!important}
+.field-label-icon svg{width:18px!important;height:18px!important;display:block!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.field-label-country{color:#6fd6e9!important;border-color:#3e7f93!important;background:#0d2833!important}
+.field-label-city{color:#e6bd58!important;border-color:#856d35!important;background:#2b2210!important}
+.field-label-start{color:#77d2aa!important;border-color:#467e65!important;background:#11291d!important}
+.field-label-end{color:#b79bea!important;border-color:#6d5b91!important;background:#23182f!important}
+
+/* Ensure empty/secondary Shopping states still carry premium colour and artwork. */
+.shopping-filter-empty{border:1px solid #586c7a!important;background:linear-gradient(145deg,#15232d,#0a161e 80%)!important;border-radius:20px!important;padding:22px 16px!important}
+.shopping-filter-empty-icon{width:64px!important;height:64px!important;border-radius:19px!important;border:1px solid #6c5c8d!important;background:#21182d!important;color:#c6a9ed!important;display:grid!important;place-items:center!important;margin:0 auto 10px!important}
+.shopping-filter-empty-icon svg{width:34px!important;height:34px!important;stroke-width:1.8!important}
+
+@media(max-width:390px){
+  .shopping-screen-head{grid-template-columns:minmax(0,1fr) 52px 44px!important;gap:8px!important;min-height:72px!important}
+  .shopping-title-visual{width:50px!important;height:50px!important;border-radius:16px!important}.shopping-title-visual svg{width:47px!important;height:47px!important}
+  .shopping-head-menu{width:44px!important;height:44px!important;min-height:44px!important}.shopping-menu-art{width:36px!important;height:36px!important}.shopping-menu-art svg{width:33px!important;height:33px!important}
+}
+
+/* PASS_BH candidate — premium empty-state artwork and final icon consistency */
+.premium-empty .empty-icon{
+  width:92px!important;height:92px!important;border-radius:27px!important;display:grid!important;place-items:center!important;
+  border:1px solid var(--tone-border,#586d7c)!important;background:linear-gradient(150deg,var(--tone-bg,#17242d),#09151d)!important;overflow:hidden!important;
+}
+.premium-empty-art{width:82px!important;height:82px!important;display:grid!important;place-items:center!important;line-height:0!important}
+.premium-empty-art svg{width:78px!important;height:78px!important;display:block!important;overflow:visible!important}
+.premium-empty[data-tone="gold"] .empty-icon{border-color:#8a7137!important;background:linear-gradient(150deg,#2a220f,#0b171d)!important}
+.premium-empty[data-tone="blue"] .empty-icon{border-color:#477f9f!important;background:linear-gradient(150deg,#102837,#09161e)!important}
+.premium-empty[data-tone="silver"] .empty-icon{border-color:#687a88!important;background:linear-gradient(150deg,#19242d,#0a151d)!important}
+
+.home-shopping-empty-art.premium-home-shopping-empty{
+  width:62px!important;height:62px!important;border-radius:19px!important;border:1px solid #8a7137!important;background:linear-gradient(150deg,#2a220f,#0b171d)!important;display:grid!important;place-items:center!important;overflow:hidden!important;
+}
+.home-shopping-empty-art.premium-home-shopping-empty .premium-empty-art{width:58px!important;height:58px!important}
+.home-shopping-empty-art.premium-home-shopping-empty .premium-empty-art svg{width:56px!important;height:56px!important}
+
+/* Bring the Shopping hero action closer to the Expenses visual strength. */
+.home-core-actions .shopping-home{grid-template-columns:66px minmax(0,1fr) 34px!important;min-height:88px!important}
+.home-core-actions .shopping-home .home-shopping-pictures{width:64px!important;height:64px!important;min-width:64px!important;display:grid!important;place-items:center!important}
+.home-core-actions .shopping-home .home-shopping-art{width:48px!important;height:48px!important;border-radius:15px!important}
+.home-core-actions .shopping-home .home-shopping-art:first-child{left:0!important;top:0!important}
+.home-core-actions .shopping-home .home-shopping-art:nth-child(2){right:0!important;bottom:0!important}
+
+/* Richer non-active nav graphics while preserving clear active-state colour. */
+.nav-item .nav-icon{border-color:#263d4b!important;color:#8ca3b2!important;background:#09151e!important}
+.nav-item[data-route="home"] .nav-icon{color:#76cde2!important}
+.nav-item[data-route="expenses"] .nav-icon{color:#6dcde3!important}
+.nav-item[data-route="shopping"] .nav-icon{color:#d8b052!important}
+.nav-item[data-route="settings"] .nav-icon{color:#aebbc5!important}
+
+@media(max-width:390px){
+  .premium-empty .empty-icon{width:84px!important;height:84px!important;border-radius:24px!important}.premium-empty-art{width:76px!important;height:76px!important}.premium-empty-art svg{width:72px!important;height:72px!important}
+  .home-core-actions .shopping-home{grid-template-columns:60px minmax(0,1fr) 32px!important}.home-core-actions .shopping-home .home-shopping-pictures{width:58px!important;height:58px!important;min-width:58px!important}.home-shopping-empty-art.premium-home-shopping-empty{width:58px!important;height:58px!important}.home-shopping-empty-art.premium-home-shopping-empty .premium-empty-art,.home-shopping-empty-art.premium-home-shopping-empty .premium-empty-art svg{width:52px!important;height:52px!important}
+}
+
+/* PASS_BI candidate — premium universal controls + dialog graphics */
+.button-visual{
+  width:30px!important;
+  height:30px!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  flex:0 0 auto!important;
+  line-height:0!important;
+}
+.button-visual svg{width:30px!important;height:30px!important;display:block!important;overflow:visible!important}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.btn.full{display:flex}
+.btn .button-visual+span{min-width:0}
+.btn.primary .button-visual,.btn.warm .button-visual,.btn.danger .button-visual{width:31px!important;height:31px!important}
+.btn.primary .button-visual svg,.btn.warm .button-visual svg,.btn.danger .button-visual svg{width:31px!important;height:31px!important}
+
+/* The back control uses a filled visual tile rather than a thin utility arrow. */
+.subscreen-back-button.premium-back-button{
+  width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important;
+  border-radius:16px!important;padding:0!important;display:grid!important;place-items:center!important;
+}
+.subscreen-back-button.premium-back-button .button-visual{
+  position:static!important;width:38px!important;height:38px!important;padding:0!important;margin:0!important;
+  overflow:visible!important;clip:auto!important;white-space:normal!important;border:0!important;
+}
+.subscreen-back-button.premium-back-button .button-visual svg{width:38px!important;height:38px!important;stroke-width:initial!important}
+.subscreen-back-button.premium-back-button>span:last-child{
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+.app-shell[data-route="shopping"].subscreen-mode .premium-back-button .button-visual circle{fill:#806026!important}
+.app-shell[data-route="expenses"].subscreen-mode .premium-back-button .button-visual circle{fill:#1f6d89!important}
+.app-shell[data-route="settings"].subscreen-mode .premium-back-button .button-visual circle{fill:#455e70!important}
+
+/* Dialog artwork now carries the same high-visual widget language as the main screens. */
+.dialog-visual{
+  width:62px!important;height:62px!important;border-radius:19px!important;display:grid!important;place-items:center!important;
+  margin:2px 0 10px!important;border:1px solid #456a7d!important;background:linear-gradient(150deg,#102733,#091720)!important;
+  position:relative!important;z-index:1!important;
+}
+.dialog-visual .button-visual,.dialog-visual .button-visual svg{width:54px!important;height:54px!important}
+.dialog-danger .dialog-visual{border-color:#87515a!important;background:linear-gradient(150deg,#321a20,#11171c)!important}
+.dialog-attention .dialog-visual{border-color:#88703a!important;background:linear-gradient(150deg,#302612,#11170f)!important}
+.dialog-info .dialog-visual{border-color:#467f95!important;background:linear-gradient(150deg,#102d39,#091820)!important}
+.dialog-actions .btn{gap:7px!important;font-size:13px!important;font-weight:900!important}
+.dialog-actions .button-visual,.dialog-actions .button-visual svg{width:27px!important;height:27px!important}
+
+/* Home toilet phrase control becomes a proper small illustrated travel widget. */
+.compact-hero .premium-wc-badge{
+  min-width:58px!important;padding:6px 5px 5px!important;border-radius:17px!important;gap:2px!important;
+  border-color:#477c91!important;background:linear-gradient(155deg,#0d2834,#08161e)!important;
+}
+.wc-visual{width:42px!important;height:42px!important;display:grid!important;place-items:center!important;line-height:0!important}
+.wc-visual svg{width:42px!important;height:42px!important;display:block!important}
+.compact-hero .premium-wc-badge small{font-size:7.5px!important;letter-spacing:.13em!important;color:#a7d9e7!important;font-weight:950!important}
+
+/* Settings stay actions match the bright Command Centre card/control family. */
+.settings-current .button-row .btn{
+  min-height:58px!important;
+  gap:7px!important;
+  font-size:13px!important;
+}
+.settings-current .button-row .button-visual,.settings-current .button-row .button-visual svg{width:32px!important;height:32px!important}
+.settings-current .button-row .btn.secondary{border-color:#665c91!important;background:linear-gradient(180deg,#27213b,#171927)!important;color:#f0eaff!important}
+.settings-current .button-row .btn.primary{border-color:#d0a64d!important;background:linear-gradient(180deg,#a97728,#76541e)!important;color:#fff6d8!important}
+
+/* Consistent large action art through editors and management tools. */
+.editor-actions .btn,.back-button,.shopping-setup-primary,.custom-shop-button{
+  min-height:54px!important;
+  gap:8px!important;
+}
+.editor-actions .button-visual,.editor-actions .button-visual svg,
+.back-button .button-visual,.back-button .button-visual svg,
+.shopping-setup-primary .button-visual,.shopping-setup-primary .button-visual svg,
+.custom-shop-button .button-visual,.custom-shop-button .button-visual svg{
+  width:30px!important;height:30px!important;
+}
+.premium-empty>.btn{gap:8px!important}
+.premium-empty>.btn .button-visual,.premium-empty>.btn .button-visual svg{width:30px!important;height:30px!important}
+
+/* Expense save/cancel/delete now use the shared crisp vector action family. */
+.premium-save-expense{gap:9px!important}
+.premium-save-expense .button-visual,.premium-save-expense .button-visual svg{width:34px!important;height:34px!important}
+.expense-cancel-button .button-visual,.expense-cancel-button .button-visual svg,.delete-below .button-visual,.delete-below .button-visual svg{width:30px!important;height:30px!important}
+
+@media(max-width:390px){
+  .subscreen-back-button.premium-back-button{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important}
+  .subscreen-back-button.premium-back-button .button-visual,.subscreen-back-button.premium-back-button .button-visual svg{width:36px!important;height:36px!important}
+  .dialog-visual{width:58px!important;height:58px!important;border-radius:18px!important}
+  .dialog-visual .button-visual,.dialog-visual .button-visual svg{width:50px!important;height:50px!important}
+  .settings-current .button-row .btn{font-size:12.5px!important;min-height:56px!important}
+}
+
+/* PASS_BJ candidate — high-quality primary navigation artwork */
+.bottom-nav .nav-icon.premium-nav-art{
+  width:40px!important;height:40px!important;border-radius:13px!important;padding:0!important;display:grid!important;place-items:center!important;
+  border:1px solid #314b5a!important;background:linear-gradient(150deg,#0f202a,#08151d)!important;overflow:hidden!important;
+}
+.bottom-nav .nav-icon.premium-nav-art svg{width:36px!important;height:36px!important;display:block!important;fill:initial!important;stroke:initial!important;overflow:visible!important}
+.bottom-nav .nav-item[data-route="home"] .premium-nav-art{border-color:#376b81!important;background:linear-gradient(150deg,#102833,#08161e)!important}
+.bottom-nav .nav-item[data-route="expenses"] .premium-nav-art{border-color:#39788f!important;background:linear-gradient(150deg,#102a36,#08161e)!important}
+.bottom-nav .nav-item[data-route="shopping"] .premium-nav-art{border-color:#806a38!important;background:linear-gradient(150deg,#2a2211,#0c171c)!important}
+.bottom-nav .nav-item[data-route="settings"] .premium-nav-art{border-color:#596778!important;background:linear-gradient(150deg,#1b2431,#0a151d)!important}
+.bottom-nav .nav-item.is-active .premium-nav-art{border-width:2px!important}
+.bottom-nav .nav-item.is-active[data-route="home"] .premium-nav-art{border-color:#61cbe2!important}
+.bottom-nav .nav-item.is-active[data-route="expenses"] .premium-nav-art{border-color:#63cfe8!important}
+.bottom-nav .nav-item.is-active[data-route="shopping"] .premium-nav-art{border-color:#d5aa4b!important}
+.bottom-nav .nav-item.is-active[data-route="settings"] .premium-nav-art{border-color:#9dafbb!important}
+.bottom-nav .nav-item b{margin-top:3px!important;font-weight:900!important;letter-spacing:-.01em!important}
+@media(max-width:390px){
+  .bottom-nav .nav-icon.premium-nav-art{width:38px!important;height:38px!important;border-radius:12px!important}
+  .bottom-nav .nav-icon.premium-nav-art svg{width:34px!important;height:34px!important}
+}
+
+/* PASS_BK candidate — destination setup uses filled, high-quality travel symbols */
+.premium-stay-symbol{
+  width:34px!important;height:34px!important;border-radius:11px!important;padding:0!important;overflow:hidden!important;
+  border-width:1px!important;display:inline-grid!important;place-items:center!important;
+}
+.premium-stay-symbol svg{
+  width:32px!important;height:32px!important;display:block!important;fill:initial!important;stroke:initial!important;stroke-width:initial!important;overflow:visible!important;
+}
+.stay-control-prefix .premium-stay-symbol{width:36px!important;height:36px!important;border-radius:12px!important}
+.stay-control-prefix .premium-stay-symbol svg{width:34px!important;height:34px!important}
+.field-label-country.premium-stay-symbol{border-color:#3f8196!important;background:#0d2833!important}
+.field-label-city.premium-stay-symbol{border-color:#856d35!important;background:#2b2210!important}
+.field-label-start.premium-stay-symbol{border-color:#467e65!important;background:#11291d!important}
+.field-label-end.premium-stay-symbol{border-color:#6d5b91!important;background:#23182f!important}
+
+/* PASS_BL candidate — high-quality micro-actions and finishing controls */
+.mini-action-visual{
+  width:24px!important;height:24px!important;display:inline-grid!important;place-items:center!important;flex:0 0 auto!important;line-height:0!important;
+}
+.mini-action-visual svg{width:24px!important;height:24px!important;display:block!important;overflow:visible!important}
+.premium-section-link{
+  min-height:38px!important;padding:0 8px 0 12px!important;display:inline-flex!important;align-items:center!important;gap:5px!important;
+  border:1px solid #3f7188!important;border-radius:999px!important;background:linear-gradient(180deg,#122a36,#0b1a23)!important;color:#dff8ff!important;font-weight:900!important;
+}
+.premium-section-link .mini-action-visual{width:22px!important;height:22px!important}.premium-section-link .mini-action-visual svg{width:22px!important;height:22px!important}
+.premium-shop-action{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;font-weight:950!important}
+.premium-shop-action .mini-action-visual{width:25px!important;height:25px!important}.premium-shop-action .mini-action-visual svg{width:25px!important;height:25px!important}
+.shopping-top-add.premium-shop-action{border-color:#487e91!important;background:linear-gradient(180deg,#17415a,#102c3d)!important;color:#ebfbff!important}
+.finish-inline.premium-shop-action{border-color:#4b805f!important;background:linear-gradient(180deg,#173b28,#10291e)!important;color:#eafff1!important}
+.finish-inline.premium-shop-action:disabled{filter:none!important;opacity:.42!important}
+
+.premium-mini-action{
+  min-height:44px!important;padding:0 9px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;border-radius:12px!important;
+  font-size:10px!important;font-weight:950!important;letter-spacing:.01em!important;
+}
+.premium-mini-action .mini-action-visual{width:22px!important;height:22px!important}.premium-mini-action .mini-action-visual svg{width:22px!important;height:22px!important}
+.premium-mini-action.add-action{border-color:#3e7f6c!important;background:linear-gradient(180deg,#173529,#0f251c)!important;color:#eafff3!important}
+.premium-mini-action.edit-action{border-color:#665c99!important;background:linear-gradient(180deg,#29223f,#19192b)!important;color:#f2edff!important}
+.premium-mini-action.rename-action{border-color:#806735!important;background:linear-gradient(180deg,#302611,#1c190f)!important;color:#fff1c8!important}
+.premium-mini-action.delete-action{border-color:#8b515a!important;background:linear-gradient(180deg,#361c22,#251419)!important;color:#fff0f2!important}
+
+/* Management rows get the larger Command Centre-style action treatment without making the card noisy. */
+.management-card .mini-actions{gap:5px!important;align-items:center!important}
+.management-card .mini-actions .premium-mini-action{min-width:0!important}
+.management-card .mini-actions .premium-mini-action span:last-child{display:none!important}
+.management-card .mini-actions .premium-mini-action{width:44px!important;padding:0!important}
+.management-card .mini-actions .mini-action-visual,.management-card .mini-actions .mini-action-visual svg{width:27px!important;height:27px!important}
+.regular-card>.premium-mini-action{min-width:94px!important}
+
+@media(max-width:390px){
+  .premium-section-link{min-height:36px!important;font-size:10px!important}
+  .management-card .mini-actions .premium-mini-action{width:42px!important;height:42px!important;min-height:42px!important}
+  .management-card .mini-actions .mini-action-visual,.management-card .mini-actions .mini-action-visual svg{width:25px!important;height:25px!important}
+}
+
+/* PASS_BM candidate — shopping filter art and premium empty-filter state */
+.shopping-filter{
+  display:grid!important;
+  grid-template-columns:28px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-height:52px!important;
+  padding:5px 8px!important;
+  border-radius:15px!important;
+  text-align:left!important;
+}
+.shopping-filter-visual{
+  width:28px!important;height:28px!important;border-radius:9px!important;display:grid!important;place-items:center!important;overflow:hidden!important;
+  border:1px solid #3b5664!important;background:#09161e!important;
+}
+.shopping-filter-visual svg{width:26px!important;height:26px!important;display:block!important;overflow:visible!important}
+.shopping-filter[data-shopping-filter="all"] .shopping-filter-visual{border-color:#755f31!important;background:#251e10!important}
+.shopping-filter[data-shopping-filter="to-buy"] .shopping-filter-visual{border-color:#4f7d90!important;background:#102b37!important}
+.shopping-filter[data-shopping-filter="done"] .shopping-filter-visual{border-color:#437962!important;background:#11281e!important}
+.shopping-filter span:not(.shopping-filter-visual){font-size:11px!important;font-weight:950!important;line-height:1!important}
+.shopping-filter b{min-width:24px!important;height:24px!important;display:grid!important;place-items:center!important;border-radius:999px!important;font-size:10px!important}
+.shopping-filter.is-active[data-shopping-filter="all"]{border-color:#a68135!important;background:linear-gradient(180deg,#2b2312,#17180f)!important;color:#fff0c1!important}
+.shopping-filter.is-active[data-shopping-filter="to-buy"]{border-color:#4b8ea9!important;background:linear-gradient(180deg,#15384a,#102735)!important;color:#e7fbff!important}
+.shopping-filter.is-active[data-shopping-filter="done"]{border-color:#4d8a68!important;background:linear-gradient(180deg,#163529,#10271d)!important;color:#eafff2!important}
+
+.premium-filter-empty{
+  min-height:170px!important;border:1px solid #3d6376!important;border-radius:21px!important;background:linear-gradient(150deg,#102430,#09161e 76%)!important;
+  display:grid!important;place-items:center!important;align-content:center!important;gap:7px!important;padding:20px!important;text-align:center!important;
+}
+.premium-filter-empty .shopping-filter-empty-icon{
+  width:78px!important;height:78px!important;border:1px solid #44788c!important;border-radius:24px!important;background:#0a1821!important;display:grid!important;place-items:center!important;
+}
+.premium-filter-empty .shopping-filter-empty-icon svg{width:68px!important;height:68px!important;display:block!important;fill:initial!important;stroke:initial!important}
+.premium-filter-empty strong{font-size:17px!important;color:#f2fbff!important}
+.premium-filter-empty>span:last-child{font-size:11px!important;color:#9db2c0!important}
+
+@media(max-width:390px){
+  .shopping-filter{grid-template-columns:26px minmax(0,1fr) auto!important;gap:5px!important;padding:5px 6px!important;min-height:50px!important}
+  .shopping-filter-visual{width:26px!important;height:26px!important}.shopping-filter-visual svg{width:24px!important;height:24px!important}
+  .shopping-filter span:not(.shopping-filter-visual){font-size:10px!important}
+}
+
+/* PASS_BN candidate — large, unambiguous Shopping row actions */
+.target-shopping-list .premium-shop-row-action{
+  width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important;
+  border:1px solid #3b5968!important;border-radius:16px!important;padding:0!important;display:grid!important;place-items:center!important;overflow:hidden!important;
+}
+.target-shopping-list .premium-shop-row-action .premium-action-icon{
+  width:38px!important;height:38px!important;border-radius:12px!important;display:grid!important;place-items:center!important;margin:0!important;
+}
+.target-shopping-list .premium-shop-row-action .premium-action-icon svg{width:36px!important;height:36px!important;display:block!important}
+.target-shopping-list .shop-check-control.premium-shop-row-action{border-color:#397761!important;background:linear-gradient(180deg,#15372c,#0d251c)!important}
+.target-shopping-list .shop-couldnt-control.premium-shop-row-action{border-color:#87515f!important;background:linear-gradient(180deg,#351b23,#25141b)!important}
+.target-shopping-list .shop-check-control.premium-shop-row-action[aria-pressed="true"],
+.target-shopping-list .shop-couldnt-control.premium-shop-row-action[aria-pressed="true"]{border-color:#6275a7!important;background:linear-gradient(180deg,#262c4b,#191c33)!important}
+.target-shopping-list .premium-shop-row-action .action-line-icon{border:0!important;background:transparent!important}
+
+@media(max-width:390px){
+  .target-shopping-list .premium-shop-row-action{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;border-radius:15px!important}
+  .target-shopping-list .premium-shop-row-action .premium-action-icon,.target-shopping-list .premium-shop-row-action .premium-action-icon svg{width:35px!important;height:35px!important}
+}
+
+/* PASS_BO visual-closure — physical-phone readability and touch-target floor */
+/* Final source pass before packaging: preserve bright Command Centre-like colour while eliminating rare tiny utility remnants. */
+.page-head .eyebrow,
+.compact-hero .hero-copy .eyebrow,
+.hero-copy .eyebrow,
+.wc-badge small,
+.shop-category-chip,
+.shop-state,
+.expense-summary-strip small,
+.expense-filters .filter,
+.expense-filters .filter b,
+.shopping-filter b,
+.shopping-list.has-items .shop-category-chip,
+.shopping-list.has-items .shop-state,
+.shopping-list.has-items .shop-item-copy>small:not(.shop-category-chip),
+.shopping-list.has-items .shop-row-top>.initials,
+.target-shopping-list.has-items .shop-state-note,
+.target-shopping-list.has-items .target-initials,
+.settings-row-copy>span,
+.shopping-list-head>span,
+.management-copy span,
+.shopping-editor-preview-copy small,
+.shopping-editor-preview-copy em,
+.preview-requester,
+.management-editor-preview small,
+.management-editor-preview em,
+.utility-summary-band small,
+.utility-summary-band em,
+.rate-preview-copy small,
+.rate-preview-copy em,
+.subscreen-mode .page-head .eyebrow,
+.management-summary-band small,
+.expense-stay-copy small,
+.expense-rate-chip,
+.premium-amount-card .amount-card-head small,
+.premium-category-panel .expense-section-head small,
+.premium-category-panel .expense-section-head em,
+.premium-optional-details summary small,
+.expense-choice-copy small,
+.amount small,
+.expense-row>.transfer-button,
+.app-version,
+.stay-live-preview>small,
+.premium-stay-editor .field-label,
+.regular-card>div small{
+  font-size:10px!important;
+  line-height:1.25!important;
+}
+
+/* Decorative status ribbons are still readable on a physical iPhone. */
+.settings-current .premium-stay-summary::after,
+.stay-hero::after,
+.premium-transfer::after,
+.rate-editor-card::before,
+.stay-live-preview::after,
+.transfer-safety-note::after{
+  font-size:10px!important;
+  line-height:1.1!important;
+}
+
+/* Locked practical touch floor. */
+.btn,
+.subscreen-back-button,
+.premium-section-link,
+.shopping-head-menu,
+.shopping-top-add,
+.finish-inline,
+.filter,
+.shopping-filter,
+.premium-mini-action,
+.target-shopping-list .premium-shop-row-action{
+  min-height:44px!important;
+}
+.premium-section-link{padding-top:0!important;padding-bottom:0!important}
+.management-card .mini-actions .premium-mini-action{
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  min-height:46px!important;
+}
+.shopping-head-menu{min-width:48px!important;min-height:48px!important}
+
+/* Prevent Safari focus zoom in every current editor without shrinking the visual hierarchy. */
+input,select,textarea{
+  font-size:16px!important;
+}
+
+/* Final horizontal-fit guard for the phone-only shell. */
+html,body,#app,.app-shell,.screen{
+  max-width:100%!important;
+}
+body,.app-shell,.screen{
+  overflow-x:hidden!important;
+}
+
+/* Give the final long card/action a deliberate clear zone above fixed navigation. */
+.app-shell:not(.subscreen-mode):not(.setup-mode) .screen{
+  padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+}
+
+@media(max-width:390px){
+  .premium-section-link{min-height:44px!important}
+  .management-card .mini-actions .premium-mini-action{width:46px!important;height:46px!important;min-height:46px!important}
+  .expense-rate-chip,.expense-choice-copy small,.settings-row-copy>span,.management-copy span{font-size:10px!important}
+}

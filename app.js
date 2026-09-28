@@ -35,7 +35,16 @@ const now=()=>new Date().toISOString();
 const stayRate=stay=>{const n=Number(stay?.exchangeRate);return Number.isFinite(n)&&n>0?n:null;};
 const shortAuDate=value=>{const m=String(value||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return String(value||'');const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${Number(m[1])} ${names[Number(m[2])-1]||m[2]} ${m[3]}`;};
 const toneKey=value=>{const v=String(value||'').toLowerCase();if(v.includes('shopping'))return'shopping';if(v.includes('expense'))return'expenses';if(v.includes('setting'))return'settings';return'home';};
-const pageHead=(title,subtitle='',accent='Travel Buddy')=>`<div class="page-head head-${toneKey(accent)}"><div><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div></div>`;
+const pageHeadVisual=tone=>{
+  const art={
+    home:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="23" fill="#15566d"/><circle cx="36" cy="36" r="17" fill="#0b2531" stroke="#6dd9ed" stroke-width="2.5"/><path d="m43 24-5 14-14 6 5-14 14-6Z" fill="#f0c864"/><circle cx="36" cy="36" r="3" fill="#f7fdff"/></svg>`,
+    expenses:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="16" y="10" width="40" height="51" rx="8" fill="#0f607c"/><path d="M25 23h22M25 33h15M25 43h19" stroke="#a8effa" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="51" r="12" fill="#34b9e4"/><path d="M51 44v14M44 51h14" stroke="#f7fdff" stroke-width="3.6" stroke-linecap="round"/></svg>`,
+    shopping:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 22h40l-5 36H21l-5-36Z" fill="#bb8124"/><path d="M25 24c0-9 4-14 11-14s11 5 11 14" fill="none" stroke="#ffe19a" stroke-width="4" stroke-linecap="round"/><circle cx="29" cy="38" r="7" fill="#55cdb8"/><circle cx="44" cy="38" r="7" fill="#d98297"/><path d="M27 50h18" stroke="#fff0bf" stroke-width="3" stroke-linecap="round"/></svg>`,
+    settings:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M15 21h42M15 36h42M15 51h42" stroke="#a8bdca" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#5ec9df"/><circle cx="47" cy="36" r="8" fill="#b387e5"/><circle cx="24" cy="51" r="8" fill="#e1b44c"/></svg>`
+  }[tone]||'';
+  return `<span class="page-head-visual" aria-hidden="true">${art}</span>`;
+};
+const pageHead=(title,subtitle='',accent='Travel Buddy')=>{const tone=toneKey(accent);return `<div class="page-head head-${tone}"><div class="page-head-copy"><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>${pageHeadVisual(tone)}</div>`;};
 const categoryTone=category=>{const v=String(category?.name||category||'').toLowerCase();if(v.includes('fruit')||v.includes('veg'))return'teal';if(v.includes('meat'))return'copper';if(v.includes('dairy'))return'blue';if(v.includes('bakery'))return'gold';if(v.includes('pantry'))return'purple';if(v.includes('frozen'))return'ice';if(v.includes('drink'))return'cyan';if(v.includes('house'))return'green';if(v.includes('toilet'))return'rose';if(v.includes('pharmacy'))return'red';return'silver';};
 const expenseTone=category=>({Groceries:'teal','Eating Out':'gold',Transport:'blue',Entertainment:'purple',Tickets:'copper',Shopping:'rose',Misc:'silver'})[category]||'silver';
 
@@ -52,6 +61,42 @@ const expenseCategoryIcon=category=>{
     Misc:'<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>'
   }[category]||'<circle cx="12" cy="12" r="7"/>';
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+};
+
+const expenseCategoryArt=category=>{
+  const art={
+    Groceries:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 24h36l-4 29H18L14 24Z" fill="#2c9f8e"/><path d="M20 24c1-8 6-12 12-12s11 4 12 12" fill="none" stroke="#89eee0" stroke-width="4" stroke-linecap="round"/><circle cx="25" cy="29" r="8" fill="#ef5b56"/><path d="M25 21c2-4 6-5 9-3-3 4-6 5-9 3Z" fill="#64cf70"/><path d="M34 28c1-7 6-11 12-10 0 6-4 11-12 10Z" fill="#69cf6e"/><circle cx="41" cy="38" r="7" fill="#f2b64d"/></svg>`,
+    'Eating Out':`<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="34" cy="42" rx="22" ry="10" fill="#d4a43f"/><ellipse cx="34" cy="39" rx="18" ry="7" fill="#f2e0a2"/><path d="M22 37c5-8 11-10 17-7 4 2 7 5 9 8" fill="none" stroke="#e46f43" stroke-width="5" stroke-linecap="round"/><circle cx="33" cy="31" r="3" fill="#de5144"/><path d="M37 27c5-5 9-4 12-1-5 2-8 3-12 1Z" fill="#69c774"/><path d="M11 12v17M7 12v9c0 4 2 6 4 6s4-2 4-6v-9M11 29v23" fill="none" stroke="#f5cf64" stroke-width="3.4" stroke-linecap="round"/></svg>`,
+    Transport:`<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="13" y="10" width="38" height="39" rx="10" fill="#348bc2"/><rect x="19" y="16" width="26" height="15" rx="4" fill="#9de5f5"/><path d="M20 38h24" stroke="#d8f7ff" stroke-width="4" stroke-linecap="round"/><circle cx="23" cy="41" r="3" fill="#e9fbff"/><circle cx="41" cy="41" r="3" fill="#e9fbff"/><path d="M21 49l-5 7M43 49l5 7M22 55h20" fill="none" stroke="#66c3ee" stroke-width="3.3" stroke-linecap="round"/></svg>`,
+    Entertainment:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 25h30l-4 31H22L18 25Z" fill="#8b63cf"/><path d="M23 25l4 31M33 25v31M43 25l-4 31" stroke="#f2dff8" stroke-width="4" opacity=".9"/><circle cx="20" cy="20" r="7" fill="#f5d46c"/><circle cx="30" cy="16" r="8" fill="#ffe18a"/><circle cx="40" cy="19" r="7" fill="#f5d46c"/><circle cx="48" cy="17" r="6" fill="#ffe18a"/></svg>`,
+    Tickets:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 20h44v11c-5 0-5 8 0 8v11H10V39c5 0 5-8 0-8V20Z" fill="#c98055"/><path d="M32 23v24" stroke="#f7d5bd" stroke-width="3" stroke-dasharray="4 4"/><circle cx="23" cy="35" r="6" fill="#f4b36d"/><path d="m21 35 2 2 4-5" fill="none" stroke="#fff2df" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    Shopping:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M15 22h34l-3 34H18L15 22Z" fill="#c86f91"/><path d="M23 25c0-8 4-13 9-13s9 5 9 13" fill="none" stroke="#f5b8cf" stroke-width="4" stroke-linecap="round"/><rect x="25" y="34" width="14" height="12" rx="3" fill="#f3d2df"/><path d="M32 36v8M28 40h8" stroke="#a74b73" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    Misc:`<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="21" fill="#7f93a5"/><path d="m32 14 4 10 10 4-10 4-4 10-4-10-10-4 10-4 4-10Z" fill="#e8f1f7"/><circle cx="48" cy="16" r="5" fill="#70d5e8"/><circle cx="15" cy="48" r="4" fill="#d9ae58"/></svg>`
+  }[category];
+  return art||`<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="#7f93a5"/><circle cx="32" cy="32" r="5" fill="#eef6fb"/></svg>`;
+};
+
+const expenseCategoryVisual=category=>`<span class="expense-illustration" aria-hidden="true">${expenseCategoryArt(category)}</span><span class="expense-line-badge" aria-hidden="true">${expenseCategoryIcon(category)}</span>`;
+
+const expenseStatusIcon=kind=>{
+  const path={
+    pending:'<path d="M5 12h8"/><path d="m10 7 5 5-5 5"/><rect x="4" y="5" width="16" height="14" rx="3"/>',
+    transferred:'<path d="m6.5 12 3.2 3.2L17.5 7.5"/><rect x="4" y="5" width="16" height="14" rx="3"/>',
+    all:'<path d="M7 8h10M7 12h10M7 16h6"/><rect x="4" y="5" width="16" height="14" rx="3"/>',
+    add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="8"/>'
+  }[kind]||'<circle cx="12" cy="12" r="8"/>';
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+};
+
+const expenseStatusArt=kind=>{
+  const art={
+    add:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="18" y="10" width="36" height="50" rx="8" fill="#0f5872"/><path d="M26 22h20M26 31h13M26 40h10" stroke="#a8effa" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="13" fill="#35b9e6"/><path d="M50 43v14M43 50h14" stroke="#f7fdff" stroke-width="4" stroke-linecap="round"/></svg>`,
+    pending:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="20" width="46" height="34" rx="9" fill="#a66d17"/><rect x="17" y="16" width="39" height="32" rx="8" fill="#d9911d"/><path d="M17 27h39" stroke="#ffd979" stroke-width="3"/><circle cx="53" cy="49" r="12" fill="#f2b42a"/><path d="M48 49h10M55 45l4 4-4 4" stroke="#fff7d8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    transferred:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M12 35 60 14 45 58 34 42 12 35Z" fill="#23bda4"/><path d="m34 42 26-28" stroke="#b7fff1" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="51" r="12" fill="#167a6d"/><path d="m45.5 51 4 4 7-9" fill="none" stroke="#eafff9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    all:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="37" width="11" height="21" rx="4" fill="#8f67d9"/><rect x="30" y="26" width="11" height="32" rx="4" fill="#bb76e8"/><rect x="47" y="15" width="11" height="43" rx="4" fill="#d58cf0"/><path d="M13 61h47" stroke="#f0d9fb" stroke-width="3" stroke-linecap="round"/></svg>`,
+    empty:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="17" y="9" width="38" height="51" rx="8" fill="#123d50"/><path d="M25 23h22M25 33h18M25 43h13" stroke="#7dd7ed" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="52" r="11" fill="#2f99bf"/><path d="M52 46v12M46 52h12" stroke="#ecfbff" stroke-width="3.5" stroke-linecap="round"/></svg>`
+  }[kind]||'';
+  return `<span class="expense-status-art expense-status-${esc(kind)}" aria-hidden="true">${art}</span>`;
 };
 
 const categoryArt=category=>{
@@ -85,6 +130,57 @@ const settingsIcon=kind=>{
   return `<span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${map[kind]||map.advanced}</svg></span>`;
 };
 
+const buttonVisual=kind=>{
+  const art={
+    back:'<circle cx="16" cy="16" r="13" fill="#285f79"/><path d="m17.5 9-7 7 7 7" fill="none" stroke="#eafaff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    add:'<circle cx="16" cy="16" r="13" fill="#2d9fc8"/><path d="M16 9v14M9 16h14" fill="none" stroke="#f3fdff" stroke-width="3" stroke-linecap="round"/>',
+    save:'<circle cx="16" cy="16" r="13" fill="#23866e"/><path d="m9 16 4.2 4.2L23 10.5" fill="none" stroke="#effff8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    cancel:'<circle cx="16" cy="16" r="13" fill="#526676"/><path d="m11 11 10 10M21 11 11 21" stroke="#f5fbff" stroke-width="2.8" stroke-linecap="round"/>',
+    delete:'<circle cx="16" cy="16" r="13" fill="#a44555"/><path d="M11 12h10l-1 11h-8l-1-11ZM13 9h6M14 14v6M18 14v6" fill="none" stroke="#fff0f3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    edit:'<circle cx="16" cy="16" r="13" fill="#6f67b7"/><path d="M10 21l2-6 9-9 5 5-9 9-7 1Z" fill="#eadfff"/><path d="m19 8 5 5" stroke="#fff" stroke-width="2"/>',
+    change:'<circle cx="16" cy="16" r="13" fill="#b47b25"/><path d="M8 12h14l-4-4M24 20H10l4 4" fill="none" stroke="#fff4ce" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    finish:'<circle cx="16" cy="16" r="13" fill="#2d8c64"/><path d="m9 16 4 4 10-10" fill="none" stroke="#f1fff7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    close:'<circle cx="16" cy="16" r="13" fill="#3d758d"/><path d="m11 11 10 10M21 11 11 21" stroke="#f4fcff" stroke-width="2.8" stroke-linecap="round"/>',
+    share:'<circle cx="16" cy="16" r="13" fill="#b07d2d"/><circle cx="11" cy="16" r="3" fill="#fff3c9"/><circle cx="22" cy="10" r="3" fill="#fff3c9"/><circle cx="22" cy="22" r="3" fill="#fff3c9"/><path d="m13.7 14.5 5.6-3M13.7 17.5l5.6 3" stroke="#fff3c9" stroke-width="2" stroke-linecap="round"/>',
+    import:'<circle cx="16" cy="16" r="13" fill="#378b79"/><path d="M16 7v13m-5-5 5 5 5-5M9 24h14" fill="none" stroke="#effff9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+  }[kind]||'<circle cx="16" cy="16" r="13" fill="#526676"/>';
+  return `<span class="button-visual button-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 32 32">${art}</svg></span>`;
+};
+
+const dialogVisual=tone=>{
+  const kind=tone==='danger'?'delete':tone==='attention'?'finish':'save';
+  return `<span class="dialog-visual dialog-visual-${esc(tone)}" aria-hidden="true">${buttonVisual(kind)}</span>`;
+};
+
+const miniActionVisual=kind=>{
+  const art={
+    view:'<circle cx="12" cy="12" r="10" fill="#245f7a"/><path d="M8 12h8M13 8l4 4-4 4" fill="none" stroke="#e9fbff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    add:'<circle cx="12" cy="12" r="10" fill="#278a76"/><path d="M12 7v10M7 12h10" stroke="#effff9" stroke-width="2.2" stroke-linecap="round"/>',
+    finish:'<circle cx="12" cy="12" r="10" fill="#2d8c64"/><path d="m7.5 12 3 3 6-6" fill="none" stroke="#f1fff7" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>',
+    edit:'<circle cx="12" cy="12" r="10" fill="#6f67b7"/><path d="M7.5 16.5 9 12l6-6 3 3-6 6-4.5 1.5Z" fill="#efe8ff"/><path d="m13.5 7.5 3 3" stroke="#fff" stroke-width="1.5"/>',
+    rename:'<circle cx="12" cy="12" r="10" fill="#a87925"/><path d="M7 16.5 9 11l5.7-5.7 4 4L13 15l-6 1.5Z" fill="#fff1bd"/><path d="M7 18h10" stroke="#ffe59a" stroke-width="1.8" stroke-linecap="round"/>',
+    delete:'<circle cx="12" cy="12" r="10" fill="#a44555"/><path d="M8.5 9h7l-.8 8h-5.4l-.8-8ZM10 7.5h4M10.5 11v4M13.5 11v4" fill="none" stroke="#fff0f3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+    cancel:'<circle cx="12" cy="12" r="10" fill="#526676"/><path d="m8.5 8.5 7 7M15.5 8.5l-7 7" stroke="#f5fbff" stroke-width="2" stroke-linecap="round"/>'
+  }[kind]||'';
+  return `<span class="mini-action-visual mini-action-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
+};
+
+const toiletVisual=()=>`<span class="wc-visual" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="5" y="5" width="38" height="38" rx="13" fill="#215b72"/><circle cx="18" cy="16" r="4" fill="#73d8eb"/><circle cx="31" cy="16" r="4" fill="#e3b84f"/><path d="M13 35v-9c0-4 2-6 5-6s5 2 5 6v9M26 35v-9c0-4 2-6 5-6s5 2 5 6v9" fill="none" stroke="#f4fbff" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+
+const settingsVisual=kind=>{
+  const art={
+    people:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="27" cy="25" r="11" fill="#58bde2"/><circle cx="48" cy="28" r="8" fill="#8c85e8"/><path d="M10 57c2-13 9-20 18-20s17 7 19 20" fill="#2e7ca0"/><path d="M39 56c2-10 7-15 13-15 6 0 10 5 11 15" fill="#665fb5"/></svg>`,
+    categories:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="11" y="11" width="22" height="22" rx="6" fill="#55cdb8"/><rect x="39" y="11" width="22" height="22" rx="6" fill="#e4b94d"/><rect x="11" y="39" width="22" height="22" rx="6" fill="#6dbbe7"/><rect x="39" y="39" width="22" height="22" rx="6" fill="#b68ae8"/><path d="M18 22h8M46 22h8M18 50h8M46 50h8" stroke="#f7fbff" stroke-width="3" stroke-linecap="round"/></svg>`,
+    regular:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="m36 9 7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L36 47.3 21 55.2l2.9-16.7L11.7 26.6l16.8-2.4L36 9Z" fill="#d9ac40"/><path d="m27 36 6 6 13-15" fill="none" stroke="#fff4c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    custom:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 49 45 20l9 9-29 29-12 2 3-11Z" fill="#9a78df"/><path d="m42 23 8 8" stroke="#eadfff" stroke-width="4"/><path d="M17 49l8 8" stroke="#f7f0ff" stroke-width="3"/><circle cx="54" cy="17" r="8" fill="#e3b44a"/></svg>`,
+    advanced:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 21h44M14 36h44M14 51h44" stroke="#9fb6c6" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#5ec9df"/><circle cx="47" cy="36" r="8" fill="#b387e5"/><circle cx="24" cy="51" r="8" fill="#e1b44c"/></svg>`,
+    transfer:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="15" width="32" height="42" rx="7" fill="#d09a2d"/><path d="M21 27h16M21 36h11" stroke="#fff0bd" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="48" r="14" fill="#2aa891"/><path d="M43 48h15M53 42l6 6-6 6" fill="none" stroke="#effff9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    rate:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="26" cy="30" r="17" fill="#2f9b88"/><circle cx="47" cy="43" r="17" fill="#4d99c4"/><path d="M20 30h12M26 21v18M41 43h12M47 34v18" stroke="#eafff8" stroke-width="4" stroke-linecap="round"/><path d="M38 19c8 1 13 5 16 11M34 54c-8-1-13-5-16-11" fill="none" stroke="#bdeef6" stroke-width="3" stroke-linecap="round"/></svg>`,
+    reset:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M19 23a24 24 0 1 1-5 25" fill="none" stroke="#d66d77" stroke-width="7" stroke-linecap="round"/><path d="M18 12v14H4" fill="none" stroke="#f3aab1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 24v16" stroke="#ffe6e8" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="49" r="3" fill="#ffe6e8"/></svg>`
+  }[kind]||'';
+  return `<span class="settings-icon premium-settings-visual" aria-hidden="true">${art}</span>`;
+};
+
 const TOILET_PHRASES={
   Germany:['de','ltr','Wo ist die Toilette?'],Austria:['de','ltr','Wo ist die Toilette?'],Switzerland:['de','ltr','Wo ist die Toilette?'],
   France:['fr','ltr','Où sont les toilettes ?'],Belgium:['fr','ltr','Où sont les toilettes ?'],Netherlands:['nl','ltr','Waar is het toilet?'],
@@ -116,7 +212,8 @@ function openDialog({title,message='',tone='info',confirmLabel='OK',cancelLabel=
   return new Promise(resolve=>{
     closeDialog._resolver=resolve;closeDialog._origin=origin;
     dialogRoot.hidden=false;
-    dialogRoot.innerHTML=`<div class="dialog-backdrop"><section class="app-dialog dialog-${esc(tone)}" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-accent"></div><h2 id="dialogTitle">${esc(title)}</h2>${message?`<p>${esc(message)}</p>`:''}${html}<div class="dialog-actions">${cancelLabel?`<button class="btn secondary" type="button" data-dialog-cancel>${esc(cancelLabel)}</button>`:''}<button class="btn ${tone==='danger'?'danger':tone==='attention'?'warm':'primary'}" type="button" data-dialog-confirm>${esc(confirmLabel)}</button></div></section></div>`;
+    const confirmKind=tone==='danger'?'delete':tone==='attention'?'finish':confirmLabel==='Close'?'close':'save';
+    dialogRoot.innerHTML=`<div class="dialog-backdrop"><section class="app-dialog dialog-${esc(tone)}" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-accent"></div>${dialogVisual(tone)}<h2 id="dialogTitle">${esc(title)}</h2>${message?`<p>${esc(message)}</p>`:''}${html}<div class="dialog-actions">${cancelLabel?`<button class="btn secondary" type="button" data-dialog-cancel>${buttonVisual('cancel')}<span>${esc(cancelLabel)}</span></button>`:''}<button class="btn ${tone==='danger'?'danger':tone==='attention'?'warm':'primary'}" type="button" data-dialog-confirm>${buttonVisual(confirmKind)}<span>${esc(confirmLabel)}</span></button></div></section></div>`;
     const backdrop=dialogRoot.querySelector('.dialog-backdrop');
     const onClick=e=>{if(e.target.closest('[data-dialog-confirm]'))closeDialog(true);else if(e.target.closest('[data-dialog-cancel]'))closeDialog(false);else if(dismissible&&e.target===backdrop)closeDialog(cancelLabel?false:true);};
     const onKey=e=>{
@@ -202,26 +299,52 @@ async function renderRoute(next=route){
 }
 
 function shoppingActionIcon(kind){
-  const path={
-    got:'<path d="m5 12 4 4L19 6"/>',
-    undo:'<path d="M9 7 4 12l5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/>',
-    unavailable:'<circle cx="12" cy="12" r="8"/><path d="m7 17 10-10"/>'
-  }[kind]||'<path d="M12 5v14M5 12h14"/>';
-  return `<span class="action-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
+  const art={
+    got:'<circle cx="12" cy="12" r="9" fill="#2da884"/><path d="m7.4 12.1 3.1 3.1 6.4-7" fill="none" stroke="#effff8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+    undo:'<circle cx="12" cy="12" r="9" fill="#556fc5"/><path d="M10 8 6 12l4 4" fill="none" stroke="#f2f4ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12h6.2c3 0 5 1.8 5 4.7" fill="none" stroke="#dfe5ff" stroke-width="2.2" stroke-linecap="round"/>',
+    unavailable:'<circle cx="12" cy="12" r="9" fill="#c96778"/><path d="m7.5 16.5 9-9" fill="none" stroke="#fff2f5" stroke-width="2.4" stroke-linecap="round"/>',
+    add:'<circle cx="12" cy="12" r="9" fill="#b88327"/><path d="M12 7v10M7 12h10" fill="none" stroke="#fff7dc" stroke-width="2.4" stroke-linecap="round"/>'
+  }[kind]||'<circle cx="12" cy="12" r="9" fill="#5b7688"/>';
+  return `<span class="action-line-icon premium-action-icon action-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
+}
+
+function shoppingHeaderArt(){
+  return `<span class="shopping-title-visual" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 24h44l-5 35H20l-6-35Z" fill="#b67f25"/><path d="M24 25c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffe09a" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="39" r="7" fill="#55cdb8"/><circle cx="44" cy="39" r="7" fill="#d9829b"/><path d="M27 51h18" stroke="#fff0bd" stroke-width="3.2" stroke-linecap="round"/><path d="m53 15 2 4 4 .8-3 3 .7 4.2-3.7-2-3.8 2 .8-4.2-3-3 4.1-.8 1.9-4Z" fill="#72dff1"/></svg></span>`;
+}
+
+function shoppingEmptyArt(){
+  return `<span class="premium-empty-art shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 25h44l-5 34H20l-6-34Z" fill="#b98127"/><path d="M24 26c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffe19d" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="41" r="7" fill="#55cdb8"/><circle cx="44" cy="41" r="7" fill="#d9829b"/><circle cx="56" cy="17" r="10" fill="#2fa9c8"/><path d="M56 11v12M50 17h12" stroke="#effcff" stroke-width="3.2" stroke-linecap="round"/></svg></span>`;
+}
+
+function peopleEmptyArt(){
+  return `<span class="premium-empty-art people-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><circle cx="28" cy="25" r="11" fill="#58bde2"/><circle cx="48" cy="29" r="8" fill="#9c88e9"/><path d="M10 59c2-14 9-21 19-21s17 7 19 21" fill="#2e7ca0"/><path d="M40 58c2-10 7-15 13-15s10 5 11 15" fill="#6d62ba"/><circle cx="57" cy="17" r="9" fill="#e1b44c"/><path d="M57 12v10M52 17h10" stroke="#fff5cf" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+}
+
+function regularItemsButtonArt(){
+  return `<span class="shopping-menu-art" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m24 7 4.6 9.2 10.2 1.5-7.4 7.2 1.8 10.2L24 30.2l-9.2 4.9 1.8-10.2-7.4-7.2 10.2-1.5L24 7Z" fill="#e5b94f"/><path d="m18.5 24 3.7 3.7 7.6-8.4" fill="none" stroke="#fff4c6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
 
 function stayFieldIcon(kind){
-  const path={
-    country:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
-    city:'<path d="M12 21s7-7 7-12a7 7 0 1 0-14 0c0 5 7 12 7 12Z"/><circle cx="12" cy="9" r="2"/>',
-    start:'<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16M8 14h3"/>',
-    end:'<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v6M16 3v6M4 10h16M13 14h3M15 12v4"/>'
-  }[kind]||'<circle cx="12" cy="12" r="7"/>';
-  return `<span class="field-label-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
+  const art={
+    country:'<circle cx="20" cy="20" r="15" fill="#236f88"/><path d="M6 20h28M20 5c6 6 6 24 0 30M20 5c-6 6-6 24 0 30" fill="none" stroke="#a9eff8" stroke-width="2.6" stroke-linecap="round"/>',
+    city:'<path d="M20 36S33 24 33 15a13 13 0 1 0-26 0c0 9 13 21 13 21Z" fill="#b78028"/><circle cx="20" cy="15" r="5" fill="#fff0bf"/><circle cx="20" cy="15" r="2.2" fill="#d39c35"/>',
+    start:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#277e66"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#55c59f"/><path d="M12 5v7M28 5v7" stroke="#dff8ee" stroke-width="2.6" stroke-linecap="round"/><path d="M12 22h7M12 28h10" stroke="#effff8" stroke-width="2.8" stroke-linecap="round"/>',
+    end:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#6f57a1"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#a483d8"/><path d="M12 5v7M28 5v7" stroke="#f1e8ff" stroke-width="2.6" stroke-linecap="round"/><path d="M19 22v8M15 26h8" stroke="#fbf8ff" stroke-width="2.8" stroke-linecap="round"/>'
+  }[kind]||'<circle cx="20" cy="20" r="14" fill="#526676"/>';
+  return `<span class="field-label-icon field-label-${esc(kind)} premium-stay-symbol" aria-hidden="true"><svg viewBox="0 0 40 40">${art}</svg></span>`;
 }
 
 function subscreenBack(label='Shopping',attr='data-back-shopping'){
-  return `<button class="subscreen-back-button" type="button" ${attr}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>${esc(label)}</span></button>`;
+  return `<button class="subscreen-back-button premium-back-button" type="button" ${attr}>${buttonVisual('back')}<span>${esc(label)}</span></button>`;
+}
+
+function shoppingFilterVisual(kind){
+  const art={
+    all:'<rect x="4" y="5" width="16" height="14" rx="5" fill="#7e6226"/><circle cx="9" cy="10" r="2.2" fill="#55cdb8"/><circle cx="15" cy="10" r="2.2" fill="#d9829b"/><path d="M8 15h8" stroke="#ffe8ae" stroke-width="2" stroke-linecap="round"/>',
+    'to-buy':'<path d="M5 8h14l-2 11H7L5 8Z" fill="#b37c27"/><path d="M9 9c0-4 1.5-6 3-6s3 2 3 6" fill="none" stroke="#ffe2a0" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="17" r="4" fill="#4cb8d6"/><path d="M17 14.5v5M14.5 17h5" stroke="#f3fdff" stroke-width="1.8" stroke-linecap="round"/>',
+    done:'<circle cx="12" cy="12" r="9" fill="#2d9f7d"/><path d="m7.5 12 3 3 6-7" fill="none" stroke="#effff7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  }[kind]||'';
+  return `<span class="shopping-filter-visual shopping-filter-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
 }
 
 function shoppingCounts(items){
@@ -242,7 +365,7 @@ function shoppingPreviewMarkup({itemName='',categoryName='Other',requesterName='
 
 function stayHero(stay=currentStay){
   if(!stay)return'';
-  return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge" aria-hidden="true"><b>WC</b><small>Phrase</small></span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
+  return `<button type="button" class="hero compact-hero stay-hero-action" data-toilet-phrase aria-label="${esc(stay.country)} ${esc(stay.city)}. Open toilet phrase helper."><div class="hero-top"><div class="flag-plate"><div class="flag">${esc(stay.flag||'◉')}</div></div><div class="hero-copy"><p class="eyebrow">Travel Buddy · Current Stay</p><h2>${esc(stay.country)}</h2><p>${esc(stay.city)}</p></div><span class="wc-badge premium-wc-badge" aria-hidden="true">${toiletVisual()}<small>Phrase</small></span></div><div class="hero-meta"><span class="pill">${esc(stay.startDate)} – ${esc(stay.endDate)}</span><span class="pill currency-pill">${esc(stay.currencyCode)}</span></div></button>`;
 }
 
 function stayStrip(){
@@ -250,14 +373,15 @@ function stayStrip(){
 }
 
 function emptyCard(text,button,label,kind='empty'){
-  const icon=kind==='shopping'?'<svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg>':kind==='people'?settingsIcon('people').replace('settings-icon','empty-inline-icon'):kind==='expenses'?expenseCategoryIcon('Misc'):'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  const icon=kind==='shopping'?shoppingEmptyArt():kind==='people'?peopleEmptyArt():kind==='expenses'?expenseStatusArt('empty'):'<span class="premium-empty-art generic-empty-art"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="24" fill="#425a69"/><path d="M36 24v24M24 36h24" stroke="#eef6fa" stroke-width="5" stroke-linecap="round"/></svg></span>';
   const emptyTone=kind==='shopping'?'gold':kind==='people'?'blue':kind==='expenses'?'blue':'silver';
-  return `<div class="card empty premium-empty" data-tone="${emptyTone}"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${esc(label)}</button>`:''}</div>`;
+  const emptyActionIcon=label&&/^Add\b/i.test(label)?buttonVisual('add'):'';
+  return `<div class="card empty premium-empty" data-tone="${emptyTone}"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${emptyActionIcon}<span>${esc(label)}</span></button>`:''}</div>`;
 }
 
 function expenseRow(expense,origin=route,{showTransfer=true}={}){
   const secondary=expense.audAmount!==null&&expense.audAmount!==undefined?formatAud(expense.audAmount):'';
-  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryIcon(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}">${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
+  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryVisual(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span><span class="expense-row-chevron" aria-hidden="true">›</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}"><span class="transfer-button-icon" aria-hidden="true">${expenseStatusIcon(expense.transferred?'transferred':'pending')}</span>${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
 }
 
 async function renderHome(){
@@ -268,15 +392,15 @@ async function renderHome(){
   const counts=shoppingCounts(shopping);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const homeItems=shopping.slice(0,2);
-  const homeArt=homeItems.length?homeItems.map(item=>{const category=categoryMap.get(item.categoryId);return `<span class="home-shopping-art product-art" data-item-name="${esc(item.itemName)}" data-state="${esc(item.state)}" aria-hidden="true">${productArt(item.itemName,category?.name||'Other')}</span>`;}).join(''):'<span class="home-shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h2l2.2 9h9.8l2-6H6.2"/><circle cx="9" cy="18" r="1.4"/><circle cx="17" cy="18" r="1.4"/></svg></span>';
+  const homeArt=homeItems.length?homeItems.map(item=>{const category=categoryMap.get(item.categoryId);return `<span class="home-shopping-art product-art" data-item-name="${esc(item.itemName)}" data-state="${esc(item.state)}" aria-hidden="true">${productArt(item.itemName,category?.name||'Other')}</span>`;}).join(''):`<span class="home-shopping-empty-art premium-home-shopping-empty" aria-hidden="true">${shoppingEmptyArt()}</span>`;
   const shoppingStatus=shopping.length?`${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable`:'Ready for your next shop';
   present(`${stayHero()}
     <div class="home-core-actions">
-      <button class="home-action expense-home" data-add-expense><span class="home-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
+      <button class="home-action expense-home" data-add-expense><span class="home-action-icon premium-home-expense-art" aria-hidden="true">${expenseStatusArt('add')}</span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
       <button class="home-action shopping-home" data-open-shopping><span class="home-shopping-pictures">${homeArt}</span><span class="home-action-copy"><strong>Shopping List</strong><small>${esc(shoppingStatus)}</small></span><span class="home-action-arrow" aria-hidden="true">›</span></button>
     </div>
-    <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h11l-3-3M19 17H8l3 3"/></svg></span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
-    <div class="section-title-row"><h3 class="section-title">Recent Expenses</h3><button class="section-link" type="button" data-open-expenses>View all</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon premium-transfer-art" aria-hidden="true">${expenseStatusArt('pending')}</span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
+    <div class="section-title-row"><h3 class="section-title">Recent Expenses</h3><button class="section-link premium-section-link" type="button" data-open-expenses><span>View all</span>${miniActionVisual('view')}</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 async function renderExpenses(){
   const expenses=await getAll('expenses');
@@ -286,12 +410,16 @@ async function renderExpenses(){
   if(expenseFilter==='pending')rows=rows.filter(expense=>!expense.transferred);
   else if(expenseFilter==='transferred')rows=rows.filter(expense=>expense.transferred);
   rows.sort(expenseSortNewest);
-  present(`${pageHead('Expenses','To enter later.','Expenses')}${stayStrip()}
-    <button class="btn primary full quick-add-button" data-add-expense>Add Expense</button>
-    <div class="filters expense-filters" aria-label="Expense filters" aria-live="polite" aria-atomic="true">
-      ${[['pending','To Transfer',pendingCount],['transferred','Transferred',transferredCount],['all','All',expenses.length]].map(([value,label,count])=>`<button class="filter ${expenseFilter===value?'is-active':''}" aria-pressed="${expenseFilter===value?'true':'false'}" data-expense-filter="${value}">${label} <b>${count}</b></button>`).join('')}
+  const summary=[['pending','To Transfer',pendingCount],['transferred','Transferred',transferredCount],['all','All Expenses',expenses.length]];
+  const listTitle=expenseFilter==='pending'?'To Transfer':expenseFilter==='transferred'?'Transferred':'Recent Expenses';
+  const listHint=expenseFilter==='pending'?'Waiting to enter later':expenseFilter==='transferred'?'Already entered':'Newest first';
+  present(`${pageHead('Expenses','Quick local spending capture.','Expenses')}${stayStrip()}
+    <button class="btn primary full quick-add-button premium-add-expense-hero" data-add-expense><span class="quick-add-leading-icon" aria-hidden="true">${expenseStatusArt('add')}</span><span class="quick-add-copy"><strong>Add Expense</strong><small>Fast ${esc(currentStay.currencyCode)} capture</small></span><span class="quick-add-chevron" aria-hidden="true">›</span></button>
+    <div class="expense-overview-band" aria-label="Expense filters">
+      ${summary.map(([value,label,count])=>`<button type="button" class="expense-overview-card ${expenseFilter===value?'is-active':''}" data-expense-filter="${value}" aria-pressed="${expenseFilter===value?'true':'false'}"><span class="expense-overview-icon" aria-hidden="true">${expenseStatusArt(value)}</span><span class="expense-overview-number">${count}</span><span class="expense-overview-label">${label}</span><span class="expense-overview-chevron" aria-hidden="true">›</span></button>`).join('')}
     </div>
-    <div class="list continuous-ledger">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <div class="section-title-row expense-list-title"><div><h3 class="section-title">${listTitle}</h3><span>${listHint}</span></div><b>${rows.length}</b></div>
+    <div class="list continuous-ledger expense-ledger-shell">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 function expenseEditor(existing=null,defaults={}){
   const stay=existing?.staySnapshot||currentStay;
@@ -317,9 +445,9 @@ function expenseEditor(existing=null,defaults={}){
       <section class="expense-category-panel premium-category-panel" aria-labelledby="categoryHeading">
         <div class="expense-section-head"><span><small>Required</small><strong id="categoryHeading">What was it for?</strong></span><em id="categoryStatus" aria-live="polite" aria-atomic="true">${selectedCategory?esc(selectedCategory):'Choose one'}</em></div>
         <input type="hidden" name="category" id="expenseCategory" value="${esc(selectedCategory)}">
-        <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryIcon(category)}</span><span class="expense-choice-copy"><strong>${esc(category)}</strong><small>${category==='Groceries'?'Food & supermarket':category==='Eating Out'?'Cafés & restaurants':category==='Transport'?'Taxi, train & fuel':category==='Entertainment'?'Fun & activities':category==='Tickets'?'Entry & attractions':category==='Shopping'?'Things you bought':'Anything else'}</small></span></button>`).join('')}</div>
+        <div class="expense-category-grid">${EXPENSE_CATEGORIES.map(category=>`<button type="button" class="expense-category-choice ${selectedCategory===category?'is-selected':''}" data-expense-category="${esc(category)}" data-tone="${expenseTone(category)}" aria-pressed="${selectedCategory===category?'true':'false'}"><span class="expense-choice-icon" aria-hidden="true">${expenseCategoryVisual(category)}</span><span class="expense-choice-copy"><strong>${esc(category)}</strong><small>${category==='Groceries'?'Food & supermarket':category==='Eating Out'?'Cafés & restaurants':category==='Transport'?'Taxi, train & fuel':category==='Entertainment'?'Fun & activities':category==='Tickets'?'Entry & attractions':category==='Shopping'?'Things you bought':'Anything else'}</small></span></button>`).join('')}</div>
       </section>
-      <button class="btn primary full save-expense-button premium-save-expense" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}><span class="save-expense-icon" aria-hidden="true">✓</span>${editing?'Save Changes':'Save Expense'}</button>
+      <button class="btn primary full save-expense-button premium-save-expense" id="saveExpenseButton" type="submit" ${selectedCategory&&editing?'':'disabled'}>${buttonVisual('save')}<span>${editing?'Save Changes':'Save Expense'}</span></button>
       <details class="optional-details premium-optional-details" ${editing?'open':''}>
         <summary><span><small>Optional</small><strong>Date & note</strong></span></summary>
         <div class="optional-details-body">
@@ -328,9 +456,9 @@ function expenseEditor(existing=null,defaults={}){
           ${editing?'<p class="micro-note">Saving an edited expense marks it To Transfer again.</p>':''}
         </div>
       </details>
-      <button class="btn secondary full expense-cancel-button" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">Cancel</button>
+      <button class="btn secondary full expense-cancel-button" type="button" data-editor-cancel data-cancel-route="${esc(expenseReturnRoute)}">${buttonVisual('cancel')}<span>Cancel</span></button>
     </form>
-    ${editing?`<button class="btn danger full delete-below" data-delete-expense="${esc(existing.id)}">Delete Expense</button>`:''}`,
+    ${editing?`<button class="btn danger full delete-below" data-delete-expense="${esc(existing.id)}">${buttonVisual('delete')}<span>Delete Expense</span></button>`:''}`,
     {subscreen:true,focusSelector:editing?null:'#expenseAmount'});
 
   const form=screen.querySelector('#expenseForm');
@@ -388,14 +516,15 @@ async function renderShopping(){
   const stayDate=shortAuDate(currentStay.startDate);
   present(`<header class="shopping-screen-head">
       <div class="shopping-screen-title"><p class="eyebrow">Shopping</p><h1>My Shopping List</h1><p>${esc(currentStay.city)}, ${esc(currentStay.country)}</p><span>${esc(stayDate)}</span></div>
-      <button class="shopping-head-menu" type="button" data-regular-items aria-label="Regular Items"><span aria-hidden="true">•••</span></button>
+      ${shoppingHeaderArt()}
+      <button class="shopping-head-menu" type="button" data-regular-items aria-label="Regular Items">${regularItemsButtonArt()}</button>
     </header>
-    ${items.length?`<div class="shopping-filterbar target-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}"><span>${label}</span><b>${count}</b></button>`).join('')}</div>`:''}
-    ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add</button><button class="finish-inline" type="button" data-finish-shopping ${counts.got?'':'disabled'}>Finish</button></div>`:''}
+    ${items.length?`<div class="shopping-filterbar target-filterbar" role="group" aria-label="Shopping filters" aria-live="polite" aria-atomic="true">${[['all','All',counts.all],['to-buy','To Buy',counts.pending],['done','Done',counts.done]].map(([value,label,count])=>`<button class="shopping-filter ${shoppingFilter===value?'is-active':''}" type="button" data-shopping-filter="${value}" aria-pressed="${shoppingFilter===value?'true':'false'}">${shoppingFilterVisual(value)}<span>${label}</span><b>${count}</b></button>`).join('')}</div>`:''}
+    ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add premium-shop-action" type="button" data-add-shop>${miniActionVisual('add')}<span>Add</span></button><button class="finish-inline premium-shop-action" type="button" data-finish-shopping ${counts.got?'':'disabled'}>${miniActionVisual('finish')}<span>Finish</span></button></div>`:''}
     ${counts.unavailable?`<div class="shopping-unavailable-note"><span aria-hidden="true">${shoppingActionIcon('unavailable')}</span><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></div>`:''}
-    ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>Add Grocery Expense</button></div>`:''}
-    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
-    ${items.length?'<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop><span aria-hidden="true">＋</span> Add Item</button>':''}`);
+    ${justFinishedShopping?`<div class="finished-shop-card"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span><button class="btn primary full" data-shop-expense>${buttonVisual('add')}<span>Add Grocery Expense</span></button></div>`:''}
+    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty premium-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 72 72"><rect x="14" y="15" width="44" height="42" rx="14" fill="#162d39"/><path d="M21 28h22M49 28h3M21 44h3M30 44h22" fill="none" stroke="#8fd8e8" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="28" r="6" fill="#d7a842"/><circle cx="27" cy="44" r="6" fill="#55cdb8"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
+    ${items.length?`<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop>${buttonVisual('add')}<span>Add Item</span></button>`:''}`);
 }
 function shoppingRow(item,personMap,categoryMap){
   const person=personMap.get(item.requesterId);
@@ -404,13 +533,13 @@ function shoppingRow(item,personMap,categoryMap){
   const meta=[item.quantity||'',item.note||''].filter(Boolean).join(' · ');
   const stateText=item.state==='couldnt'?`<small class="shop-state-note">Couldn’t get · keep for next time</small>`:'';
   return `<article class="shop-row target-shop-row" data-state="${esc(item.state)}" data-tone="${categoryTone(category)}">
-      <button class="shop-check-control" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}"><span class="shop-check-mark" aria-hidden="true">${item.state==='got'?'✓':''}</span></button>
+      <button class="shop-check-control premium-shop-row-action" type="button" data-shop-state="got" data-shop-id="${esc(item.id)}" aria-label="${item.state==='got'?'Undo Got It':'Mark Got It'}" aria-pressed="${item.state==='got'?'true':'false'}">${shoppingActionIcon(item.state==='got'?'undo':'got')}</button>
       <button class="shop-item-main" data-edit-shop="${esc(item.id)}" aria-label="Edit ${esc(item.itemName)}">
         <span class="shop-item-picture product-art" data-item-name="${esc(item.itemName)}" aria-hidden="true">${art}</span>
         <span class="shop-item-copy"><strong>${esc(item.itemName)}</strong>${meta?`<small>${esc(meta)}</small>`:''}${stateText}</span>
         ${person?`<span class="initials target-initials" title="${esc(person.name)}">${esc(person.initials)}</span>`:''}
       </button>
-      <button class="shop-couldnt-control ${item.state==='couldnt'?'is-active':''}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}"><span class="shop-grip-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12M6 12h12M6 16h12"/></svg></span></button>
+      <button class="shop-couldnt-control premium-shop-row-action ${item.state==='couldnt'?'is-active':''}" type="button" data-shop-state="couldnt" data-shop-id="${esc(item.id)}" aria-label="${item.state==='couldnt'?"Undo Couldn’t Get":"Mark Couldn’t Get"}" aria-pressed="${item.state==='couldnt'?'true':'false'}">${shoppingActionIcon(item.state==='couldnt'?'undo':'unavailable')}</button>
     </article>`;
 }
 async function showAddShopping(category=null){
@@ -420,14 +549,14 @@ async function showAddShopping(category=null){
     present(`${subscreenBack('Shopping')} ${pageHead('Add Item','Tap a picture.','Shopping')}
       <div class="category-grid">${ordered.map(c=>`<button class="category-box ${c.name==='Other'?'category-other':''}" data-tone="${categoryTone(c)}" data-category-name="${esc(c.name)}" data-choose-category="${esc(c.id)}"><span class="category-picture" aria-hidden="true">${categoryHeroArt(c.name)}</span><span class="category-label"><span class="category-line-art">${categoryArt(c)}</span><strong>${esc(c.name)}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>`).join('')}</div>
       <details class="meal-ideas-panel"><summary><span>Meal Ideas</span><small>Optional inspiration</small></summary><div class="meal-ideas">${mealIdeas.map(idea=>`<span>${esc(idea)}</span>`).join('')}</div></details>
-      <button class="btn secondary full back-button" data-back-shopping>Back to Shopping</button>`,{subscreen:true});
+      <button class="btn secondary full back-button" data-back-shopping>${buttonVisual('back')}<span>Back to Shopping</span></button>`,{subscreen:true});
     return;
   }
   const matches=catalogue.filter(item=>item.categoryId===category.id).sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   present(`${subscreenBack('Categories','data-add-shop')} ${pageHead(category.name,'Tap an item to add it.','Shopping')}
     <div class="catalogue-grid">${matches.map(item=>`<button class="catalogue-tile" data-tone="${categoryTone(category)}" data-category-name="${esc(category.name)}" data-item-name="${esc(item.name)}" data-quick-shop-item="${esc(item.id)}"><span class="catalogue-picture product-art" aria-hidden="true">${productArt(item.name,category.name)}</span><strong>${esc(item.name)}</strong></button>`).join('')||`<div class="span-two">${emptyCard('No saved items in this category yet','','','shopping')}</div>`}</div>
-    <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">Add Something Else</button>
-    <button class="btn secondary full" data-add-shop>Back to Categories</button>`,{subscreen:true});
+    <button class="btn warm full custom-shop-button" data-custom-shop="${esc(category.id)}">${buttonVisual('add')}<span>Add Something Else</span></button>
+    <button class="btn secondary full" data-add-shop>${buttonVisual('back')}<span>Back to Categories</span></button>`,{subscreen:true});
 }
 async function customShoppingItemEditor(category){
   const [people,activeItems]=await Promise.all([getAll('people'),getAll('shoppingItems')]);
@@ -436,13 +565,13 @@ async function customShoppingItemEditor(category){
     <div id="shoppingLivePreview">${shoppingPreviewMarkup({categoryName:category.name})}</div>
     <form class="editor-card simple-shopping-editor" id="shoppingItemForm">
       <label>Item name<input id="customShoppingName" name="itemName" required maxlength="80" autocomplete="off"></label>
-      <button class="btn warm full" type="submit">Add Item</button>
+      <button class="btn warm full" type="submit">${buttonVisual('add')}<span>Add Item</span></button>
       <details class="optional-details"><summary>Optional details</summary><div class="optional-details-body">
         <label>Quantity<input name="quantity" maxlength="30"></label>
         <label>Requester<select name="requesterId"><option value="">None</option>${people.map(person=>`<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('')}</select></label>
         <label>Note<input name="note" maxlength="160"></label>
       </div></details>
-      <button type="button" class="btn secondary full" data-back-category="${esc(category.id)}">Cancel</button>
+      <button type="button" class="btn secondary full" data-back-category="${esc(category.id)}">${buttonVisual('cancel')}<span>Cancel</span></button>
     </form>`,{subscreen:true,focusSelector:'#customShoppingName'});
   const form=screen.querySelector('#shoppingItemForm');
   const nameInput=form.elements.itemName, requesterSelect=form.elements.requesterId, preview=screen.querySelector('#shoppingLivePreview');
@@ -488,9 +617,9 @@ async function shoppingItemEditor(item){
       <div class="field-grid two"><label>Quantity<input name="quantity" maxlength="30" value="${esc(item.quantity||'')}"></label><label>Requester<select name="requesterId"><option value="">None</option>${people.map(person=>`<option value="${esc(person.id)}" ${person.id===item.requesterId?'selected':''}>${esc(person.name)}</option>`).join('')}</select></label></div>
       <label>Category<select name="categoryId">${orderedCategories.map(category=>`<option value="${esc(category.id)}" ${category.id===item.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label>
       <label>Note <span class="hint">Optional</span><input name="note" maxlength="160" value="${esc(item.note||'')}"></label>
-      <div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-shopping>Cancel</button><button class="btn warm" type="submit">Save</button></div>
+      <div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-shopping>${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn warm" type="submit">${buttonVisual('save')}<span>Save</span></button></div>
     </form>
-    <button class="btn danger full delete-below" data-delete-shop="${esc(item.id)}">Remove Item</button>`,{subscreen:true});
+    <button class="btn danger full delete-below" data-delete-shop="${esc(item.id)}">${buttonVisual('delete')}<span>Remove Item</span></button>`,{subscreen:true});
   const form=screen.querySelector('#shoppingEditForm'), preview=screen.querySelector('#shoppingEditPreview');
   const refresh=()=>{const category=orderedCategories.find(c=>c.id===form.elements.categoryId.value);const person=people.find(p=>p.id===form.elements.requesterId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.itemName.value,categoryName:category?.name||'Other',requesterName:person?.name||'',requesterInitials:person?.initials||''});};
   form.elements.itemName.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);form.elements.requesterId.addEventListener('change',refresh);refresh();
@@ -508,9 +637,9 @@ async function showRegularItems(){
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
   present(`${subscreenBack('Shopping')} ${pageHead('Regular Items','Tap Add for the things you buy often.','Shopping')}
-    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini" data-add-regular="${esc(item.id)}">Add</button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
-    <button class="btn warm full" data-add-regular-inline>Add Regular Item</button>
-    <button class="btn secondary full" data-back-shopping>Back</button>`,{subscreen:true});
+    <div class="regular-grid">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<div class="regular-card" data-tone="${categoryTone(category)}"><span class="catalogue-picture product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div><strong>${esc(item.name)}</strong><small>${esc(category?.name||'Other')}</small></div><button class="mini premium-mini-action add-action" data-add-regular="${esc(item.id)}">${miniActionVisual('add')}<span>Add</span></button></div>`;}).join(''):`<div class="span-two">${emptyCard('No Regular Items yet','','','shopping')}</div>`}</div>
+    <button class="btn warm full" data-add-regular-inline>${buttonVisual('add')}<span>Add Regular Item</span></button>
+    <button class="btn secondary full" data-back-shopping>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function shareShopping(){
@@ -584,16 +713,16 @@ async function renderSettings(){
   present(`${pageHead('Settings','','Settings')}
     <section class="settings-section settings-current" data-tone="blue"><h2>Current Stay</h2>
       <div class="settings-summary premium-stay-summary"><div class="flag-plate mini-flag"><div class="flag">${esc(currentStay.flag)}</div></div><div><strong>${esc(currentStay.country)} · ${esc(currentStay.city)}</strong><span>${esc(currentStay.startDate)} – ${esc(currentStay.endDate)} · ${esc(currentStay.currencyCode)}</span></div></div>
-      <div class="button-row"><button class="btn secondary" data-edit-stay>Edit Stay</button><button class="btn primary" data-change-stay>Change Stay</button></div>
+      <div class="button-row"><button class="btn secondary" data-edit-stay>${buttonVisual('edit')}<span>Edit Stay</span></button><button class="btn primary" data-change-stay>${buttonVisual('change')}<span>Change Stay</span></button></div>
     </section>
     <section class="settings-section settings-shopping" data-tone="gold"><h2>Shopping Setup</h2>
-      <button class="settings-row" data-tone="blue" data-manage-people>${settingsIcon('people')}<span class="settings-row-copy"><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="gold" data-manage-categories>${settingsIcon('categories')}<span class="settings-row-copy"><strong>Categories</strong><span>${categories.length} available</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="teal" data-manage-regulars>${settingsIcon('regular')}<span class="settings-row-copy"><strong>Regular Items</strong><span>${regulars.length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="purple" data-manage-custom>${settingsIcon('custom')}<span class="settings-row-copy"><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="blue" data-manage-people>${settingsVisual('people')}<span class="settings-row-copy"><strong>People</strong><span>${people.length} requester${people.length===1?'':'s'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="gold" data-manage-categories>${settingsVisual('categories')}<span class="settings-row-copy"><strong>Categories</strong><span>${categories.length} available</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="teal" data-manage-regulars>${settingsVisual('regular')}<span class="settings-row-copy"><strong>Regular Items</strong><span>${regulars.length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="purple" data-manage-custom>${settingsVisual('custom')}<span class="settings-row-copy"><strong>Custom Items</strong><span>${catalogue.filter(item=>!item.builtIn).length} saved</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </section>
     <section class="settings-section settings-advanced" data-tone="silver"><h2>More</h2>
-      <button class="settings-row" data-tone="silver" data-advanced-settings>${settingsIcon('advanced')}<span class="settings-row-copy"><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="silver" data-advanced-settings>${settingsVisual('advanced')}<span class="settings-row-copy"><strong>Advanced</strong><span>List transfer, optional AUD conversion and reset</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </section>
     <p class="app-version">Travel Buddy V1 · Build ${esc(BUILD_VERSION)} · Offline local PWA</p>`);
 }
@@ -601,13 +730,13 @@ async function renderSettings(){
 async function advancedSettings(){
   const shoppingItems=await getAll('shoppingItems');
   present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Advanced','','Settings')}
-    <div class="utility-summary-band" data-tone="silver"><span class="utility-summary-icon">${settingsIcon('advanced')}</span><span><small>Offline Controls</small><strong>Local tools for this phone</strong><em>${shoppingItems.length} shopping item${shoppingItems.length===1?'':'s'} · ${stayRate(currentStay)?'AUD conversion on':'AUD conversion off'}</em></span></div>
+    <div class="utility-summary-band" data-tone="silver"><span class="utility-summary-icon">${settingsVisual('advanced')}</span><span><small>Offline Controls</small><strong>Local tools for this phone</strong><em>${shoppingItems.length} shopping item${shoppingItems.length===1?'':'s'} · ${stayRate(currentStay)?'AUD conversion on':'AUD conversion off'}</em></span></div>
     <div class="settings-list premium-settings-list advanced-tool-list">
-      <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsIcon('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
-      <button class="settings-row danger" data-tone="red" data-reset>${settingsIcon('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="gold" data-shopping-tools>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Shopping List Transfer</strong><span>Manual share/import only</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row" data-tone="teal" data-exchange-rate>${settingsVisual('rate')}<span class="settings-row-copy"><strong>Optional AUD Conversion</strong><span>${stayRate(currentStay)?`1 AUD = ${esc(stayRate(currentStay))} ${esc(currentStay.currencyCode)}`:'Off'}</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
+      <button class="settings-row danger" data-tone="red" data-reset>${settingsVisual('reset')}<span class="settings-row-copy"><strong>Reset Travel Buddy</strong><span>Erase local Travel Buddy data</span></span><span class="row-chevron" aria-hidden="true">›</span></button>
     </div>
-    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+    <button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function stayEditor(mode='edit',force=false){
@@ -626,7 +755,7 @@ async function stayEditor(mode='edit',force=false){
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
       <label class="stay-field"><span class="field-label"><span>City / Destination</span></span><span class="stay-control"><span class="stay-control-prefix">${stayFieldIcon('city')}</span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"><span class="stay-control-chevron" aria-hidden="true">›</span></span></label>
       <div class="stay-date-stack"><label class="stay-field"><span class="field-label"><span>Stay start</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('start')}</span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></span></label><label class="stay-field"><span class="field-label"><span>Stay end</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('end')}</span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></span></label></div>
-      <div class="editor-actions static-actions">${force?'':'<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button>'}<button class="btn primary" type="submit">${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</button></div>
+      <div class="editor-actions static-actions">${force?'':`<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">${buttonVisual('cancel')}<span>Cancel</span></button>`}<button class="btn primary" type="submit">${buttonVisual(mode==='change'?'change':'save')}<span>${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</span></button></div>
     </form>`,{subscreen:true});
 
   const form=screen.querySelector('#stayForm');
@@ -669,8 +798,8 @@ async function exchangeRateEditor(){
   if(!currentStay)return stayEditor('setup',true);
   const rate=stayRate(currentStay);
   present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Optional AUD Conversion','Only use this if you want an AUD figure saved too.','Settings')}
-    <div class="rate-preview-card" data-tone="teal"><span class="rate-preview-icon">${settingsIcon('rate')}</span><span class="rate-preview-copy"><small>Current Stay Currency</small><strong>AUD ↔ ${esc(currentStay.currencyCode)}</strong><em>${esc(currentStay.country)} · ${esc(currentStay.city)}${rate?` · 1 AUD = ${esc(rate)} ${esc(currentStay.currencyCode)}`:' · Conversion is off'}</em></span></div>
-    <form class="editor-card rate-editor-card" id="rateForm"><label><span class="rate-label-row"><span>1 AUD =</span><span class="hint">${esc(currentStay.currencyCode)}</span></span><input id="rateInput" name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn it off" value="${esc(rate||'')}"></label><p class="editor-help">Enter the fixed rate you want Travel Buddy to use for this stay. Leave it blank to keep AUD conversion off.</p><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true});
+    <div class="rate-preview-card" data-tone="teal"><span class="rate-preview-icon">${settingsVisual('rate')}</span><span class="rate-preview-copy"><small>Current Stay Currency</small><strong>AUD ↔ ${esc(currentStay.currencyCode)}</strong><em>${esc(currentStay.country)} · ${esc(currentStay.city)}${rate?` · 1 AUD = ${esc(rate)} ${esc(currentStay.currencyCode)}`:' · Conversion is off'}</em></span></div>
+    <form class="editor-card rate-editor-card" id="rateForm"><label><span class="rate-label-row"><span>1 AUD =</span><span class="hint">${esc(currentStay.currencyCode)}</span></span><input id="rateInput" name="exchangeRate" type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Leave blank to turn it off" value="${esc(rate||'')}"></label><p class="editor-help">Enter the fixed rate you want Travel Buddy to use for this stay. Leave it blank to keep AUD conversion off.</p><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn primary" type="submit">${buttonVisual('save')}<span>Save</span></button></div></form>`,{subscreen:true});
   screen.querySelector('#rateForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const raw=String(new FormData(event.currentTarget).get('exchangeRate')||'').trim();
@@ -685,18 +814,18 @@ async function exchangeRateEditor(){
 async function managePeople(){
   const people=await getAll('people');
   present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('People','Requester initials for Shopping.','Settings')}
-    <div class="management-summary-band" data-tone="blue"><span class="management-summary-icon">${settingsIcon('people')}</span><span><small>Shopping Requesters</small><strong>${people.length} ${people.length===1?'person':'people'}</strong></span></div>
-    <div class="management-list">${people.length?people.map(person=>`<article class="management-card person-card" data-tone="blue"><div class="person-avatar">${esc(person.initials)}</div><div class="management-copy"><strong>${esc(person.name)}</strong><span>Initials · ${esc(person.initials)}</span></div><div class="mini-actions"><button class="mini" data-edit-person="${esc(person.id)}">Edit</button><button class="mini danger" data-delete-person="${esc(person.id)}">Delete</button></div></article>`).join(''):emptyCard('No people yet','','','people')}<button class="btn primary full" data-add-person>Add Person</button></div>
-    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+    <div class="management-summary-band" data-tone="blue"><span class="management-summary-icon">${settingsVisual('people')}</span><span><small>Shopping Requesters</small><strong>${people.length} ${people.length===1?'person':'people'}</strong></span></div>
+    <div class="management-list">${people.length?people.map(person=>`<article class="management-card person-card" data-tone="blue"><div class="person-avatar">${esc(person.initials)}</div><div class="management-copy"><strong>${esc(person.name)}</strong><span>Initials · ${esc(person.initials)}</span></div><div class="mini-actions"><button class="mini premium-mini-action edit-action" data-edit-person="${esc(person.id)}">${miniActionVisual('edit')}<span>Edit</span></button><button class="mini danger premium-mini-action delete-action" data-delete-person="${esc(person.id)}">${miniActionVisual('delete')}<span>Delete</span></button></div></article>`).join(''):emptyCard('No people yet','','','people')}<button class="btn primary full" data-add-person>${buttonVisual('add')}<span>Add Person</span></button></div>
+    <button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function personEditor(person=null){
   personEditorReturn='people';
   present(`${subscreenBack('People','data-back-people')} ${pageHead(person?'Edit Person':'Add Person','Name and initials.','Settings')}
-    <div class="management-editor-preview" id="personPreview" data-tone="blue"><span class="person-avatar">${person?.initials?esc(person.initials):settingsIcon('people')}</span><span><small>Requester Preview</small><strong>${esc(person?.name||'Person name')}</strong><em>${esc(person?.initials||'Initials')}</em></span></div>
-    <form class="editor-card" id="personForm"><label>Name<input id="personName" name="name" required maxlength="60" value="${esc(person?.name||'')}"></label><label>Initials<input name="initials" maxlength="3" value="${esc(person?.initials||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-people>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:person?null:'#personName'});
+    <div class="management-editor-preview" id="personPreview" data-tone="blue"><span class="person-avatar">${person?.initials?esc(person.initials):settingsVisual('people')}</span><span><small>Requester Preview</small><strong>${esc(person?.name||'Person name')}</strong><em>${esc(person?.initials||'Initials')}</em></span></div>
+    <form class="editor-card" id="personForm"><label>Name<input id="personName" name="name" required maxlength="60" value="${esc(person?.name||'')}"></label><label>Initials<input name="initials" maxlength="3" value="${esc(person?.initials||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-people>${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn primary" type="submit">${buttonVisual('save')}<span>Save</span></button></div></form>`,{subscreen:true,focusSelector:person?null:'#personName'});
   const form=screen.querySelector('#personForm'), preview=screen.querySelector('#personPreview');
-  const refresh=()=>{const name=String(form.elements.name.value||'').trim();const initials=normalizeInitials(name,form.elements.initials.value);preview.innerHTML=`<span class="person-avatar">${initials?esc(initials):settingsIcon('people')}</span><span><small>Requester Preview</small><strong>${esc(name||'Person name')}</strong><em>${esc(initials||'Initials')}</em></span>`;};
+  const refresh=()=>{const name=String(form.elements.name.value||'').trim();const initials=normalizeInitials(name,form.elements.initials.value);preview.innerHTML=`<span class="person-avatar">${initials?esc(initials):settingsVisual('people')}</span><span><small>Requester Preview</small><strong>${esc(name||'Person name')}</strong><em>${esc(initials||'Initials')}</em></span>`;};
   form.elements.name.addEventListener('input',refresh);form.elements.initials.addEventListener('input',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -721,13 +850,13 @@ async function deletePerson(personId){
 async function manageCategories(){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-summary-band" data-tone="gold"><span class="management-summary-icon">${settingsIcon('categories')}</span><span><small>Shopping Categories</small><strong>${ordered.length} available</strong></span></div><div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-product-art" aria-hidden="true">${categoryHeroArt(category.name)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini" data-rename-category="${esc(category.id)}">Rename</button>${category.builtIn?'':`<button class="mini danger" data-delete-category="${esc(category.id)}">Delete</button>`}</div></article>`).join('')}<button class="btn warm full shopping-setup-primary" data-add-category>Add Category</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Categories','Used when adding items.','Shopping Setup')}<div class="management-summary-band" data-tone="gold"><span class="management-summary-icon">${settingsVisual('categories')}</span><span><small>Shopping Categories</small><strong>${ordered.length} available</strong></span></div><div class="management-list">${ordered.map(category=>`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon category-product-art" aria-hidden="true">${categoryHeroArt(category.name)}</span><div class="management-copy"><strong>${esc(category.name)}</strong><span>${category.builtIn?'Built in':'Custom category'}</span></div><div class="mini-actions"><button class="mini premium-mini-action rename-action" data-rename-category="${esc(category.id)}">${miniActionVisual('rename')}<span>Rename</span></button>${category.builtIn?'':`<button class="mini danger premium-mini-action delete-action" data-delete-category="${esc(category.id)}">${miniActionVisual('delete')}<span>Delete</span></button>`}</div></article>`).join('')}<button class="btn warm full shopping-setup-primary" data-add-category>${buttonVisual('add')}<span>Add Category</span></button></div><button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function categoryEditor(category=null){
   present(`${subscreenBack('Categories','data-back-categories')} ${pageHead(category?'Rename Category':'Add Category','The active shopping list stays continuous.','Shopping Setup')}
     <div class="management-editor-preview category-editor-preview" id="categoryPreview" data-tone="${categoryTone(category?.name||'Other')}"><span class="management-preview-icon category-product-art">${categoryHeroArt(category?.name||'Other')}</span><span><small>Category Preview</small><strong>${esc(category?.name||'Category name')}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span></div>
-    <form class="editor-card shopping-setup-editor" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
+    <form class="editor-card shopping-setup-editor" id="categoryForm"><label>Category name<input id="categoryName" name="name" required maxlength="60" value="${esc(category?.name||'')}"></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-categories>${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn warm" type="submit">${buttonVisual('save')}<span>Save</span></button></div></form>`,{subscreen:true,focusSelector:category?null:'#categoryName'});
   const form=screen.querySelector('#categoryForm'), preview=screen.querySelector('#categoryPreview');
   const refresh=()=>{const name=String(form.elements.name.value||'').trim()||'Category name';preview.dataset.tone=categoryTone(name);preview.innerHTML=`<span class="management-preview-icon category-product-art">${categoryHeroArt(name)}</span><span><small>Category Preview</small><strong>${esc(name)}</strong><em>${category?.builtIn?'Built in':'Custom category'}</em></span>`;};form.elements.name.addEventListener('input',refresh);refresh();
   form.addEventListener('submit',async event=>{
@@ -755,14 +884,14 @@ async function manageCustom(){
   const [catalogue,categories]=await Promise.all([getAll('catalogue'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=catalogue.filter(item=>!item.builtIn).sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-summary-band" data-tone="purple"><span class="management-summary-icon">${settingsIcon('custom')}</span><span><small>Reusable Catalogue</small><strong>${rows.length} custom ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-custom="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-custom="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-custom>Add Custom Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Custom Items','Reusable items you have added.','Shopping Setup')}<div class="management-summary-band" data-tone="purple"><span class="management-summary-icon">${settingsVisual('custom')}</span><span><small>Reusable Catalogue</small><strong>${rows.length} custom ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini premium-mini-action edit-action" data-edit-custom="${esc(item.id)}">${miniActionVisual('edit')}<span>Edit</span></button><button class="mini danger premium-mini-action delete-action" data-delete-custom="${esc(item.id)}">${miniActionVisual('delete')}<span>Delete</span></button></div></article>`;}).join(''):emptyCard('No custom items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-custom>${buttonVisual('add')}<span>Add Custom Item</span></button></div><button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function customEditor(item=null){
   const categories=await getAll('categories');
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
-  present(`${subscreenBack('Custom Items','data-back-custom')} ${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<div id="customPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Reusable Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
+  present(`${subscreenBack('Custom Items','data-back-custom')} ${pageHead(item?'Edit Custom Item':'Add Custom Item','Saved for future shops.','Shopping Setup')}<div id="customPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Reusable Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="customForm"><label>Item name<input id="customItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-back-custom>${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn warm" type="submit">${buttonVisual('save')}<span>Save</span></button></div></form>`,{subscreen:true,focusSelector:item?null:'#customItemName'});
   const form=screen.querySelector('#customForm'), preview=screen.querySelector('#customPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Reusable Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -780,7 +909,7 @@ async function manageRegulars(){
   const [regulars,categories]=await Promise.all([getAll('regularItems'),getAll('categories')]);
   const categoryMap=new Map(categories.map(category=>[category.id,category]));
   const rows=[...regulars].sort((a,b)=>a.name.localeCompare(b.name));
-  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-summary-band" data-tone="teal"><span class="management-summary-icon">${settingsIcon('regular')}</span><span><small>Quick Add Favourites</small><strong>${rows.length} regular ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini" data-edit-regular="${esc(item.id)}">Edit</button><button class="mini danger" data-delete-regular="${esc(item.id)}">Delete</button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-regular-setting>Add Regular Item</button></div><button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+  present(`${subscreenBack('Settings','data-back-settings')} ${pageHead('Regular Items','Things you buy often.','Shopping Setup')}<div class="management-summary-band" data-tone="teal"><span class="management-summary-icon">${settingsVisual('regular')}</span><span><small>Quick Add Favourites</small><strong>${rows.length} regular ${rows.length===1?'item':'items'}</strong></span></div><div class="management-list">${rows.length?rows.map(item=>{const category=categoryMap.get(item.categoryId);return`<article class="management-card" data-tone="${categoryTone(category)}"><span class="management-item-icon product-icon product-art" data-item-name="${esc(item.name)}" aria-hidden="true">${productArt(item.name,category?.name||'Other')}</span><div class="management-copy"><strong>${esc(item.name)}</strong><span>${esc(category?.name||'Other')}</span></div><div class="mini-actions"><button class="mini premium-mini-action edit-action" data-edit-regular="${esc(item.id)}">${miniActionVisual('edit')}<span>Edit</span></button><button class="mini danger premium-mini-action delete-action" data-delete-regular="${esc(item.id)}">${miniActionVisual('delete')}<span>Delete</span></button></div></article>`;}).join(''):emptyCard('No Regular Items yet','','','shopping')}<button class="btn warm full shopping-setup-primary" data-add-regular-setting>${buttonVisual('add')}<span>Add Regular Item</span></button></div><button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function regularEditor(item=null,returnTo='settings'){
@@ -788,7 +917,7 @@ async function regularEditor(item=null,returnTo='settings'){
   const [categories,regulars]=await Promise.all([getAll('categories'),getAll('regularItems')]);
   const ordered=[...categories].sort((a,b)=>(Number(a.sortOrder)||9999)-(Number(b.sortOrder)||9999)||a.name.localeCompare(b.name));
   const initialCategory=ordered.find(category=>category.id===item?.categoryId)||ordered[0];
-  present(`${subscreenBack(returnTo==='shopping'?'Regular Items':'Regular Items','data-regular-cancel')} ${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<div id="regularPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Regular Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>Cancel</button><button class="btn warm" type="submit">Save</button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
+  present(`${subscreenBack(returnTo==='shopping'?'Regular Items':'Regular Items','data-regular-cancel')} ${pageHead(item?'Edit Regular Item':'Add Regular Item','Saved for quick reuse.','Shopping')}<div id="regularPreview">${shoppingPreviewMarkup({itemName:item?.name||'',categoryName:initialCategory?.name||'Other',eyebrow:'Regular Item Preview'})}</div><form class="editor-card shopping-setup-editor" id="regularForm"><label>Item name<input id="regularItemName" name="name" required maxlength="80" value="${esc(item?.name||'')}"></label><label>Category<select name="categoryId">${ordered.map(category=>`<option value="${esc(category.id)}" ${category.id===item?.categoryId?'selected':''}>${esc(category.name)}</option>`).join('')}</select></label><div class="editor-actions static-actions"><button class="btn secondary" type="button" data-regular-cancel>${buttonVisual('cancel')}<span>Cancel</span></button><button class="btn warm" type="submit">${buttonVisual('save')}<span>Save</span></button></div></form>`,{subscreen:true,focusSelector:item?null:'#regularItemName'});
   const form=screen.querySelector('#regularForm'), preview=screen.querySelector('#regularPreview');const refresh=()=>{const category=ordered.find(c=>c.id===form.elements.categoryId.value);preview.innerHTML=shoppingPreviewMarkup({itemName:form.elements.name.value,categoryName:category?.name||'Other',eyebrow:'Regular Item Preview'});};form.elements.name.addEventListener('input',refresh);form.elements.categoryId.addEventListener('change',refresh);refresh();
   form.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -813,10 +942,10 @@ async function shoppingTools(){
   const items=await getAll('shoppingItems');
   const counts=shoppingCounts(items);
   present(`${subscreenBack('Advanced','data-advanced-settings')} ${pageHead('Shopping List Transfer','Manual only. No sync.','Settings')}
-    <div class="utility-summary-band" data-tone="gold"><span class="utility-summary-icon">${settingsIcon('transfer')}</span><span><small>Current Shopping List</small><strong>${items.length} item${items.length===1?'':'s'} ready to share</strong><em>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</em></span></div>
-    <div class="settings-list premium-settings-list transfer-tool-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Create a versioned Travel Buddy list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsIcon('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div>
+    <div class="utility-summary-band" data-tone="gold"><span class="utility-summary-icon">${settingsVisual('transfer')}</span><span><small>Current Shopping List</small><strong>${items.length} item${items.length===1?'':'s'} ready to share</strong><em>${counts.pending} to buy · ${counts.got} got · ${counts.unavailable} unavailable</em></span></div>
+    <div class="settings-list premium-settings-list transfer-tool-list"><button class="settings-row" data-tone="gold" data-share-shopping>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Share Shopping List</strong><span>Create a versioned Travel Buddy list file.</span></span><span class="row-chevron" aria-hidden="true">›</span></button><button class="settings-row" data-tone="teal" data-import-shopping>${settingsVisual('transfer')}<span class="settings-row-copy"><strong>Import Shopping List</strong><span>Merge safely without replacing this list.</span></span><span class="row-chevron" aria-hidden="true">›</span></button></div>
     <div class="transfer-safety-note"><strong>Manual and local</strong><span>Nothing syncs automatically. Imports merge into the current list and keep existing items.</span></div>
-    <button class="btn secondary full back-button" data-back-settings>Back</button>`,{subscreen:true});
+    <button class="btn secondary full back-button" data-back-settings>${buttonVisual('back')}<span>Back</span></button>`,{subscreen:true});
 }
 
 async function resetTravelBuddy(){
