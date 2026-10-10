@@ -1,4 +1,4 @@
-export const BUILD_VERSION = '0.10.9';
+export const BUILD_VERSION = '0.10.10';
 export const SCHEMA_VERSION = 3;
 export const EXPENSE_CATEGORIES = ['Groceries','Eating Out','Transport','Entertainment','Tickets','Shopping','Misc'];
 export const SHOPPING_STATES = ['pending','got','couldnt'];

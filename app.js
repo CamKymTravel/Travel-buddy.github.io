@@ -20,7 +20,7 @@ const dialogRoot=document.querySelector('#dialogRoot');
 
 let route='home';
 let currentStay=null;
-let expenseFilter='pending';
+let expenseFilter='all';
 let shoppingFilter='all';
 let expenseReturnRoute='expenses';
 let justFinishedShopping=false;
@@ -35,25 +35,46 @@ const now=()=>new Date().toISOString();
 const stayRate=stay=>{const n=Number(stay?.exchangeRate);return Number.isFinite(n)&&n>0?n:null;};
 const shortAuDate=value=>{const m=String(value||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return String(value||'');const names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${Number(m[1])} ${names[Number(m[2])-1]||m[2]} ${m[3]}`;};
 const toneKey=value=>{const v=String(value||'').toLowerCase();if(v.includes('shopping'))return'shopping';if(v.includes('expense'))return'expenses';if(v.includes('setting'))return'settings';return'home';};
-const pageHeadVisual=tone=>{
-  const art={
-    home:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="23" fill="#15566d"/><circle cx="36" cy="36" r="17" fill="#0b2531" stroke="#6dd9ed" stroke-width="2.5"/><path d="m43 24-5 14-14 6 5-14 14-6Z" fill="#f0c864"/><circle cx="36" cy="36" r="3" fill="#f7fdff"/></svg>`,
-    expenses:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="16" y="10" width="40" height="51" rx="8" fill="#0f607c"/><path d="M25 23h22M25 33h15M25 43h19" stroke="#a8effa" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="51" r="12" fill="#34b9e4"/><path d="M51 44v14M44 51h14" stroke="#f7fdff" stroke-width="3.6" stroke-linecap="round"/></svg>`,
-    shopping:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 22h40l-5 36H21l-5-36Z" fill="#bb8124"/><path d="M25 24c0-9 4-14 11-14s11 5 11 14" fill="none" stroke="#ffe19a" stroke-width="4" stroke-linecap="round"/><circle cx="29" cy="38" r="7" fill="#55cdb8"/><circle cx="44" cy="38" r="7" fill="#d98297"/><path d="M27 50h18" stroke="#fff0bf" stroke-width="3" stroke-linecap="round"/></svg>`,
-    settings:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M15 21h42M15 36h42M15 51h42" stroke="#a8bdca" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#5ec9df"/><circle cx="47" cy="36" r="8" fill="#b387e5"/><circle cx="24" cy="51" r="8" fill="#e1b44c"/></svg>`
-  }[tone]||'';
-  return `<span class="page-head-visual" aria-hidden="true">${art}</span>`;
+const pageHeadKind=(title,tone)=>{
+  const v=String(title||'').toLowerCase();
+  if(v.includes('people')||v.includes('person'))return'people';
+  if(v.includes('categor'))return'categories';
+  if(v.includes('regular'))return'regular';
+  if(v.includes('custom'))return'custom';
+  if(v.includes('advanced'))return'advanced';
+  if(v.includes('transfer'))return'transfer';
+  if(v.includes('conversion')||v.includes('exchange'))return'rate';
+  if(v.includes('stay'))return'stay';
+  return tone;
 };
-const pageHead=(title,subtitle='',accent='Travel Buddy')=>{const tone=toneKey(accent);return `<div class="page-head head-${tone}"><div class="page-head-copy"><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>${pageHeadVisual(tone)}</div>`;};
+const pageHeadVisual=(tone,title='')=>{
+  const kind=pageHeadKind(title,tone);
+  const art={
+    home:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="23" fill="#6f3454"/><circle cx="36" cy="36" r="17" fill="#1e0f18" stroke="#ff84bc" stroke-width="2.5"/><path d="m43 24-5 14-14 6 5-14 14-6Z" fill="#f3a4c8"/><circle cx="36" cy="36" r="3" fill="#f7fdff"/></svg>`,
+    expenses:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="16" y="10" width="40" height="51" rx="8" fill="#7e3a5d"/><path d="M25 23h22M25 33h15M25 43h19" stroke="#ffd6e8" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="51" r="12" fill="#d84589"/><path d="M51 44v14M44 51h14" stroke="#f7fdff" stroke-width="3.6" stroke-linecap="round"/></svg>`,
+    shopping:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 22h40l-5 36H21l-5-36Z" fill="#8a3c61"/><path d="M25 24c0-9 4-14 11-14s11 5 11 14" fill="none" stroke="#ffd0e4" stroke-width="4" stroke-linecap="round"/><circle cx="29" cy="38" r="7" fill="#d54a8c"/><circle cx="44" cy="38" r="7" fill="#f19ac1"/><path d="M27 50h18" stroke="#ffe4ef" stroke-width="3" stroke-linecap="round"/></svg>`,
+    settings:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M15 21h42M15 36h42M15 51h42" stroke="#e5b4ca" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#ff82ba"/><circle cx="47" cy="36" r="8" fill="#d97abb"/><circle cx="24" cy="51" r="8" fill="#f0a0c4"/></svg>`,
+    people:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="27" cy="25" r="11" fill="#e65c9d"/><circle cx="48" cy="28" r="8" fill="#c86ca9"/><path d="M10 57c2-13 9-20 18-20s17 7 19 20" fill="#7b3559"/><path d="M39 56c2-10 7-15 13-15 6 0 10 5 11 15" fill="#6a3152"/></svg>`,
+    categories:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="11" y="11" width="22" height="22" rx="6" fill="#d54a8c"/><rect x="39" y="11" width="22" height="22" rx="6" fill="#ec94bd"/><rect x="11" y="39" width="22" height="22" rx="6" fill="#d968a6"/><rect x="39" y="39" width="22" height="22" rx="6" fill="#c976b2"/></svg>`,
+    regular:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="m36 9 7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L36 47.3 21 55.2l2.9-16.7L11.7 26.6l16.8-2.4L36 9Z" fill="#d94b8d"/><path d="m27 36 6 6 13-15" fill="none" stroke="#ffe6f1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    custom:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 49 45 20l9 9-29 29-12 2 3-11Z" fill="#c968a8"/><path d="m42 23 8 8" stroke="#ffe5f0" stroke-width="4"/><circle cx="54" cy="17" r="8" fill="#f09dc2"/></svg>`,
+    advanced:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 21h44M14 36h44M14 51h44" stroke="#e3b1c7" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#ff82ba"/><circle cx="47" cy="36" r="8" fill="#d97abb"/><circle cx="24" cy="51" r="8" fill="#f0a0c4"/></svg>`,
+    transfer:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="16" width="34" height="40" rx="8" fill="#8c3f62"/><path d="M20 28h18M20 37h13" stroke="#ffe4ef" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="45" r="14" fill="#b93c77"/><path d="M44 45h15M54 39l6 6-6 6" fill="none" stroke="#fff5fa" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    rate:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="26" cy="30" r="17" fill="#bd407b"/><circle cx="47" cy="43" r="17" fill="#d35a98"/><path d="M20 30h12M26 21v18M41 43h12M47 34v18" stroke="#fff4fa" stroke-width="4" stroke-linecap="round"/></svg>`,
+    stay:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M36 63S56 44 56 27a20 20 0 1 0-40 0c0 17 20 36 20 36Z" fill="#b83d78"/><circle cx="36" cy="27" r="9" fill="#f2a4c7"/><path d="M28 25h16l-2 11H30l-2-11Z" fill="#cf4b83" opacity=".92"/></svg>`
+  }[kind]||'';
+  return `<span class="page-head-visual" data-head-kind="${esc(kind)}" aria-hidden="true">${art}</span>`;
+};
+const pageHead=(title,subtitle='',accent='Travel Buddy')=>{const tone=toneKey(accent);return `<div class="page-head head-${tone}"><div class="page-head-copy"><p class="eyebrow">${esc(accent)}</p><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div>${pageHeadVisual(tone,title)}</div>`;};
 const sectionBadgeVisual=kind=>{
   const art={
-    recent:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="7" width="26" height="34" rx="7" fill="#14556f"/><path d="M17 17h14M17 24h10M17 31h12" stroke="#9ce7f5" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="35" r="7" fill="#35b9e6"/><path d="M35 31v8M31 35h8" stroke="#f6fdff" stroke-width="2.4" stroke-linecap="round"/></svg>`,
-    current:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42s13-12 13-23a13 13 0 1 0-26 0c0 11 13 23 13 23Z" fill="#2d88aa"/><circle cx="24" cy="19" r="6" fill="#f4c756"/></svg>`,
-    shopping:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="14" height="14" rx="4" fill="#55cdb8"/><rect x="27" y="7" width="14" height="14" rx="4" fill="#e2b547"/><rect x="7" y="27" width="14" height="14" rx="4" fill="#68b7e5"/><rect x="27" y="27" width="14" height="14" rx="4" fill="#ad83df"/></svg>`,
-    more:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32M8 24h32M8 34h32" stroke="#9fb6c5" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="14" r="5" fill="#5ec9df"/><circle cx="31" cy="24" r="5" fill="#b387e5"/><circle cx="15" cy="34" r="5" fill="#e1b44c"/></svg>`,
+    recent:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="7" width="26" height="34" rx="7" fill="#743755"/><path d="M17 17h14M17 24h10M17 31h12" stroke="#ffd6e8" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="35" r="7" fill="#d84589"/><path d="M35 31v8M31 35h8" stroke="#fff6fb" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+    current:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42s13-12 13-23a13 13 0 1 0-26 0c0 11 13 23 13 23Z" fill="#b63c77"/><circle cx="24" cy="19" r="6" fill="#f1a3c6"/></svg>`,
+    shopping:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="14" height="14" rx="4" fill="#d54a8c"/><rect x="27" y="7" width="14" height="14" rx="4" fill="#e889b5"/><rect x="7" y="27" width="14" height="14" rx="4" fill="#d765a4"/><rect x="27" y="27" width="14" height="14" rx="4" fill="#c876b1"/></svg>`,
+    more:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32M8 24h32M8 34h32" stroke="#e0b0c6" stroke-width="4" stroke-linecap="round"/><circle cx="18" cy="14" r="5" fill="#ff82ba"/><circle cx="31" cy="24" r="5" fill="#d97abb"/><circle cx="15" cy="34" r="5" fill="#f0a0c4"/></svg>`,
     pending:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="13" width="29" height="22" rx="6" fill="#b57a20"/><circle cx="36" cy="34" r="8" fill="#edb229"/><path d="M32 34h8M37 30l4 4-4 4" stroke="#fff6d6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     transferred:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 23 41 8 31 41 23 29 7 23Z" fill="#35bda3"/><circle cx="35" cy="35" r="8" fill="#217d6d"/><path d="m31 35 3 3 5-7" fill="none" stroke="#effff9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    all:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="26" width="8" height="14" rx="3" fill="#8f67d9"/><rect x="20" y="18" width="8" height="22" rx="3" fill="#b878e7"/><rect x="32" y="9" width="8" height="31" rx="3" fill="#d58cf0"/></svg>`
+    all:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="26" width="8" height="14" rx="3" fill="#a94876"/><rect x="20" y="18" width="8" height="22" rx="3" fill="#cc5e9d"/><rect x="32" y="9" width="8" height="31" rx="3" fill="#ef88bd"/></svg>`
   }[kind]||'';
   return `<span class="section-badge section-badge-${esc(kind)}" aria-hidden="true">${art}</span>`;
 };
@@ -106,7 +127,7 @@ const expenseStatusArt=kind=>{
     pending:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="20" width="46" height="34" rx="9" fill="#a66d17"/><rect x="17" y="16" width="39" height="32" rx="8" fill="#d9911d"/><path d="M17 27h39" stroke="#ffd979" stroke-width="3"/><circle cx="53" cy="49" r="12" fill="#f2b42a"/><path d="M48 49h10M55 45l4 4-4 4" stroke="#fff7d8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     transferred:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M12 35 60 14 45 58 34 42 12 35Z" fill="#23bda4"/><path d="m34 42 26-28" stroke="#b7fff1" stroke-width="4" stroke-linecap="round"/><circle cx="51" cy="51" r="12" fill="#167a6d"/><path d="m45.5 51 4 4 7-9" fill="none" stroke="#eafff9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     all:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="37" width="11" height="21" rx="4" fill="#8f67d9"/><rect x="30" y="26" width="11" height="32" rx="4" fill="#bb76e8"/><rect x="47" y="15" width="11" height="43" rx="4" fill="#d58cf0"/><path d="M13 61h47" stroke="#f0d9fb" stroke-width="3" stroke-linecap="round"/></svg>`,
-    empty:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="17" y="9" width="38" height="51" rx="8" fill="#123d50"/><path d="M25 23h22M25 33h18M25 43h13" stroke="#7dd7ed" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="52" r="11" fill="#2f99bf"/><path d="M52 46v12M46 52h12" stroke="#ecfbff" stroke-width="3.5" stroke-linecap="round"/></svg>`
+    empty:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="17" y="9" width="38" height="51" rx="8" fill="#3a1828"/><path d="M25 23h22M25 33h18M25 43h13" stroke="#f3a3c7" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="52" r="11" fill="#d2508c"/><path d="M52 46v12M46 52h12" stroke="#fff1f7" stroke-width="3.5" stroke-linecap="round"/></svg>`
   }[kind]||'';
   return `<span class="expense-status-art expense-status-${esc(kind)}" aria-hidden="true">${art}</span>`;
 };
@@ -144,35 +165,38 @@ const settingsIcon=kind=>{
 
 const buttonVisual=kind=>{
   const art={
-    back:'<circle cx="16" cy="16" r="13" fill="#285f79"/><path d="m17.5 9-7 7 7 7" fill="none" stroke="#eafaff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
-    add:'<circle cx="16" cy="16" r="13" fill="#2d9fc8"/><path d="M16 9v14M9 16h14" fill="none" stroke="#f3fdff" stroke-width="3" stroke-linecap="round"/>',
-    save:'<circle cx="16" cy="16" r="13" fill="#23866e"/><path d="m9 16 4.2 4.2L23 10.5" fill="none" stroke="#effff8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
-    cancel:'<circle cx="16" cy="16" r="13" fill="#526676"/><path d="m11 11 10 10M21 11 11 21" stroke="#f5fbff" stroke-width="2.8" stroke-linecap="round"/>',
+    back:'<circle cx="16" cy="16" r="13" fill="#c43e82"/><path d="m17.5 9-7 7 7 7" fill="none" stroke="#fff3f9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    add:'<circle cx="16" cy="16" r="13" fill="#d83f88"/><path d="M16 9v14M9 16h14" fill="none" stroke="#fff3f9" stroke-width="3" stroke-linecap="round"/>',
+    save:'<circle cx="16" cy="16" r="13" fill="#c63f7e"/><path d="m9 16 4.2 4.2L23 10.5" fill="none" stroke="#fff2f8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    cancel:'<circle cx="16" cy="16" r="13" fill="#7c4a65"/><path d="m11 11 10 10M21 11 11 21" stroke="#fff0f7" stroke-width="2.8" stroke-linecap="round"/>',
     delete:'<circle cx="16" cy="16" r="13" fill="#a44555"/><path d="M11 12h10l-1 11h-8l-1-11ZM13 9h6M14 14v6M18 14v6" fill="none" stroke="#fff0f3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
-    edit:'<circle cx="16" cy="16" r="13" fill="#6f67b7"/><path d="M10 21l2-6 9-9 5 5-9 9-7 1Z" fill="#eadfff"/><path d="m19 8 5 5" stroke="#fff" stroke-width="2"/>',
-    change:'<circle cx="16" cy="16" r="13" fill="#b47b25"/><path d="M8 12h14l-4-4M24 20H10l4 4" fill="none" stroke="#fff4ce" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    edit:'<circle cx="16" cy="16" r="13" fill="#b04d8f"/><path d="M10 21l2-6 9-9 5 5-9 9-7 1Z" fill="#ffe2f1"/><path d="m19 8 5 5" stroke="#fff" stroke-width="2"/>',
+    change:'<circle cx="16" cy="16" r="13" fill="#c65a8f"/><path d="M8 12h14l-4-4M24 20H10l4 4" fill="none" stroke="#fff0f7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    forward:'<circle cx="16" cy="16" r="13" fill="#d83f88"/><path d="m12 8 8 8-8 8" fill="none" stroke="#fff3f9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
     finish:'<circle cx="16" cy="16" r="13" fill="#2d8c64"/><path d="m9 16 4 4 10-10" fill="none" stroke="#f1fff7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
-    close:'<circle cx="16" cy="16" r="13" fill="#3d758d"/><path d="m11 11 10 10M21 11 11 21" stroke="#f4fcff" stroke-width="2.8" stroke-linecap="round"/>',
-    share:'<circle cx="16" cy="16" r="13" fill="#b07d2d"/><circle cx="11" cy="16" r="3" fill="#fff3c9"/><circle cx="22" cy="10" r="3" fill="#fff3c9"/><circle cx="22" cy="22" r="3" fill="#fff3c9"/><path d="m13.7 14.5 5.6-3M13.7 17.5l5.6 3" stroke="#fff3c9" stroke-width="2" stroke-linecap="round"/>',
-    import:'<circle cx="16" cy="16" r="13" fill="#378b79"/><path d="M16 7v13m-5-5 5 5 5-5M9 24h14" fill="none" stroke="#effff9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
-  }[kind]||'<circle cx="16" cy="16" r="13" fill="#526676"/>';
+    close:'<circle cx="16" cy="16" r="13" fill="#9d4776"/><path d="m11 11 10 10M21 11 11 21" stroke="#fff1f8" stroke-width="2.8" stroke-linecap="round"/>',
+    share:'<circle cx="16" cy="16" r="13" fill="#b34b7f"/><circle cx="11" cy="16" r="3" fill="#ffe0ed"/><circle cx="22" cy="10" r="3" fill="#ffe0ed"/><circle cx="22" cy="22" r="3" fill="#ffe0ed"/><path d="m13.7 14.5 5.6-3M13.7 17.5l5.6 3" stroke="#ffe0ed" stroke-width="2" stroke-linecap="round"/>',
+    import:'<circle cx="16" cy="16" r="13" fill="#b64a7f"/><path d="M16 7v13m-5-5 5 5 5-5M9 24h14" fill="none" stroke="#fff2f8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+    notice:'<circle cx="16" cy="16" r="13" fill="#c64782"/><path d="M16 9v8" fill="none" stroke="#fff4fa" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="22" r="1.8" fill="#fff4fa"/>',
+    info:'<circle cx="16" cy="16" r="13" fill="#a94a78"/><circle cx="16" cy="10.5" r="1.7" fill="#fff4fa"/><path d="M16 15v8" fill="none" stroke="#fff4fa" stroke-width="3" stroke-linecap="round"/>'
+  }[kind]||'<circle cx="16" cy="16" r="13" fill="#7a455f"/>';
   return `<span class="button-visual button-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 32 32">${art}</svg></span>`;
 };
 
 const dialogVisual=tone=>{
-  const kind=tone==='danger'?'delete':tone==='attention'?'finish':'save';
+  const kind=tone==='danger'?'delete':tone==='attention'?'notice':tone==='info'?'info':'info';
   return `<span class="dialog-visual dialog-visual-${esc(tone)}" aria-hidden="true">${buttonVisual(kind)}</span>`;
 };
 
 const miniActionVisual=kind=>{
   const art={
-    view:'<circle cx="12" cy="12" r="10" fill="#245f7a"/><path d="M8 12h8M13 8l4 4-4 4" fill="none" stroke="#e9fbff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
-    add:'<circle cx="12" cy="12" r="10" fill="#278a76"/><path d="M12 7v10M7 12h10" stroke="#effff9" stroke-width="2.2" stroke-linecap="round"/>',
+    view:'<circle cx="12" cy="12" r="10" fill="#b94a80"/><path d="M8 12h8M13 8l4 4-4 4" fill="none" stroke="#fff1f8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    add:'<circle cx="12" cy="12" r="10" fill="#d83f88"/><path d="M12 7v10M7 12h10" stroke="#fff3f9" stroke-width="2.2" stroke-linecap="round"/>',
     finish:'<circle cx="12" cy="12" r="10" fill="#2d8c64"/><path d="m7.5 12 3 3 6-6" fill="none" stroke="#f1fff7" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>',
-    edit:'<circle cx="12" cy="12" r="10" fill="#6f67b7"/><path d="M7.5 16.5 9 12l6-6 3 3-6 6-4.5 1.5Z" fill="#efe8ff"/><path d="m13.5 7.5 3 3" stroke="#fff" stroke-width="1.5"/>',
-    rename:'<circle cx="12" cy="12" r="10" fill="#a87925"/><path d="M7 16.5 9 11l5.7-5.7 4 4L13 15l-6 1.5Z" fill="#fff1bd"/><path d="M7 18h10" stroke="#ffe59a" stroke-width="1.8" stroke-linecap="round"/>',
+    edit:'<circle cx="12" cy="12" r="10" fill="#b24c88"/><path d="M7.5 16.5 9 12l6-6 3 3-6 6-4.5 1.5Z" fill="#ffe5f1"/><path d="m13.5 7.5 3 3" stroke="#fff" stroke-width="1.5"/>',
+    rename:'<circle cx="12" cy="12" r="10" fill="#c05a8f"/><path d="M7 16.5 9 11l5.7-5.7 4 4L13 15l-6 1.5Z" fill="#ffe1ee"/><path d="M7 18h10" stroke="#ffd3e6" stroke-width="1.8" stroke-linecap="round"/>',
     delete:'<circle cx="12" cy="12" r="10" fill="#a44555"/><path d="M8.5 9h7l-.8 8h-5.4l-.8-8ZM10 7.5h4M10.5 11v4M13.5 11v4" fill="none" stroke="#fff0f3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
-    cancel:'<circle cx="12" cy="12" r="10" fill="#526676"/><path d="m8.5 8.5 7 7M15.5 8.5l-7 7" stroke="#f5fbff" stroke-width="2" stroke-linecap="round"/>'
+    cancel:'<circle cx="12" cy="12" r="10" fill="#7a4d62"/><path d="m8.5 8.5 7 7M15.5 8.5l-7 7" stroke="#fff1f8" stroke-width="2" stroke-linecap="round"/>'
   }[kind]||'';
   return `<span class="mini-action-visual mini-action-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
 };
@@ -182,28 +206,28 @@ const directionVisual=kind=>{
   return `<span class="direction-visual direction-${esc(kind||'next')}" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span>`;
 };
 
-const toiletVisual=()=>`<span class="wc-visual" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="13" fill="#164d65"/><rect x="8" y="8" width="32" height="25" rx="8" fill="#216f8a"/><text x="24" y="25" text-anchor="middle" font-size="15" font-weight="900" fill="#f4fbff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">WC</text><path d="M19 36h12l4 5v-5h1a4 4 0 0 0 4-4v-2" fill="#e4b84d"/><circle cx="16" cy="37" r="3" fill="#67d2e8"/></svg></span>`;
+const toiletVisual=()=>`<span class="wc-visual" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="13" fill="#7b3559"/><rect x="8" y="8" width="32" height="25" rx="8" fill="#8a3c61"/><text x="24" y="25" text-anchor="middle" font-size="15" font-weight="900" fill="#fff5fa" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">WC</text><path d="M19 36h12l4 5v-5h1a4 4 0 0 0 4-4v-2" fill="#d54a8c"/><circle cx="16" cy="37" r="3" fill="#f19ac1"/></svg></span>`;
 
 const optionalPanelVisual=kind=>{
   const art=kind==='expense'
-    ?'<rect x="10" y="9" width="36" height="38" rx="9" fill="#195f79"/><path d="M19 20h18M19 28h12" stroke="#a6ebf7" stroke-width="3.5" stroke-linecap="round"/><circle cx="40" cy="41" r="10" fill="#d7a842"/><path d="M40 35v12M34 41h12" stroke="#fff7dc" stroke-width="2.7" stroke-linecap="round"/>'
-    :'<path d="M12 16h32v30H12z" fill="#8c6b25" rx="8"/><circle cx="22" cy="26" r="5" fill="#55cdb8"/><circle cx="34" cy="26" r="5" fill="#d9839e"/><path d="M19 37h18" stroke="#fff0bd" stroke-width="3.5" stroke-linecap="round"/><circle cx="44" cy="43" r="9" fill="#2c8f79"/><path d="M44 38v10M39 43h10" stroke="#effff9" stroke-width="2.5" stroke-linecap="round"/>';
+    ?'<rect x="10" y="9" width="36" height="38" rx="9" fill="#7b3559"/><path d="M19 20h18M19 28h12" stroke="#ffd6e8" stroke-width="3.5" stroke-linecap="round"/><circle cx="40" cy="41" r="10" fill="#d54a8c"/><path d="M40 35v12M34 41h12" stroke="#fff3f9" stroke-width="2.7" stroke-linecap="round"/>'
+    :'<path d="M12 16h32v30H12z" fill="#7b3559" rx="8"/><circle cx="22" cy="26" r="5" fill="#55cdb8"/><circle cx="34" cy="26" r="5" fill="#d9839e"/><path d="M19 37h18" stroke="#fff0bd" stroke-width="3.5" stroke-linecap="round"/><circle cx="44" cy="43" r="9" fill="#b93c77"/><path d="M44 38v10M39 43h10" stroke="#effff9" stroke-width="2.5" stroke-linecap="round"/>';
   return `<span class="optional-panel-visual optional-panel-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 56 56">${art}</svg></span>`;
 };
 
 const settingsVisual=kind=>{
   const art={
-    people:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="27" cy="25" r="11" fill="#58bde2"/><circle cx="48" cy="28" r="8" fill="#8c85e8"/><path d="M10 57c2-13 9-20 18-20s17 7 19 20" fill="#2e7ca0"/><path d="M39 56c2-10 7-15 13-15 6 0 10 5 11 15" fill="#665fb5"/></svg>`,
-    categories:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="11" y="11" width="22" height="22" rx="6" fill="#55cdb8"/><rect x="39" y="11" width="22" height="22" rx="6" fill="#e4b94d"/><rect x="11" y="39" width="22" height="22" rx="6" fill="#6dbbe7"/><rect x="39" y="39" width="22" height="22" rx="6" fill="#b68ae8"/><path d="M18 22h8M46 22h8M18 50h8M46 50h8" stroke="#f7fbff" stroke-width="3" stroke-linecap="round"/></svg>`,
-    regular:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="m36 9 7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L36 47.3 21 55.2l2.9-16.7L11.7 26.6l16.8-2.4L36 9Z" fill="#d9ac40"/><path d="m27 36 6 6 13-15" fill="none" stroke="#fff4c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    custom:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 49 45 20l9 9-29 29-12 2 3-11Z" fill="#9a78df"/><path d="m42 23 8 8" stroke="#eadfff" stroke-width="4"/><path d="M17 49l8 8" stroke="#f7f0ff" stroke-width="3"/><circle cx="54" cy="17" r="8" fill="#e3b44a"/></svg>`,
-    advanced:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 21h44M14 36h44M14 51h44" stroke="#9fb6c6" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#5ec9df"/><circle cx="47" cy="36" r="8" fill="#b387e5"/><circle cx="24" cy="51" r="8" fill="#e1b44c"/></svg>`,
-    transfer:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="15" width="32" height="42" rx="7" fill="#d09a2d"/><path d="M21 27h16M21 36h11" stroke="#fff0bd" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="48" r="14" fill="#2aa891"/><path d="M43 48h15M53 42l6 6-6 6" fill="none" stroke="#effff9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    rate:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="26" cy="30" r="17" fill="#2f9b88"/><circle cx="47" cy="43" r="17" fill="#4d99c4"/><path d="M20 30h12M26 21v18M41 43h12M47 34v18" stroke="#eafff8" stroke-width="4" stroke-linecap="round"/><path d="M38 19c8 1 13 5 16 11M34 54c-8-1-13-5-16-11" fill="none" stroke="#bdeef6" stroke-width="3" stroke-linecap="round"/></svg>`,
+    people:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="27" cy="25" r="11" fill="#e65c9d"/><circle cx="48" cy="28" r="8" fill="#c86ca9"/><path d="M10 57c2-13 9-20 18-20s17 7 19 20" fill="#7b3559"/><path d="M39 56c2-10 7-15 13-15 6 0 10 5 11 15" fill="#6a3152"/></svg>`,
+    categories:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="11" y="11" width="22" height="22" rx="6" fill="#d54a8c"/><rect x="39" y="11" width="22" height="22" rx="6" fill="#ec94bd"/><rect x="11" y="39" width="22" height="22" rx="6" fill="#d968a6"/><rect x="39" y="39" width="22" height="22" rx="6" fill="#c976b2"/><path d="M18 22h8M46 22h8M18 50h8M46 50h8" stroke="#fff3f9" stroke-width="3" stroke-linecap="round"/></svg>`,
+    regular:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="m36 9 7.5 15.2 16.8 2.4-12.2 11.9 2.9 16.7L36 47.3 21 55.2l2.9-16.7L11.7 26.6l16.8-2.4L36 9Z" fill="#d94b8d"/><path d="m27 36 6 6 13-15" fill="none" stroke="#ffe6f1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    custom:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M16 49 45 20l9 9-29 29-12 2 3-11Z" fill="#c968a8"/><path d="m42 23 8 8" stroke="#ffe5f0" stroke-width="4"/><path d="M17 49l8 8" stroke="#fff3f9" stroke-width="3"/><circle cx="54" cy="17" r="8" fill="#f09dc2"/></svg>`,
+    advanced:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 21h44M14 36h44M14 51h44" stroke="#e3b1c7" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="21" r="8" fill="#ff82ba"/><circle cx="47" cy="36" r="8" fill="#d97abb"/><circle cx="24" cy="51" r="8" fill="#f0a0c4"/></svg>`,
+    transfer:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="13" y="15" width="32" height="42" rx="7" fill="#8c3f62"/><path d="M21 27h16M21 36h11" stroke="#ffe4ef" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="48" r="14" fill="#b93c77"/><path d="M43 48h15M53 42l6 6-6 6" fill="none" stroke="#fff5fa" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    rate:`<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="26" cy="30" r="17" fill="#bd407b"/><circle cx="47" cy="43" r="17" fill="#d35a98"/><path d="M20 30h12M26 21v18M41 43h12M47 34v18" stroke="#fff4fa" stroke-width="4" stroke-linecap="round"/><path d="M38 19c8 1 13 5 16 11M34 54c-8-1-13-5-16-11" fill="none" stroke="#f2a4c7" stroke-width="3" stroke-linecap="round"/></svg>`,
     reset:`<svg viewBox="0 0 72 72" aria-hidden="true"><path d="M19 23a24 24 0 1 1-5 25" fill="none" stroke="#d66d77" stroke-width="7" stroke-linecap="round"/><path d="M18 12v14H4" fill="none" stroke="#f3aab1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 24v16" stroke="#ffe6e8" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="49" r="3" fill="#ffe6e8"/></svg>`,
-    share:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="14" width="34" height="44" rx="8" fill="#9d6b1f"/><path d="M20 27h18M20 36h13" stroke="#fff0bf" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="23" r="7" fill="#e8bd52"/><circle cx="58" cy="39" r="7" fill="#5cc9df"/><circle cx="48" cy="54" r="7" fill="#7bd3a3"/><path d="m53 28 3 5M54 45l-3 4" stroke="#fff9df" stroke-width="3" stroke-linecap="round"/></svg>`,
-    import:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="14" y="13" width="44" height="46" rx="9" fill="#176b64"/><path d="M36 16v25m-9-9 9 9 9-9" fill="none" stroke="#c9fff4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 49h26" stroke="#effffb" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="20" r="8" fill="#5ec9df"/></svg>`,
-    local:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="20" y="8" width="32" height="56" rx="9" fill="#40586a"/><rect x="24" y="15" width="24" height="36" rx="5" fill="#102631"/><circle cx="36" cy="57" r="3" fill="#a8c1cf"/><path d="M29 27h14M29 34h10" stroke="#73d7e9" stroke-width="4" stroke-linecap="round"/><path d="M50 15c7 4 11 10 11 18M54 12c9 5 14 13 14 23" fill="none" stroke="#dfb64d" stroke-width="3" stroke-linecap="round"/></svg>`
+    share:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="14" width="34" height="44" rx="8" fill="#8c3f62"/><path d="M20 27h18M20 36h13" stroke="#ffe4ef" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="23" r="7" fill="#d54a8c"/><circle cx="58" cy="39" r="7" fill="#5cc9df"/><circle cx="48" cy="54" r="7" fill="#d968a6"/><path d="m53 28 3 5M54 45l-3 4" stroke="#fff5fa" stroke-width="3" stroke-linecap="round"/></svg>`,
+    import:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="14" y="13" width="44" height="46" rx="9" fill="#8c3f62"/><path d="M36 16v25m-9-9 9 9 9-9" fill="none" stroke="#ffd6e8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 49h26" stroke="#fff5fa" stroke-width="4" stroke-linecap="round"/><circle cx="52" cy="20" r="8" fill="#ff82ba"/></svg>`,
+    local:`<svg viewBox="0 0 72 72" aria-hidden="true"><rect x="20" y="8" width="32" height="56" rx="9" fill="#7a455f"/><rect x="24" y="15" width="24" height="36" rx="5" fill="#1e0f18"/><circle cx="36" cy="57" r="3" fill="#e5b4ca"/><path d="M29 27h14M29 34h10" stroke="#f19ac1" stroke-width="4" stroke-linecap="round"/><path d="M50 15c7 4 11 10 11 18M54 12c9 5 14 13 14 23" fill="none" stroke="#d54a8c" stroke-width="3" stroke-linecap="round"/></svg>`
   }[kind]||'';
   return `<span class="settings-icon premium-settings-visual" aria-hidden="true">${art}</span>`;
 };
@@ -239,7 +263,7 @@ function openDialog({title,message='',tone='info',confirmLabel='OK',cancelLabel=
   return new Promise(resolve=>{
     closeDialog._resolver=resolve;closeDialog._origin=origin;
     dialogRoot.hidden=false;
-    const confirmKind=tone==='danger'?'delete':tone==='attention'?'finish':confirmLabel==='Close'?'close':'save';
+    const confirmKind=tone==='danger'?'delete':tone==='attention'?(confirmLabel==='OK'?'notice':'finish'):confirmLabel==='Close'?'close':'save';
     dialogRoot.innerHTML=`<div class="dialog-backdrop"><section class="app-dialog dialog-${esc(tone)}" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-accent"></div>${dialogVisual(tone)}<h2 id="dialogTitle">${esc(title)}</h2>${message?`<p>${esc(message)}</p>`:''}${html}<div class="dialog-actions">${cancelLabel?`<button class="btn secondary" type="button" data-dialog-cancel>${buttonVisual('cancel')}<span>${esc(cancelLabel)}</span></button>`:''}<button class="btn ${tone==='danger'?'danger':tone==='attention'?'warm':'primary'}" type="button" data-dialog-confirm>${buttonVisual(confirmKind)}<span>${esc(confirmLabel)}</span></button></div></section></div>`;
     const backdrop=dialogRoot.querySelector('.dialog-backdrop');
     const onClick=e=>{if(e.target.closest('[data-dialog-confirm]'))closeDialog(true);else if(e.target.closest('[data-dialog-cancel]'))closeDialog(false);else if(dismissible&&e.target===backdrop)closeDialog(cancelLabel?false:true);};
@@ -257,7 +281,7 @@ function openDialog({title,message='',tone='info',confirmLabel='OK',cancelLabel=
     requestAnimationFrame(()=>dialogRoot.querySelector('[data-dialog-confirm]')?.focus());
   });
 }
-const showMessage=(title,message,options={})=>openDialog({title,message,...options});
+const showMessage=(title,message,options={})=>openDialog({title,message,tone:'attention',...options});
 const askConfirm=(title,message,options={})=>openDialog({title,message,cancelLabel:'Cancel',confirmLabel:'Confirm',tone:'danger',...options});
 
 function showToiletPhrase(){
@@ -280,6 +304,9 @@ function resetView(focusSelector=null){
 
 function present(html,{subscreen=false,focusSelector=null}={}){
   screen.innerHTML=html;
+  // Physical-iPhone regression guard: Safari's native required-field bubble
+  // visually breaks the premium UI. Validation remains app-controlled.
+  screen.querySelectorAll('form').forEach(form=>{form.noValidate=true;});
   const hideNav=subscreen||!currentStay;
   bottomNav.hidden=hideNav;
   app.classList.toggle('subscreen-mode',subscreen);
@@ -328,36 +355,36 @@ async function renderRoute(next=route){
 function shoppingActionIcon(kind){
   const art={
     got:'<circle cx="12" cy="12" r="9" fill="#2da884"/><path d="m7.4 12.1 3.1 3.1 6.4-7" fill="none" stroke="#effff8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
-    undo:'<circle cx="12" cy="12" r="9" fill="#556fc5"/><path d="M10 8 6 12l4 4" fill="none" stroke="#f2f4ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12h6.2c3 0 5 1.8 5 4.7" fill="none" stroke="#dfe5ff" stroke-width="2.2" stroke-linecap="round"/>',
+    undo:'<circle cx="12" cy="12" r="9" fill="#b94a80"/><path d="M10 8 6 12l4 4" fill="none" stroke="#fff1f8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12h6.2c3 0 5 1.8 5 4.7" fill="none" stroke="#ffd3e6" stroke-width="2.2" stroke-linecap="round"/>',
     unavailable:'<circle cx="12" cy="12" r="9" fill="#c96778"/><path d="m7.5 16.5 9-9" fill="none" stroke="#fff2f5" stroke-width="2.4" stroke-linecap="round"/>',
-    add:'<circle cx="12" cy="12" r="9" fill="#b88327"/><path d="M12 7v10M7 12h10" fill="none" stroke="#fff7dc" stroke-width="2.4" stroke-linecap="round"/>'
-  }[kind]||'<circle cx="12" cy="12" r="9" fill="#5b7688"/>';
+    add:'<circle cx="12" cy="12" r="9" fill="#d83f88"/><path d="M12 7v10M7 12h10" fill="none" stroke="#fff3f9" stroke-width="2.4" stroke-linecap="round"/>'
+  }[kind]||'<circle cx="12" cy="12" r="9" fill="#7a455f"/>';
   return `<span class="action-line-icon premium-action-icon action-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
 }
 
 function shoppingHeaderArt(){
-  return `<span class="shopping-title-visual" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 24h44l-5 35H20l-6-35Z" fill="#b67f25"/><path d="M24 25c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffe09a" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="39" r="7" fill="#55cdb8"/><circle cx="44" cy="39" r="7" fill="#d9829b"/><path d="M27 51h18" stroke="#fff0bd" stroke-width="3.2" stroke-linecap="round"/><path d="m53 15 2 4 4 .8-3 3 .7 4.2-3.7-2-3.8 2 .8-4.2-3-3 4.1-.8 1.9-4Z" fill="#72dff1"/></svg></span>`;
+  return `<span class="shopping-title-visual" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 24h44l-5 35H20l-6-35Z" fill="#8a3c61"/><path d="M24 25c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffd0e4" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="39" r="7" fill="#55cdb8"/><circle cx="44" cy="39" r="7" fill="#d9829b"/><path d="M27 51h18" stroke="#fff0bd" stroke-width="3.2" stroke-linecap="round"/><path d="m53 15 2 4 4 .8-3 3 .7 4.2-3.7-2-3.8 2 .8-4.2-3-3 4.1-.8 1.9-4Z" fill="#ef88bd"/></svg></span>`;
 }
 
 function shoppingEmptyArt(){
-  return `<span class="premium-empty-art shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 25h44l-5 34H20l-6-34Z" fill="#b98127"/><path d="M24 26c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffe19d" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="41" r="7" fill="#55cdb8"/><circle cx="44" cy="41" r="7" fill="#d9829b"/><circle cx="56" cy="17" r="10" fill="#2fa9c8"/><path d="M56 11v12M50 17h12" stroke="#effcff" stroke-width="3.2" stroke-linecap="round"/></svg></span>`;
+  return `<span class="premium-empty-art shopping-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><path d="M14 25h44l-5 34H20l-6-34Z" fill="#8a3c61"/><path d="M24 26c0-10 5-15 12-15s12 5 12 15" fill="none" stroke="#ffd0e4" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="41" r="7" fill="#55cdb8"/><circle cx="44" cy="41" r="7" fill="#d9829b"/><circle cx="56" cy="17" r="10" fill="#d84589"/><path d="M56 11v12M50 17h12" stroke="#fff3f9" stroke-width="3.2" stroke-linecap="round"/></svg></span>`;
 }
 
 function peopleEmptyArt(){
-  return `<span class="premium-empty-art people-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><circle cx="28" cy="25" r="11" fill="#58bde2"/><circle cx="48" cy="29" r="8" fill="#9c88e9"/><path d="M10 59c2-14 9-21 19-21s17 7 19 21" fill="#2e7ca0"/><path d="M40 58c2-10 7-15 13-15s10 5 11 15" fill="#6d62ba"/><circle cx="57" cy="17" r="9" fill="#e1b44c"/><path d="M57 12v10M52 17h10" stroke="#fff5cf" stroke-width="3" stroke-linecap="round"/></svg></span>`;
+  return `<span class="premium-empty-art people-empty-art" aria-hidden="true"><svg viewBox="0 0 72 72"><circle cx="28" cy="25" r="11" fill="#e65c9d"/><circle cx="48" cy="29" r="8" fill="#c86ca9"/><path d="M10 59c2-14 9-21 19-21s17 7 19 21" fill="#2e7ca0"/><path d="M40 58c2-10 7-15 13-15s10 5 11 15" fill="#6d62ba"/><circle cx="57" cy="17" r="9" fill="#e1b44c"/><path d="M57 12v10M52 17h10" stroke="#fff5cf" stroke-width="3" stroke-linecap="round"/></svg></span>`;
 }
 
 function regularItemsButtonArt(){
-  return `<span class="shopping-menu-art" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m24 7 4.6 9.2 10.2 1.5-7.4 7.2 1.8 10.2L24 30.2l-9.2 4.9 1.8-10.2-7.4-7.2 10.2-1.5L24 7Z" fill="#e5b94f"/><path d="m18.5 24 3.7 3.7 7.6-8.4" fill="none" stroke="#fff4c6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  return `<span class="shopping-menu-art" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m24 7 4.6 9.2 10.2 1.5-7.4 7.2 1.8 10.2L24 30.2l-9.2 4.9 1.8-10.2-7.4-7.2 10.2-1.5L24 7Z" fill="#d94b8d"/><path d="m18.5 24 3.7 3.7 7.6-8.4" fill="none" stroke="#ffe6f1" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
 
 function stayFieldIcon(kind){
   const art={
-    country:'<circle cx="20" cy="20" r="15" fill="#236f88"/><path d="M6 20h28M20 5c6 6 6 24 0 30M20 5c-6 6-6 24 0 30" fill="none" stroke="#a9eff8" stroke-width="2.6" stroke-linecap="round"/>',
-    city:'<path d="M20 36S33 24 33 15a13 13 0 1 0-26 0c0 9 13 21 13 21Z" fill="#b78028"/><circle cx="20" cy="15" r="5" fill="#fff0bf"/><circle cx="20" cy="15" r="2.2" fill="#d39c35"/>',
-    start:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#277e66"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#55c59f"/><path d="M12 5v7M28 5v7" stroke="#dff8ee" stroke-width="2.6" stroke-linecap="round"/><path d="M12 22h7M12 28h10" stroke="#effff8" stroke-width="2.8" stroke-linecap="round"/>',
-    end:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#6f57a1"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#a483d8"/><path d="M12 5v7M28 5v7" stroke="#f1e8ff" stroke-width="2.6" stroke-linecap="round"/><path d="M19 22v8M15 26h8" stroke="#fbf8ff" stroke-width="2.8" stroke-linecap="round"/>'
-  }[kind]||'<circle cx="20" cy="20" r="14" fill="#526676"/>';
+    country:'<circle cx="20" cy="20" r="15" fill="#a33f73"/><path d="M6 20h28M20 5c6 6 6 24 0 30M20 5c-6 6-6 24 0 30" fill="none" stroke="#ffd5e7" stroke-width="2.6" stroke-linecap="round"/>',
+    city:'<path d="M20 36S33 24 33 15a13 13 0 1 0-26 0c0 9 13 21 13 21Z" fill="#c14b86"/><circle cx="20" cy="15" r="5" fill="#ffe3ef"/><circle cx="20" cy="15" r="2.2" fill="#e672aa"/>',
+    start:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#a93a71"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#e96fa9"/><path d="M12 5v7M28 5v7" stroke="#ffe8f2" stroke-width="2.6" stroke-linecap="round"/><path d="M12 22h7M12 28h10" stroke="#fff3f8" stroke-width="2.8" stroke-linecap="round"/>',
+    end:'<rect x="6" y="8" width="28" height="27" rx="6" fill="#7b3f70"/><rect x="6" y="8" width="28" height="8" rx="6" fill="#c46aa3"/><path d="M12 5v7M28 5v7" stroke="#fce8f5" stroke-width="2.6" stroke-linecap="round"/><path d="M19 22v8M15 26h8" stroke="#fff3fa" stroke-width="2.8" stroke-linecap="round"/>'
+  }[kind]||'<circle cx="20" cy="20" r="14" fill="#7a455f"/>';
   return `<span class="field-label-icon field-label-${esc(kind)} premium-stay-symbol" aria-hidden="true"><svg viewBox="0 0 40 40">${art}</svg></span>`;
 }
 
@@ -367,8 +394,8 @@ function subscreenBack(label='Shopping',attr='data-back-shopping'){
 
 function shoppingFilterVisual(kind){
   const art={
-    all:'<rect x="4" y="5" width="16" height="14" rx="5" fill="#7e6226"/><circle cx="9" cy="10" r="2.2" fill="#55cdb8"/><circle cx="15" cy="10" r="2.2" fill="#d9829b"/><path d="M8 15h8" stroke="#ffe8ae" stroke-width="2" stroke-linecap="round"/>',
-    'to-buy':'<path d="M5 8h14l-2 11H7L5 8Z" fill="#b37c27"/><path d="M9 9c0-4 1.5-6 3-6s3 2 3 6" fill="none" stroke="#ffe2a0" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="17" r="4" fill="#4cb8d6"/><path d="M17 14.5v5M14.5 17h5" stroke="#f3fdff" stroke-width="1.8" stroke-linecap="round"/>',
+    all:'<rect x="4" y="5" width="16" height="14" rx="5" fill="#7b3559"/><circle cx="9" cy="10" r="2.2" fill="#55cdb8"/><circle cx="15" cy="10" r="2.2" fill="#d9829b"/><path d="M8 15h8" stroke="#ffd0e4" stroke-width="2" stroke-linecap="round"/>',
+    'to-buy':'<path d="M5 8h14l-2 11H7L5 8Z" fill="#b37c27"/><path d="M9 9c0-4 1.5-6 3-6s3 2 3 6" fill="none" stroke="#ffe2a0" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="17" r="4" fill="#edb229"/><path d="M17 14.5v5M14.5 17h5" stroke="#fff6d6" stroke-width="1.8" stroke-linecap="round"/>',
     done:'<circle cx="12" cy="12" r="9" fill="#2d9f7d"/><path d="m7.5 12 3 3 6-7" fill="none" stroke="#effff7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
   }[kind]||'';
   return `<span class="shopping-filter-visual shopping-filter-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 24 24">${art}</svg></span>`;
@@ -391,7 +418,7 @@ const mealIdeaVisual=idea=>{
 const shoppingNoticeArt=kind=>{
   const art=kind==='finished'
     ?'<circle cx="36" cy="36" r="27" fill="#1f795d"/><path d="m21 37 9 9 21-22" fill="none" stroke="#eafff5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="20" r="8" fill="#e1b64f"/>'
-    :'<circle cx="36" cy="36" r="27" fill="#8a5f22"/><path d="M20 20 52 52M52 20 20 52" stroke="#fff0c5" stroke-width="6" stroke-linecap="round"/><circle cx="54" cy="18" r="7" fill="#5dc9df"/>';
+    :'<circle cx="36" cy="36" r="27" fill="#a44555"/><path d="M20 20 52 52M52 20 20 52" stroke="#fff0f3" stroke-width="6" stroke-linecap="round"/><circle cx="54" cy="18" r="7" fill="#d66d77"/>';
   return `<span class="shopping-notice-art shopping-notice-${esc(kind)}" aria-hidden="true"><svg viewBox="0 0 72 72">${art}</svg></span>`;
 };
 
@@ -421,15 +448,17 @@ function stayStrip(){
 }
 
 function emptyCard(text,button,label,kind='empty'){
-  const icon=kind==='shopping'?shoppingEmptyArt():kind==='people'?peopleEmptyArt():kind==='expenses'?expenseStatusArt('empty'):'<span class="premium-empty-art generic-empty-art"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="24" fill="#425a69"/><path d="M36 24v24M24 36h24" stroke="#eef6fa" stroke-width="5" stroke-linecap="round"/></svg></span>';
+  const icon=kind==='shopping'?shoppingEmptyArt():kind==='people'?peopleEmptyArt():kind==='expenses'?expenseStatusArt('empty'):'<span class="premium-empty-art generic-empty-art"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="24" fill="#7a455f"/><path d="M36 24v24M24 36h24" stroke="#ffd6e8" stroke-width="5" stroke-linecap="round"/></svg></span>';
   const emptyTone=kind==='shopping'?'gold':kind==='people'?'blue':kind==='expenses'?'blue':'silver';
   const emptyActionIcon=label&&/^Add\b/i.test(label)?buttonVisual('add'):'';
   return `<div class="card empty premium-empty" data-tone="${emptyTone}"><span class="empty-icon" aria-hidden="true">${icon}</span><strong>${esc(text)}</strong>${button?`<button class="btn primary full" ${button}>${emptyActionIcon}<span>${esc(label)}</span></button>`:''}</div>`;
 }
 
-function expenseRow(expense,origin=route,{showTransfer=true}={}){
+function expenseRow(expense,origin=route,{showTransfer=false}={}){
   const secondary=expense.audAmount!==null&&expense.audAmount!==undefined?formatAud(expense.audAmount):'';
-  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(expense.note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryVisual(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.note||expense.category)}</strong><small>${esc(expense.date)} · ${esc(expense.category)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span><span class="expense-row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}"><span class="transfer-button-icon" aria-hidden="true">${expenseStatusIcon(expense.transferred?'transferred':'pending')}</span>${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
+  const note=String(expense.note||'').trim();
+  const detail=note?`${note} · ${expense.date}`:expense.date;
+  return `<div class="list-row expense-row" data-tone="${expenseTone(expense.category)}"><button class="expense-open" type="button" data-edit-expense="${esc(expense.id)}" data-return-route="${esc(origin)}" aria-label="Edit ${esc(note||expense.category)} expense"><span class="expense-category-icon" aria-hidden="true">${expenseCategoryVisual(expense.category)}</span><span class="expense-copy"><strong>${esc(expense.category)}</strong><small>${esc(detail)}</small></span><span class="amount"><strong>${formatLocal(expense.localAmount,expense.currencyCode)}</strong>${secondary?`<small>${secondary}</small>`:''}</span><span class="expense-row-chevron" aria-hidden="true">${directionVisual('next')}</span></button>${showTransfer?`<button class="mini transfer-button ${expense.transferred?'is-done':'transfer-wait'}" data-toggle-transfer="${esc(expense.id)}" aria-pressed="${expense.transferred?'true':'false'}"><span class="transfer-button-icon" aria-hidden="true">${expenseStatusIcon(expense.transferred?'transferred':'pending')}</span>${expense.transferred?'Transferred':'To Transfer'}</button>`:''}</div>`;
 }
 
 async function renderHome(){
@@ -447,8 +476,8 @@ async function renderHome(){
       <button class="home-action expense-home" data-add-expense><span class="home-action-icon premium-home-expense-art" aria-hidden="true">${expenseStatusArt('add')}</span><span class="home-action-copy"><strong>Add Expense</strong><small>Quick ${esc(currentStay.currencyCode)} capture</small></span><span class="home-action-arrow" aria-hidden="true">${directionVisual('next')}</span></button>
       <button class="home-action shopping-home" data-open-shopping><span class="home-shopping-pictures">${homeArt}</span><span class="home-action-copy"><strong>Shopping List</strong><small>${esc(shoppingStatus)}</small></span><span class="home-action-arrow" aria-hidden="true">${directionVisual('next')}</span></button>
     </div>
-    <button class="transfer-summary premium-transfer" data-open-expenses><span class="transfer-icon premium-transfer-art" aria-hidden="true">${expenseStatusArt('pending')}</span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
-    <div class="section-title-row"><h3 class="section-title premium-section-title">${sectionBadgeVisual('recent')}<span>Recent Expenses</span></h3><button class="section-link premium-section-link" type="button" data-open-expenses><span>View all</span>${miniActionVisual('view')}</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <button class="transfer-summary premium-transfer" data-open-expenses data-expense-filter-target="pending"><span class="transfer-icon premium-transfer-art" aria-hidden="true">${expenseStatusArt('pending')}</span><span class="transfer-copy"><strong>Expenses to transfer</strong><small>${pending.length?'Waiting to enter in Travel Command Centre':'Nothing waiting'}</small></span><span class="transfer-count">${pending.length}</span></button>
+    <div class="section-title-row"><h3 class="section-title premium-section-title">${sectionBadgeVisual('recent')}<span>Recent Expenses</span></h3><button class="section-link premium-section-link" type="button" data-open-expenses data-expense-filter-target="all"><span>View all</span>${miniActionVisual('view')}</button></div><div class="list home-expense-list continuous-ledger">${recent.length?recent.map(expense=>expenseRow(expense,'home',{showTransfer:false})).join(''):emptyCard('No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 async function renderExpenses(){
   const expenses=await getAll('expenses');
@@ -467,7 +496,7 @@ async function renderExpenses(){
       ${summary.map(([value,label,count])=>`<button type="button" class="expense-overview-card ${expenseFilter===value?'is-active':''}" data-expense-filter="${value}" aria-pressed="${expenseFilter===value?'true':'false'}"><span class="expense-overview-icon" aria-hidden="true">${expenseStatusArt(value)}</span><span class="expense-overview-number">${count}</span><span class="expense-overview-label">${label}</span><span class="expense-overview-chevron" aria-hidden="true">${directionVisual('next')}</span></button>`).join('')}
     </div>
     <div class="section-title-row expense-list-title"><div><h3 class="section-title premium-section-title">${sectionBadgeVisual(expenseFilter==='pending'?'pending':expenseFilter==='transferred'?'transferred':'all')}<span>${listTitle}</span></h3><span>${listHint}</span></div><b>${rows.length}</b></div>
-    <div class="list continuous-ledger expense-ledger-shell">${rows.length?rows.map(expense=>expenseRow(expense,'expenses')).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
+    <div class="list continuous-ledger expense-ledger-shell">${rows.length?rows.map(expense=>expenseRow(expense,'expenses',{showTransfer:expenseFilter==='pending'})).join(''):emptyCard(expenseFilter==='pending'?'Nothing waiting to transfer':expenseFilter==='transferred'?'Nothing transferred yet':'No expenses yet','data-add-expense','Add Expense','expenses')}</div>`);
 }
 function expenseEditor(existing=null,defaults={}){
   const stay=existing?.staySnapshot||currentStay;
@@ -571,7 +600,7 @@ async function renderShopping(){
     ${items.length?`<div class="shopping-status-rail"><div class="shopping-progress" aria-label="${counts.got} got and ${counts.unavailable} unavailable out of ${counts.all}"><span class="shopping-progress-got" style="width:${gotPct}%"></span><span class="shopping-progress-unavailable" style="left:${gotPct}%;width:${unavailablePct}%"></span></div><button class="shopping-top-add premium-shop-action" type="button" data-add-shop>${miniActionVisual('add')}<span>Add</span></button><button class="finish-inline premium-shop-action" type="button" data-finish-shopping ${counts.got?'':'disabled'}>${miniActionVisual('finish')}<span>Finish</span></button></div>`:''}
     ${counts.unavailable?`<div class="shopping-unavailable-note premium-shopping-notice">${shoppingNoticeArt('unavailable')}<span class="shopping-notice-copy"><strong>${counts.unavailable} unavailable</strong><small>${counts.unavailable===1?'This item will':'These items will'} stay for next time.</small></span></div>`:''}
     ${justFinishedShopping?`<div class="finished-shop-card premium-shopping-finished">${shoppingNoticeArt('finished')}<span class="shopping-notice-copy"><strong>Shopping finished</strong><span>Add the shop total only if you want to remember it.</span></span><button class="btn primary full" data-shop-expense>${buttonVisual('add')}<span>Add Grocery Expense</span></button></div>`:''}
-    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty premium-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 72 72"><rect x="14" y="15" width="44" height="42" rx="14" fill="#162d39"/><path d="M21 28h22M49 28h3M21 44h3M30 44h22" fill="none" stroke="#8fd8e8" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="28" r="6" fill="#d7a842"/><circle cx="27" cy="44" r="6" fill="#55cdb8"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
+    <div class="shopping-list target-shopping-list ${items.length?'has-items':''}">${shown.length?shown.map(item=>shoppingRow(item,personMap,categoryMap)).join(''):items.length?`<div class="shopping-filter-empty premium-filter-empty"><span class="shopping-filter-empty-icon" aria-hidden="true"><svg viewBox="0 0 72 72"><rect x="14" y="15" width="44" height="42" rx="14" fill="#1e0f18"/><path d="M21 28h22M49 28h3M21 44h3M30 44h22" fill="none" stroke="#e5b4ca" stroke-width="5" stroke-linecap="round"/><circle cx="46" cy="28" r="6" fill="#d54a8c"/><circle cx="27" cy="44" r="6" fill="#ef82b5"/></svg></span><strong>No items in this view</strong><span>Try another filter.</span></div>`:emptyCard('Shopping list is empty','data-add-shop','Add Item','shopping')}</div>
     ${items.length?`<button class="btn warm full shopping-second-add target-bottom-add" type="button" data-add-shop>${buttonVisual('add')}<span>Add Item</span></button>`:''}`);
 }
 function shoppingRow(item,personMap,categoryMap){
@@ -795,7 +824,7 @@ async function stayEditor(mode='edit',force=false){
   const countryLocked=!!(base&&existingExpenses.some(expense=>expense.stayId===base.id));
   if(force)setNavigationEnabled(false);
   const options=COUNTRIES.map(country=>`<option value="${esc(country.name)}"></option>`).join('');
-  present(`${force?'':subscreenBack('Settings','data-back-settings')} <div class="stay-editor-head">${pageHead(title,subtitle,'Settings')}</div>
+  present(`${force?'':subscreenBack('Settings','data-back-settings')} <div class="stay-editor-head ${mode==='setup'?'stay-editor-setup-head':''}">${pageHead(title,subtitle,'Settings')}</div>
     <div class="stay-live-preview ${mode==='setup'?'setup-preview-hidden':''}" id="stayLivePreview"><small>Current Stay Preview</small><div class="stay-preview-main"><span class="stay-preview-flag">${esc(base?.flag||'◉')}</span><span><strong>${esc(base?.country||'Choose a country')}</strong><em>${esc(base?.city||'City / Destination')}</em></span>${base?.currencyCode?`<b class="stay-preview-currency">${esc(base.currencyCode)}</b>`:''}</div><div class="stay-preview-dates">${esc(base?.startDate||'Start date')} – ${esc(base?.endDate||'End date')}</div></div>
     <form class="editor-card quick-stay premium-stay-editor target-stay-editor" id="stayForm">
       <label class="stay-field"><span class="field-label"><span>Country</span></span><span class="stay-control"><span class="stay-control-prefix country-prefix" id="countryPrefix">${base?.flag?esc(base.flag):stayFieldIcon('country')}</span><input name="country" list="countryList" required maxlength="60" autocomplete="off" placeholder="Start typing a country" value="${esc(base?.country||'')}" ${countryLocked?'readonly':''}><span class="stay-control-chevron" aria-hidden="true">${directionVisual('down')}</span></span><datalist id="countryList">${options}</datalist></label>
@@ -803,7 +832,7 @@ async function stayEditor(mode='edit',force=false){
       ${countryLocked?'<p class="micro-note">Use Change Stay when you move to another country.</p>':''}
       <label class="stay-field"><span class="field-label"><span>City / Destination</span></span><span class="stay-control"><span class="stay-control-prefix">${stayFieldIcon('city')}</span><input name="city" required maxlength="80" autocomplete="address-level2" placeholder="City or place" value="${esc(base?.city||'')}"><span class="stay-control-chevron" aria-hidden="true">${directionVisual('next')}</span></span></label>
       <div class="stay-date-stack"><label class="stay-field"><span class="field-label"><span>Stay start</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('start')}</span><input name="startDate" type="date" required value="${esc(auDateToIso(base?.startDate||''))}"></span></label><label class="stay-field"><span class="field-label"><span>Stay end</span></span><span class="stay-control date-control"><span class="stay-control-prefix">${stayFieldIcon('end')}</span><input name="endDate" type="date" required value="${esc(auDateToIso(base?.endDate||''))}"></span></label></div>
-      <div class="editor-actions static-actions">${force?'':`<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">${buttonVisual('cancel')}<span>Cancel</span></button>`}<button class="btn primary" type="submit">${buttonVisual(mode==='change'?'change':'save')}<span>${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</span></button></div>
+      <div class="editor-actions static-actions">${force?'':`<button class="btn secondary" type="button" data-editor-cancel data-cancel-route="settings">${buttonVisual('cancel')}<span>Cancel</span></button>`}<button class="btn primary" type="submit">${buttonVisual(mode==='setup'?'forward':mode==='change'?'change':'save')}<span>${mode==='setup'?'Start Travel Buddy':mode==='change'?'Change Stay':'Save'}</span></button></div>
     </form>`,{subscreen:true});
 
   const form=screen.querySelector('#stayForm');
@@ -1013,7 +1042,7 @@ screen.addEventListener('click',async event=>{
   if(button.matches('[data-toilet-phrase]'))return showToiletPhrase();
   if(button.matches('[data-add-expense]'))return expenseEditor(null,{category:button.hasAttribute('data-groceries')?'Groceries':undefined,returnRoute:route});
   if(button.matches('[data-open-shopping]')){shoppingFilter='all';return renderRoute('shopping');}
-  if(button.matches('[data-open-expenses]'))return renderRoute('expenses');
+  if(button.matches('[data-open-expenses]')){expenseFilter=button.dataset.expenseFilterTarget||'all';return renderRoute('expenses');}
   if(button.matches('[data-expense-filter]')){expenseFilter=button.dataset.expenseFilter;return renderExpenses();}
   if(button.matches('[data-edit-expense]'))return expenseEditor(await getRecord('expenses',button.dataset.editExpense),{returnRoute:button.dataset.returnRoute||route});
   if(button.matches('[data-toggle-transfer]')){const expense=await getRecord('expenses',button.dataset.toggleTransfer);if(expense)await putRecord('expenses',{...expense,transferred:!expense.transferred,modifiedAt:now()});return renderExpenses();}
@@ -1085,7 +1114,7 @@ importInput.addEventListener('change',async()=>{
   if(file)await importShoppingFile(file);
 });
 
-navButtons.forEach(button=>button.addEventListener('click',()=>{if(currentStay){justFinishedShopping=false;renderRoute(button.dataset.route);}}));
+navButtons.forEach(button=>button.addEventListener('click',()=>{if(currentStay){justFinishedShopping=false;if(button.dataset.route==='expenses')expenseFilter='all';renderRoute(button.dataset.route);}}));
 
 async function autoLaunch(){
   try{
